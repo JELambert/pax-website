@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit a Pack — PAX Marketplace</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-hover: #334155;
+      --color-border: #334155;
+      --color-text: #e2e8f0;
+      --color-text-muted: #94a3b8;
+      --color-accent: #38bdf8;
+      --color-accent-hover: #7dd3fc;
+      --color-success: #34d399;
+      --color-error: #f87171;
+      --color-warning: #fbbf24;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--color-accent); text-decoration: none; }
+    a:hover { color: var(--color-accent-hover); }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header — matches pax-market.com */
+    header {
+      border-bottom: 1px solid var(--color-border);
+      padding: 1rem 0;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+    .site-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+    }
+    .site-title span { color: var(--color-accent); }
+    nav { display: flex; gap: 0.75rem 1.25rem; flex-wrap: wrap; align-items: center; margin-left: auto; }
+    nav a {
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    nav a:hover { color: var(--color-text); }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+    .user-info img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    .btn-logout {
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.5rem;
+    }
+    .btn-logout:hover { color: var(--color-error); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--color-border);
+      padding: 2rem 0;
+      margin-top: 4rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 4rem 0 2rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 span { color: var(--color-accent); }
+    .hero p {
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--color-accent);
+      color: var(--color-bg);
+    }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-github {
+      background: #24292e;
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.875rem 2rem;
+    }
+    .btn-github:hover { background: #2f363d; }
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .btn-secondary:hover { background: var(--color-surface-hover); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 2rem;
+    }
+    .tab {
+      padding: 0.75rem 1.25rem;
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--color-text); }
+    .tab.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--color-border);
+      border-radius: 0.75rem;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--color-accent);
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .drop-zone.has-file {
+      border-color: var(--color-success);
+      background: rgba(52, 211, 153, 0.05);
+    }
+    .drop-zone-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .drop-zone-text {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+    }
+    .drop-zone-text strong { color: var(--color-accent); }
+    .drop-zone input { display: none; }
+    .file-name {
+      margin-top: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--color-success);
+    }
+
+    /* Messages */
+    .message-box {
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+    .message-error {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: var(--color-error);
+    }
+    .message-warning {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--color-warning);
+    }
+    .message-success {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: var(--color-success);
+    }
+    .message-box ul {
+      margin: 0.5rem 0 0 1.25rem;
+    }
+    .message-box li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Submissions table */
+    .submissions-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .submissions-table th {
+      text-align: left;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .submissions-table td {
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-open { background: rgba(56, 189, 248, 0.2); color: var(--color-accent); }
+    .status-merged { background: rgba(52, 211, 153, 0.2); color: var(--color-success); }
+    .status-closed { background: rgba(248, 113, 113, 0.2); color: var(--color-error); }
+    .ci-pending { color: var(--color-warning); }
+    .ci-success { color: var(--color-success); }
+    .ci-failure { color: var(--color-error); }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-overlay {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      justify-content: center;
+      padding: 2rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Pack structure hint */
+    .structure-hint {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+    }
+    .structure-hint h3 {
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .structure-hint pre {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--color-text-muted);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="https://pax-market.com" class="site-title">pax/<span>market</span></a>
+      <nav>
+        <a href="https://pax-market.com/showcase/">Explore</a>
+        <a href="https://pax-market.com/pax/">Browse PAX</a>
+        <a href="https://pax-market.com/guide/">Create a PAX</a>
+        <a href="https://pax-market.com/about/">About</a>
+        <a href="https://submit.pax-market.com">Submit</a>
+        <div id="user-nav" class="hidden"></div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Login view -->
+  <div id="view-login">
+    <div class="container">
+      <div class="hero">
+        <h1>Submit a <span>PAX Pack</span></h1>
+        <p>Share your analytical expertise with the community. Upload a pack and it will be reviewed for inclusion in the marketplace.</p>
+      </div>
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <a href="/auth/login" class="btn btn-github">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          Sign in with GitHub
+        </a>
+      </div>
+
+      <div class="structure-hint">
+        <h3>Expected pack structure</h3>
+        <pre>your-pack-name/
+  pax.yaml              # Pack manifest (required)
+  knowledge/
+    domain.json         # Domain metadata
+    constructs.json     # Construct definitions
+    findings.json       # Empirical findings
+    sources.json        # Bibliographic sources
+  playbooks/            # Optional
+    quick_start.yaml</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload view -->
+  <div id="view-upload" class="hidden">
+    <div class="container">
+      <div style="padding: 2.5rem 0 1.5rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700;">Submit a Pack</h1>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="upload">Upload</button>
+        <button class="tab" data-tab="submissions">My Submissions</button>
+      </div>
+
+      <!-- Upload tab -->
+      <div id="tab-upload">
+        <div id="upload-messages"></div>
+
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-zone-icon">📦</div>
+          <div class="drop-zone-text">
+            <strong>Drop your pack .zip here</strong> or click to browse
+          </div>
+          <div class="file-name hidden" id="file-name"></div>
+          <input type="file" id="file-input" accept=".zip">
+        </div>
+
+        <div class="structure-hint">
+          <h3>Pack requirements</h3>
+          <pre>your-pack-name/
+  pax.yaml              # name, version, description, pax_type, schema_version
+  knowledge/
+    domain.json         # Domain metadata
+    constructs.json     # Construct definitions
+    findings.json       # Empirical findings
+    sources.json        # Bibliographic sources</pre>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button class="btn btn-primary" id="btn-submit" disabled>Submit Pack</button>
+          <div id="upload-spinner" class="hidden">
+            <div class="loading-overlay" style="padding: 0;">
+              <div class="spinner"></div>
+              <span>Creating pull request...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submissions tab -->
+      <div id="tab-submissions" class="hidden">
+        <div id="submissions-loading" class="loading-overlay">
+          <div class="spinner"></div>
+          <span>Loading submissions...</span>
+        </div>
+        <div id="submissions-content" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      PAX Marketplace &mdash; <a href="https://pax-market.com">pax-market.com</a>
+    </div>
+  </footer>
+
+  <script src="/static/upload.js"></script>
+</body>
+</html>

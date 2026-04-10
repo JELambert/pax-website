@@ -1,0 +1,49 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [registry-updated]
+  workflow_dispatch:
+
+jobs:
+  build-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Fetch registry artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash scripts/fetch-artifacts.sh
+
+      - name: Generate Hugo content from catalog
+        run: python3 scripts/generate-content.py
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+
+      - name: Build
+        run: hugo --minify
+
+      - name: Verify build
+        run: |
+          test -f public/index.html || (echo "No index.html" && exit 1)
+          test -f public/registry.json || (echo "No registry.json" && exit 1)
+          HTML_COUNT=$(find public -name '*.html' | wc -l)
+          PACK_COUNT=$(find public/pax -name '*.pax.tar.gz' 2>/dev/null | wc -l)
+          echo "Build verified: $HTML_COUNT HTML files, $PACK_COUNT pack archives"
+          test "$HTML_COUNT" -gt 10 || (echo "Too few HTML files" && exit 1)

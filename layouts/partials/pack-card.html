@@ -1,0 +1,27 @@
+<div class="pack-card" data-pax-type="{{ .Params.pax_type }}" data-tags="{{ delimit .Params.tags "," }}" data-name="{{ .Params.pax_name }}" data-description="{{ .Params.description }}" data-domain="{{ with .Params.domain }}{{ .display_name }}{{ end }}" data-constructs="{{ .Params.construct_count }}">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+    <div style="display: flex; gap: 0.5rem; align-items: center; min-width: 0;">
+      <span class="badge badge-{{ .Params.pax_type }}">{{ .Params.pax_type }}</span>
+      {{ with .Params.domain }}{{ with .display_name }}<span style="font-size: 0.7rem; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ . }}</span>{{ end }}{{ end }}
+    </div>
+    <span style="font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); white-space: nowrap;">v{{ .Params.version }}</span>
+  </div>
+  <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+  <p class="description">{{ .Params.description }}</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.75rem;">
+    {{ with .Params.construct_count }}<span class="tag">{{ . }} constructs</span>{{ end }}
+    {{ with .Params.finding_count }}<span class="tag">{{ . }} findings</span>{{ end }}
+    {{ with .Params.engines }}{{ if gt (len .) 0 }}<span class="tag">{{ len . }} engines</span>{{ end }}{{ end }}
+    {{ if .Params.has_playbooks }}<span class="tag">playbooks</span>{{ end }}
+    {{ if .Params.has_data_sources }}<span class="tag" style="border-color: rgba(251, 146, 60, 0.3); color: var(--color-field);">data</span>{{ end }}
+  </div>
+  <div class="meta">
+    {{ range first 4 .Params.tags }}
+      <span class="tag">{{ . }}</span>
+    {{ end }}
+    {{ if gt (len .Params.tags) 4 }}
+      <span class="tag">+{{ sub (len .Params.tags) 4 }}</span>
+    {{ end }}
+    {{ with .Params.download_size }}<span style="margin-left: auto; font-size: 0.7rem; color: var(--color-text-muted);">{{ . }}</span>{{ end }}
+  </div>
+</div>

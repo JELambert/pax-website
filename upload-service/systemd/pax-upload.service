@@ -1,0 +1,16 @@
+[Unit]
+Description=PAX Upload Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pax-market/upload-service
+ExecStart=/opt/pax-market/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+MemoryMax=256M
+EnvironmentFile=/opt/pax-market/upload-service/.env
+
+[Install]
+WantedBy=multi-user.target

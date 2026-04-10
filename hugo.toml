@@ -1,0 +1,43 @@
+baseURL = 'https://pax-market.com/'
+languageCode = 'en-us'
+title = 'PAX Marketplace'
+description = 'Browse and discover PAX — Portable Analytical eXpertise for structured research'
+
+[params]
+  tagline = 'Portable Analytical eXpertise'
+  github_url = 'https://github.com/JELambert/pax-website'
+  registry_url = 'https://github.com/JELambert/pax-market'
+  praxis_url = 'https://github.com/JELambert/praxis'
+
+[taxonomies]
+  tag = 'tags'
+  pax_type = 'pax_types'
+
+[outputs]
+  home = ['HTML', 'JSON']
+  section = ['HTML', 'JSON']
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[menu]
+  [[menu.main]]
+    name = 'Explore'
+    url = '/showcase/'
+    weight = 1
+  [[menu.main]]
+    name = 'Browse PAX'
+    url = '/pax/'
+    weight = 2
+  [[menu.main]]
+    name = 'Create a PAX'
+    url = '/guide/'
+    weight = 3
+  [[menu.main]]
+    name = 'About'
+    url = '/about/'
+    weight = 4
+  [[menu.main]]
+    name = 'Submit'
+    url = 'https://submit.pax-market.com'
+    weight = 5

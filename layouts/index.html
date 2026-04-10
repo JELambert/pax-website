@@ -1,0 +1,144 @@
+{{ define "main" }}
+{{ $graphData := hugo.Data.graph }}
+{{ $packCount := len (where .Site.RegularPages "Section" "pax") }}
+<section class="hero">
+  <h1>PAX <span>Marketplace</span></h1>
+  <p>Structured expertise for any domain — grounded in peer-reviewed research, industry standards, and validated methodology. Download a pack, drop it into your AI, and run evidence-based analysis that generic training data can't deliver.</p>
+  <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+    <a href="/pax/" class="download-btn" style="text-decoration: none;">Browse PAX</a>
+    <a href="/guide/" style="text-decoration: none; padding: 0.75rem 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-weight: 600; font-size: 0.875rem;">Create a PAX</a>
+  </div>
+</section>
+
+<!-- Value prop — three user tiers -->
+<section style="margin-bottom: 3rem;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+    <!-- Tier 1: Use a Pack -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+        <span style="font-size: 1.25rem;">&#8681;</span>
+        <h3 style="font-size: 1.1rem; color: var(--color-accent); margin: 0;">Use a Pack</h3>
+      </div>
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;">Download structured expertise on any topic — economic growth, public health, conflict, climate, financial risk, and more. Paste it into ChatGPT, Claude, or any LLM. Your AI can now run real data analysis backed by scientific research and established methodology. No setup. No code.</p>
+      <a href="/pax/" style="font-size: 0.85rem;">Browse all packs &rarr;</a>
+    </div>
+
+    <!-- Tier 2: Create a Pack -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+        <span style="font-size: 1.25rem;">&#43;</span>
+        <h3 style="font-size: 1.1rem; color: var(--color-accent); margin: 0;">Create a Pack</h3>
+      </div>
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;">Package your domain knowledge — research findings, analytical frameworks, validated constructs — into a structured PAX. Share it with analysts, researchers, and strategists who need evidence-based context. Works with any LLM. Built by experts, used by anyone.</p>
+      <a href="/guide/" style="font-size: 0.85rem;">See the creation guide &rarr;</a>
+    </div>
+
+    <!-- Tier 3: Go Deeper with Praxis -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+        <span style="font-size: 1.25rem;">&#9883;</span>
+        <h3 style="font-size: 1.1rem; color: var(--color-accent); margin: 0;">Go Deeper with Praxis</h3>
+      </div>
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;">Run the full Praxis MCP server to unlock cross-pack synthesis, automated gap analysis, and multi-step analytical workflows. Discover how constructs connect across domains — income predicts both well-being and conflict. Built for data scientists, researchers, and quantitative teams.</p>
+      <a href="/showcase/" style="font-size: 0.85rem;">See it in action &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- Stats bar — dynamic from data files -->
+<section style="margin-bottom: 3rem;">
+  <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; padding: 1.5rem; background: var(--color-surface); border-radius: 0.75rem;">
+    {{ with $graphData }}
+    <div style="text-align: center;">
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--color-accent);">{{ .stats.nodes }}</div>
+      <div style="font-size: 0.8rem; color: var(--color-text-muted);">Constructs</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--color-accent);">{{ .stats.edges }}</div>
+      <div style="font-size: 0.8rem; color: var(--color-text-muted);">Finding Edges</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--color-paper);">{{ .stats.domains }}</div>
+      <div style="font-size: 0.8rem; color: var(--color-text-muted);">Domains</div>
+    </div>
+    {{ end }}
+    <div style="text-align: center;">
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--color-topic);">{{ $packCount }}</div>
+      <div style="font-size: 0.8rem; color: var(--color-text-muted);">Published PAX</div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured PAX (curated) -->
+{{ $featured := slice "bartel-comp-materials" "pmsc-market-for-force" "military-coup-prediction" "financial-development" "credit-risk-ml" }}
+<section style="margin-bottom: 3rem;">
+  <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Featured PAX</h2>
+  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+    {{ range $featured }}
+      {{ with site.GetPage (printf "/pax/%s" .) }}
+    <a href="{{ .RelPermalink }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; text-decoration: none; transition: border-color 0.15s;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+        <span class="badge badge-{{ .Params.pax_type }}" style="flex-shrink: 0;">{{ .Params.pax_type }}</span>
+        <span style="color: var(--color-text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ .Title }}</span>
+        <span style="color: var(--color-text-muted); font-size: 0.75rem; flex-shrink: 0;">{{ .Params.construct_count }} constructs · {{ .Params.finding_count }} findings</span>
+      </div>
+    </a>
+      {{ end }}
+    {{ end }}
+  </div>
+</section>
+
+<!-- Browse PAX -->
+<section>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.5rem;">Browse PAX</h2>
+    <a href="/pax/" style="font-size: 0.875rem;">View all {{ $packCount }} &rarr;</a>
+  </div>
+  <div class="pack-grid">
+    {{ range first 6 (where .Site.RegularPages "Section" "pax") }}
+      {{ partial "pack-card.html" . }}
+    {{ end }}
+  </div>
+</section>
+
+<!-- Contribute CTA -->
+<section style="margin-top: 3rem; padding: 2.5rem 0; border-top: 1px solid var(--color-border);">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; align-items: center;">
+    <div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.75rem;">Share Your <span style="color: var(--color-accent);">Expertise</span></h2>
+      <p style="color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+        Built a PAX from your research or domain knowledge? Submit it to the marketplace and make it available to the community. Upload a zip, we validate the structure, and after review it goes live.
+      </p>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="https://submit.pax-market.com" class="download-btn" style="text-decoration: none;">Submit a Pack</a>
+        <a href="/guide/" style="padding: 0.75rem 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-weight: 600; font-size: 0.875rem; text-decoration: none;">Creation Guide</a>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border);">
+        <span style="color: var(--color-accent); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem; flex-shrink: 0; margin-top: 0.1rem;">01</span>
+        <div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Create your PAX</div>
+          <div style="color: var(--color-text-muted); font-size: 0.8rem;">Structure your knowledge as YAML + JSON files</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border);">
+        <span style="color: var(--color-accent); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem; flex-shrink: 0; margin-top: 0.1rem;">02</span>
+        <div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Upload &amp; validate</div>
+          <div style="color: var(--color-text-muted); font-size: 0.8rem;">Zip it up and submit at submit.pax-market.com</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.875rem 1rem; background: var(--color-surface); border-radius: 0.5rem; border: 1px solid var(--color-border);">
+        <span style="color: var(--color-accent); font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem; flex-shrink: 0; margin-top: 0.1rem;">03</span>
+        <div>
+          <div style="font-weight: 600; font-size: 0.875rem;">Review &amp; publish</div>
+          <div style="color: var(--color-text-muted); font-size: 0.8rem;">We review for quality, then it's live on the marketplace</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}

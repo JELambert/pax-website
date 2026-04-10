@@ -1,0 +1,669 @@
+{{ define "main" }}
+<style>
+/* ── Pack header two-column grid ── */
+.pack-header-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+@media (max-width: 680px) {
+  .pack-header-grid { grid-template-columns: 1fr; }
+  .pack-header-stats { margin-top: 1rem; }
+}
+
+/* ── Sticky section tab bar ── */
+.section-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 0 2rem;
+  padding: 0 0.25rem;
+}
+.section-tabs::-webkit-scrollbar { display: none; }
+.section-tabs a {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 480px) {
+  .section-tabs a { padding: 0.625rem 0.625rem; font-size: 0.75rem; }
+  .tab-count { display: none; }
+}
+.section-tabs a:hover { color: var(--color-text); border-bottom-color: var(--color-border); }
+.section-tabs a.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+.tab-count {
+  background: var(--color-surface);
+  border-radius: 9999px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+}
+
+/* ── Show-more buttons ── */
+.show-more-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.625rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.show-more-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ── Inline construct filter ── */
+.construct-filter {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  margin-bottom: 0.75rem;
+  outline: none;
+}
+.construct-filter:focus { border-color: var(--color-accent); }
+.construct-card[hidden] { display: none; }
+
+/* ── Meta accordion ── */
+details.meta-accordion { margin-top: 2rem; }
+details.meta-accordion > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  user-select: none;
+}
+details.meta-accordion > summary::after { content: "▾"; font-size: 0.9rem; }
+details.meta-accordion[open] > summary { color: var(--color-text); }
+details.meta-accordion[open] > summary::after { content: "▴"; }
+details.meta-accordion > summary::-webkit-details-marker { display: none; }
+
+/* ── v2 schema badge ── */
+.schema-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  background: rgba(56,189,248,0.12);
+  color: var(--color-accent);
+  border: 1px solid rgba(56,189,248,0.25);
+}
+
+/* ── v2 finding stats bar ── */
+.finding-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+.finding-stats span strong { color: var(--color-text); }
+
+/* ── v2 source enrichment ── */
+.source-enriched {
+  margin-top: 0.375rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* ── v2 relationships table ── */
+.relationships-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.relationships-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+.relationships-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+.relationships-table tr:last-child td { border-bottom: none; }
+
+/* ── v2 quality sub-scores ── */
+.quality-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.quality-cell {
+  background: var(--color-surface);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  text-align: center;
+}
+.quality-cell .score { font-size: 1.4rem; font-weight: 700; }
+.quality-cell .label { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 0.125rem; }
+
+/* ── Copy button on install block ── */
+.install-block { position: relative; }
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.7rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+</style>
+
+<div class="pack-detail">
+  <div style="margin-bottom: 1rem;">
+    <a href="/pax/" style="font-size: 0.875rem; color: var(--color-text-muted);">&larr; Browse all PAX</a>
+  </div>
+
+  <!-- ── Two-column header ── -->
+  <div class="pack-header-grid">
+    <div>
+      <h1 style="margin-bottom: 0.5rem;">{{ .Title }}</h1>
+
+      <div class="meta-row" style="margin-bottom: 0.75rem;">
+        <span class="badge badge-{{ .Params.pax_type }}">{{ .Params.pax_type }}</span>
+        <span style="font-family: var(--font-mono);">v{{ .Params.version }}</span>
+        {{ with .Params.author }}{{ if and (ne . "") (ne . "mcp_agent") }}<span>by {{ . }}</span>{{ end }}{{ end }}
+        {{ with .Params.license }}<span>{{ . }}</span>{{ end }}
+        {{ with .Params.pax_schema_version }}<span class="schema-badge">PAX {{ . }}</span>{{ end }}
+      </div>
+
+      <!-- Domain metadata inline -->
+      {{ with .Params.domain }}{{ if .display_name }}
+      <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
+        <span>{{ .display_name }}</span>
+        {{ with .temporal_scope }}<span>· {{ . }}</span>{{ end }}
+        {{ with .level_of_analysis }}<span>· {{ . }}</span>{{ end }}
+        {{ with .population }}<span>· {{ . }}</span>{{ end }}
+      </div>
+      {{ end }}{{ end }}
+
+      <p style="font-size: 1.05rem; color: var(--color-text-muted); max-width: 640px; margin-bottom: 1.25rem; line-height: 1.6;">{{ .Params.description }}</p>
+
+      {{ with .Params.download_url }}
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ . }}" class="download-btn" download>
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+          Download .pax.tar.gz
+        </a>
+        {{ with $.Params.download_size }}<span style="font-size: 0.8rem; color: var(--color-text-muted);">{{ . }}</span>{{ end }}
+        <span style="font-size: 0.8rem; color: var(--color-text-muted);">·</span>
+        <a href="/PAX_USAGE_GUIDE.md" download style="font-size: 0.8rem; color: var(--color-text-muted); border-bottom: 1px dashed var(--color-border);">Get the usage guide</a>
+      </div>
+      {{ end }}
+    </div>
+
+    <!-- Stat grid in right column -->
+    <div class="pack-header-stats">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        {{ with .Params.construct_count }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-accent);">{{ . }}</div>
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Constructs</div>
+        </div>
+        {{ end }}
+        {{ with .Params.finding_count }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-accent);">{{ . }}</div>
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Findings</div>
+        </div>
+        {{ end }}
+        {{ with .Params.playbooks_detail }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-topic);">{{ len . }}</div>
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Playbooks</div>
+        </div>
+        {{ end }}
+        {{ with .Params.engines }}{{ if gt (len .) 0 }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-engine);">{{ len . }}</div>
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Engines</div>
+        </div>
+        {{ end }}{{ end }}
+        {{ with .Params.proposition_count }}{{ if gt . 0 }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-paper);">{{ . }}</div>
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Propositions</div>
+        </div>
+        {{ end }}{{ end }}
+        {{ with .Params.created }}
+        <div style="background: var(--color-surface); padding: 0.875rem; border-radius: 0.5rem; text-align: center; grid-column: span 2;">
+          <div style="font-size: 0.75rem; color: var(--color-text-muted);">Published</div>
+          <div style="font-size: 0.8rem; font-weight: 600; margin-top: 0.125rem;">{{ . | truncate 10 "" }}</div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── v2 quality scores ── -->
+  {{ with .Params.quality }}
+  {{ $q := . }}
+  {{ if or $q.overall $q.construct_completeness $q.finding_density $q.statistical_richness $q.relationship_coverage $q.source_depth }}
+  <div style="margin-bottom: 2rem;">
+    <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Quality</div>
+    <div class="quality-grid">
+      {{ with $q.overall }}<div class="quality-cell"><div class="score" style="color: var(--color-accent);">{{ . }}</div><div class="label">Overall</div></div>{{ end }}
+      {{ with $q.construct_completeness }}<div class="quality-cell"><div class="score" style="color: var(--color-topic);">{{ . }}</div><div class="label">Construct Completeness</div></div>{{ end }}
+      {{ with $q.finding_density }}<div class="quality-cell"><div class="score" style="color: var(--color-topic);">{{ . }}</div><div class="label">Finding Density</div></div>{{ end }}
+      {{ with $q.statistical_richness }}<div class="quality-cell"><div class="score" style="color: var(--color-paper);">{{ . }}</div><div class="label">Statistical Richness</div></div>{{ end }}
+      {{ with $q.relationship_coverage }}<div class="quality-cell"><div class="score" style="color: var(--color-paper);">{{ . }}</div><div class="label">Relationship Coverage</div></div>{{ end }}
+      {{ with $q.source_depth }}<div class="quality-cell"><div class="score" style="color: var(--color-paper);">{{ . }}</div><div class="label">Source Depth</div></div>{{ end }}
+      {{ with $q.source_quality }}<div class="quality-cell"><div class="score" style="color: var(--color-text-muted);">{{ . }}</div><div class="label">Source Quality</div></div>{{ end }}
+      {{ with $q.data_coverage }}<div class="quality-cell"><div class="score" style="color: var(--color-text-muted);">{{ . }}</div><div class="label">Data Coverage</div></div>{{ end }}
+    </div>
+  </div>
+  {{ end }}
+  {{ end }}
+
+  <!-- ── Sticky tab bar ── -->
+  <nav class="section-tabs" id="section-tabs">
+    {{ if .Params.playbooks_detail }}<a href="#section-playbooks">Playbooks <span class="tab-count">{{ len .Params.playbooks_detail }}</span></a>{{ end }}
+    {{ if .Params.constructs_detail }}<a href="#section-constructs">Constructs <span class="tab-count">{{ len .Params.constructs_detail }}</span></a>{{ end }}
+    {{ if .Params.findings_detail }}<a href="#section-findings">Findings <span class="tab-count">{{ len .Params.findings_detail }}</span></a>{{ end }}
+    {{ if .Params.relationships_detail }}<a href="#section-relationships">Relationships <span class="tab-count">{{ len .Params.relationships_detail }}</span></a>{{ end }}
+    {{ with .Params.engines }}{{ if gt (len .) 0 }}<a href="#section-engines">Engines <span class="tab-count">{{ len . }}</span></a>{{ end }}{{ end }}
+    {{ if .Params.sources_detail }}<a href="#section-sources">Sources <span class="tab-count">{{ len .Params.sources_detail }}</span></a>{{ end }}
+    {{ if .Params.related_packs }}<a href="#section-related">Related</a>{{ end }}
+    <a href="#section-install">Install</a>
+  </nav>
+
+  <!-- ── Playbooks (first — action section) ── -->
+  {{ with .Params.playbooks_detail }}
+  <div class="section" id="section-playbooks">
+    <h2>Playbooks</h2>
+    {{ range . }}
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-weight: 600; font-size: 0.95rem;">{{ .display_name }}</span>
+        <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted);">
+          {{ with .estimated_runtime }}<span>{{ . }}</span>{{ end }}
+          <span>{{ .step_count }} steps</span>
+        </div>
+      </div>
+      {{ with .description }}<p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0 0 0.5rem 0;">{{ . }}</p>{{ end }}
+      {{ with .engines_used }}
+      <div style="display: flex; flex-wrap: wrap; gap: 0.375rem;">
+        {{ range . }}<span class="construct-chip" style="background: rgba(244,114,182,0.1); color: var(--color-engine); border-color: rgba(244,114,182,0.2); font-size: 0.75rem;">{{ . }}</span>{{ end }}
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <!-- ── Constructs ── -->
+  {{ with .Params.constructs_detail }}
+  {{ $total := len . }}
+  {{ $threshold := 12 }}
+  <div class="section" id="section-constructs">
+    <h2>Constructs</h2>
+    {{ if gt $total $threshold }}
+      <!-- First 12 always visible -->
+      {{ range first $threshold . }}
+      <div class="construct-card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem;">
+          <code style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-accent);">{{ .id }}</code>
+          {{ with .display_name }}<span style="font-size: 0.9rem; font-weight: 600;">{{ . }}</span>{{ end }}
+        </div>
+        {{ with .definition }}<p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5;">{{ . }}</p>{{ end }}
+        {{ with .aliases }}<div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem;">{{ range . }}<span class="tag" style="font-size: 0.7rem;">{{ . }}</span>{{ end }}</div>{{ end }}
+      </div>
+      {{ end }}
+      <!-- Overflow: hidden by default -->
+      <div class="constructs-overflow" hidden>
+        {{ range after $threshold . }}
+        <div class="construct-card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem;">
+            <code style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-accent);">{{ .id }}</code>
+            {{ with .display_name }}<span style="font-size: 0.9rem; font-weight: 600;">{{ . }}</span>{{ end }}
+          </div>
+          {{ with .definition }}<p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5;">{{ . }}</p>{{ end }}
+          {{ with .aliases }}<div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem;">{{ range . }}<span class="tag" style="font-size: 0.7rem;">{{ . }}</span>{{ end }}</div>{{ end }}
+        </div>
+        {{ end }}
+      </div>
+      <button class="show-more-btn constructs-show-more">Show all {{ $total }} constructs ▾</button>
+    {{ else }}
+      <!-- Short pack: render all flat -->
+      {{ range . }}
+      <div class="construct-card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem;">
+          <code style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-accent);">{{ .id }}</code>
+          {{ with .display_name }}<span style="font-size: 0.9rem; font-weight: 600;">{{ . }}</span>{{ end }}
+        </div>
+        {{ with .definition }}<p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0; line-height: 1.5;">{{ . }}</p>{{ end }}
+        {{ with .aliases }}<div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.375rem;">{{ range . }}<span class="tag" style="font-size: 0.7rem;">{{ . }}</span>{{ end }}</div>{{ end }}
+      </div>
+      {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <!-- ── Findings ── -->
+  {{ with .Params.findings_detail }}
+  {{ $total := len . }}
+  {{ $fthreshold := 5 }}
+  <div class="section" id="section-findings">
+    <h2>Findings</h2>
+    {{ if gt $total $fthreshold }}
+      {{ range first $fthreshold . }}
+      <div style="background: var(--color-surface); border-left: 3px solid {{ if eq .direction "positive" }}var(--color-topic){{ else if eq .direction "negative" }}#ef4444{{ else }}var(--color-accent){{ end }}; border-radius: 0 0.5rem 0.5rem 0; padding: 1rem; margin-bottom: 0.75rem;">
+        <p style="color: var(--color-text); font-size: 0.9rem; margin: 0 0 0.5rem 0; line-height: 1.5;">{{ .finding_text }}</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted);">
+          {{ with .direction }}<span><strong>Direction:</strong> {{ . }}</span>{{ end }}
+          {{ with .confidence }}<span><strong>Confidence:</strong> {{ . }}</span>{{ end }}
+          {{ with .effect_size }}<span><strong>Effect:</strong> {{ . }}</span>{{ end }}
+          {{ with .method_used }}<span><strong>Method:</strong> {{ . }}</span>{{ end }}
+        </div>
+      </div>
+      {{ end }}
+      <div class="findings-overflow" hidden>
+        {{ range after $fthreshold . }}
+        <div style="background: var(--color-surface); border-left: 3px solid {{ if eq .direction "positive" }}var(--color-topic){{ else if eq .direction "negative" }}#ef4444{{ else }}var(--color-accent){{ end }}; border-radius: 0 0.5rem 0.5rem 0; padding: 1rem; margin-bottom: 0.75rem;">
+          <p style="color: var(--color-text); font-size: 0.9rem; margin: 0 0 0.5rem 0; line-height: 1.5;">{{ .finding_text }}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted);">
+            {{ with .direction }}<span><strong>Direction:</strong> {{ . }}</span>{{ end }}
+            {{ with .confidence }}<span><strong>Confidence:</strong> {{ . }}</span>{{ end }}
+            {{ with .effect_size }}<span><strong>Effect:</strong> {{ . }}</span>{{ end }}
+            {{ with .method_used }}<span><strong>Method:</strong> {{ . }}</span>{{ end }}
+          </div>
+          {{ $hasStats := or .effect_size_value .p_value .sample_size .r_squared }}
+          {{ if $hasStats }}
+          {{ $f := . }}
+          <div class="finding-stats">
+            {{ with $f.effect_size_value }}{{ if $f.effect_size_type }}<span><strong>{{ $f.effect_size_type }}</strong> = {{ . }}</span>{{ else }}<span><strong>Effect</strong> = {{ . }}</span>{{ end }}{{ end }}
+            {{ with $f.effect_size_se }}<span><strong>SE</strong> = {{ . }}</span>{{ end }}
+            {{ if and $f.ci_lower $f.ci_upper }}<span><strong>95% CI</strong> [{{ $f.ci_lower }}, {{ $f.ci_upper }}]</span>{{ end }}
+            {{ with $f.p_value }}<span><strong>p</strong> = {{ . }}</span>{{ end }}
+            {{ with $f.r_squared }}<span><strong>R²</strong> = {{ . }}</span>{{ end }}
+            {{ with $f.sample_size }}<span><strong>N</strong> = {{ . }}</span>{{ end }}
+          </div>
+          {{ end }}
+        </div>
+        {{ end }}
+      </div>
+      <button class="show-more-btn findings-show-more">Show all {{ $total }} findings ▾</button>
+    {{ else }}
+      {{ range . }}
+      <div style="background: var(--color-surface); border-left: 3px solid {{ if eq .direction "positive" }}var(--color-topic){{ else if eq .direction "negative" }}#ef4444{{ else }}var(--color-accent){{ end }}; border-radius: 0 0.5rem 0.5rem 0; padding: 1rem; margin-bottom: 0.75rem;">
+        <p style="color: var(--color-text); font-size: 0.9rem; margin: 0 0 0.5rem 0; line-height: 1.5;">{{ .finding_text }}</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted);">
+          {{ with .direction }}<span><strong>Direction:</strong> {{ . }}</span>{{ end }}
+          {{ with .confidence }}<span><strong>Confidence:</strong> {{ . }}</span>{{ end }}
+          {{ with .effect_size }}<span><strong>Effect:</strong> {{ . }}</span>{{ end }}
+          {{ with .method_used }}<span><strong>Method:</strong> {{ . }}</span>{{ end }}
+        </div>
+      </div>
+      {{ end }}
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <!-- ── Propositions ── -->
+  {{ with .Params.propositions_detail }}
+  <div class="section">
+    <h2>Propositions</h2>
+    {{ range . }}
+    <div style="background: var(--color-surface); border-left: 3px solid var(--color-enterprise); border-radius: 0 0.5rem 0.5rem 0; padding: 1rem; margin-bottom: 0.75rem;">
+      <p style="color: var(--color-text); font-size: 0.9rem; margin: 0 0 0.5rem 0;">{{ .proposition_text }}</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted);">
+        {{ with .construct_from }}<span><strong>From:</strong> <code style="font-family: var(--font-mono);">{{ . }}</code></span>{{ end }}
+        {{ with .construct_to }}<span><strong>To:</strong> <code style="font-family: var(--font-mono);">{{ . }}</code></span>{{ end }}
+        {{ with .direction }}<span><strong>Direction:</strong> {{ . }}</span>{{ end }}
+      </div>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <!-- ── Engines (flat chip list) ── -->
+  {{ with .Params.engines }}{{ if gt (len .) 0 }}
+  <div class="section" id="section-engines">
+    <h2>Engines</h2>
+    <div class="construct-list">
+      {{ range . }}<span class="construct-chip" style="background: rgba(244,114,182,0.1); color: var(--color-engine); border-color: rgba(244,114,182,0.2);">{{ . }}</span>{{ end }}
+    </div>
+  </div>
+  {{ end }}{{ end }}
+
+  <!-- ── Construct Relationships (v2) ── -->
+  {{ with .Params.relationships_detail }}
+  <div class="section" id="section-relationships">
+    <h2>Construct Relationships</h2>
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; overflow: hidden;">
+      <table class="relationships-table">
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Type</th>
+            <th>Direction</th>
+            <th>Strength</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range . }}
+          <tr>
+            <td><code style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-accent);">{{ .construct_from }}</code></td>
+            <td><code style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-accent);">{{ .construct_to }}</code></td>
+            <td><span style="color: var(--color-text-muted);">{{ .relationship_type }}</span></td>
+            <td><span style="color: {{ if eq .direction "positive" }}var(--color-topic){{ else if eq .direction "negative" }}#ef4444{{ else }}var(--color-text-muted){{ end }};">{{ .direction }}</span></td>
+            <td style="color: var(--color-text-muted);">{{ .strength }}</td>
+          </tr>
+          {{ if .mechanism }}
+          <tr>
+            <td colspan="5" style="padding: 0.25rem 0.75rem 0.75rem; font-size: 0.75rem; color: var(--color-text-muted); font-style: italic; border-bottom: 1px solid var(--color-border);">{{ .mechanism }}</td>
+          </tr>
+          {{ end }}
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {{ end }}
+
+  <!-- ── Related PAX ── -->
+  {{ with .Params.related_packs }}
+  <div class="section" id="section-related">
+    <h2>Related PAX</h2>
+    <div class="pack-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      {{ range . }}
+        {{ $pack := $.Site.GetPage (printf "/pax/%s" .) }}
+        {{ if $pack }}{{ partial "pack-card.html" $pack }}{{ end }}
+      {{ end }}
+    </div>
+  </div>
+  {{ end }}
+
+  <!-- ── Pack metadata accordion (Sources, Tags, Details) ── -->
+  {{ $hasMeta := or .Params.sources_detail (and .Params.tags (gt (len .Params.tags) 0)) .Content }}
+  {{ if $hasMeta }}
+  <details class="meta-accordion" id="section-sources">
+    <summary>Pack metadata</summary>
+
+    {{ with .Params.sources_detail }}
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-text-muted);">Sources</h3>
+      {{ range . }}
+      <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--color-border);">
+        <div style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+          {{ with .authors }}{{ . }}{{ end }}{{ with .year }} ({{ . }}){{ end }}. <em>{{ .title }}</em>
+          {{ with .journal }}<span style="color: var(--color-text-muted); font-size: 0.8rem;"> · {{ . }}</span>{{ end }}
+          {{ with .doi }}<a href="https://doi.org/{{ . }}" target="_blank" rel="noopener" style="font-size: 0.8rem; margin-left: 0.5rem;">DOI</a>{{ end }}
+          {{ with .url }}<a href="{{ . }}" target="_blank" rel="noopener" style="font-size: 0.8rem; margin-left: 0.5rem;">↗</a>{{ end }}
+        </div>
+        {{ $hasEnrichment := or .methodology_summary .study_design .sample_size .population_description .replication_status .data_availability .key_limitations }}
+        {{ if $hasEnrichment }}
+        {{ $s := . }}
+        <div class="source-enriched">
+          {{ with $s.study_design }}<span><strong>Design:</strong> {{ . }}</span>{{ end }}
+          {{ with $s.sample_size }}<span><strong>N:</strong> {{ . }}</span>{{ end }}
+          {{ with $s.population_description }}<span><strong>Population:</strong> {{ . }}</span>{{ end }}
+          {{ with $s.replication_status }}<span><strong>Replicated:</strong> {{ . }}</span>{{ end }}
+          {{ with $s.data_availability }}<span><strong>Data:</strong> {{ . }}</span>{{ end }}
+        </div>
+        {{ with $s.methodology_summary }}<p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 0.375rem 0 0; line-height: 1.5;">{{ . }}</p>{{ end }}
+        {{ with $s.key_limitations }}<p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 0.25rem 0 0; line-height: 1.5;"><strong>Limitations:</strong> {{ . }}</p>{{ end }}
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{ with .Params.tags }}
+    <div style="margin-top: 1.25rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-text-muted);">Tags</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {{ range . }}<span class="tag">{{ . }}</span>{{ end }}
+      </div>
+    </div>
+    {{ end }}
+
+    {{ with .Content }}
+    <div style="margin-top: 1.25rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-text-muted);">Details</h3>
+      <div class="content-body">{{ . }}</div>
+    </div>
+    {{ end }}
+  </details>
+  {{ end }}
+
+  <!-- ── Installation ── -->
+  <div class="section" id="section-install">
+    <h2>Installation</h2>
+    <div style="background: var(--color-surface); padding: 1.5rem; border-radius: 0.5rem;">
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 1rem;">Install this PAX into your Praxis instance — or <a href="/getting-started/" style="color: var(--color-accent);">set up Praxis first</a> if you haven't yet.</p>
+      <div class="install-block">
+        <code id="install-cmd" style="display: block; background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-x: auto;">praxis_import_pax("{{ .Params.pax_name }}.pax.tar.gz", install=True)</code>
+        <button class="copy-btn" onclick="copyInstall()">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ── Construct expander + filter ── */
+  var cOverflow = document.querySelector('.constructs-overflow');
+  var cBtn = document.querySelector('.constructs-show-more');
+  if (cBtn && cOverflow) {
+    cBtn.addEventListener('click', function () {
+      cOverflow.hidden = false;
+      cBtn.style.display = 'none';
+      /* inject filter */
+      var filter = document.createElement('input');
+      filter.className = 'construct-filter';
+      filter.placeholder = 'Filter constructs by name or ID…';
+      cOverflow.parentElement.insertBefore(filter, cOverflow);
+      filter.addEventListener('input', function () {
+        var q = filter.value.toLowerCase();
+        document.querySelectorAll('.construct-card').forEach(function (card) {
+          card.hidden = q.length > 0 && !card.textContent.toLowerCase().includes(q);
+        });
+      });
+      filter.focus();
+    });
+  }
+
+  /* ── Findings expander ── */
+  var fOverflow = document.querySelector('.findings-overflow');
+  var fBtn = document.querySelector('.findings-show-more');
+  if (fBtn && fOverflow) {
+    fBtn.addEventListener('click', function () {
+      fOverflow.hidden = false;
+      fBtn.style.display = 'none';
+    });
+  }
+
+  /* ── Sticky tab active state via IntersectionObserver ── */
+  var tabs = document.querySelectorAll('.section-tabs a');
+  if (tabs.length && 'IntersectionObserver' in window) {
+    var sections = [];
+    tabs.forEach(function (tab) {
+      var id = tab.getAttribute('href').replace('#', '');
+      var el = document.getElementById(id);
+      if (el) sections.push(el);
+    });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          tabs.forEach(function (tab) { tab.classList.remove('active'); });
+          var active = document.querySelector('.section-tabs a[href="#' + entry.target.id + '"]');
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+
+/* ── Copy install command ── */
+function copyInstall() {
+  var cmd = document.getElementById('install-cmd');
+  if (!cmd) return;
+  navigator.clipboard.writeText(cmd.textContent.trim()).then(function () {
+    var btn = document.querySelector('.copy-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
+  });
+}
+</script>
+{{ end }}

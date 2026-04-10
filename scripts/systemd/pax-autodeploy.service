@@ -1,0 +1,15 @@
+[Unit]
+Description=PAX Marketplace Auto-Deploy
+Documentation=https://github.com/JELambert/pax-market
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/pax-market
+ExecStart=/opt/pax-market/scripts/ct105-autodeploy.sh
+StandardOutput=append:/var/log/pax-autodeploy.log
+StandardError=append:/var/log/pax-autodeploy.log
+TimeoutStartSec=300
+MemoryMax=512M

@@ -1,0 +1,431 @@
+{{ define "main" }}
+<div style="padding: 3rem 0; max-width: 800px;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">This Is What It Looks Like</h1>
+  <p style="color: var(--color-text-muted); margin-bottom: 2rem;">You talk to an AI agent. It uses Praxis behind the scenes — searching structured knowledge, incorporating research, running analyses, and comparing results to the literature. Here's a real conversation:</p>
+
+  <!-- USE CASE SELECTOR -->
+  <style>
+    .use-case-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.875rem;
+    }
+    .use-case-pill {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      cursor: pointer;
+      transition: background 150ms ease, border-color 150ms ease;
+      text-align: left;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--color-text-muted);
+      line-height: 1.2;
+    }
+    .use-case-pill:hover { border-color: var(--color-accent); }
+    .use-case-pill[aria-selected="true"] {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #0d0d0d;
+    }
+    .use-case-pill[aria-selected="true"] .pill-persona { color: rgba(13,13,13,0.65); }
+    .pill-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.01em; color: inherit; }
+    .pill-persona { font-size: 0.7rem; color: var(--color-text-muted); white-space: nowrap; }
+    .demo-context-bar {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      padding: 0.625rem 1rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.625rem;
+      margin-bottom: 1.25rem;
+      transition: opacity 150ms ease;
+    }
+    .demo-context-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+    .demo-context-text { font-size: 0.8rem; color: var(--color-text-muted); }
+    .use-case-chat { transition: opacity 150ms ease; }
+    .use-case-chat.fading { opacity: 0; }
+  </style>
+
+  <div id="demo-container">
+    <div id="demo-selector" role="tablist" aria-label="Demo use cases">
+      <div class="use-case-pills">
+        <button class="use-case-pill" role="tab" aria-selected="true"
+          aria-controls="chat-churn" data-case="churn"
+          data-persona="SaaS Analytics Team"
+          data-description="Understanding and predicting mid-tier customer churn using RFM + literature">
+          <span class="pill-label">Customer Churn</span>
+          <span class="pill-persona">SaaS Analytics Team</span>
+        </button>
+        <button class="use-case-pill" role="tab" aria-selected="false"
+          aria-controls="chat-materials" data-case="materials"
+          data-persona="Dr. Sarah Chen · Computational Materials Scientist"
+          data-description="ML pre-screening of 50,000 battery cathode candidates to reduce DFT cost by 99%">
+          <span class="pill-label">Materials Discovery</span>
+          <span class="pill-persona">Dr. Sarah Chen · Comp. Materials</span>
+        </button>
+      </div>
+      <div class="demo-context-bar" id="demo-context-bar">
+        <span class="demo-context-label">Scenario</span>
+        <span class="demo-context-text" id="demo-context-text">SaaS Analytics Team — Understanding and predicting mid-tier customer churn using RFM + literature</span>
+      </div>
+    </div>
+
+    <!-- CHURN DEMO -->
+    <div class="use-case-chat" id="chat-churn" data-case="churn">
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1rem;">
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">We're seeing higher churn in our mid-tier customers. I want to understand what the research says about predicting and preventing customer churn. What do we know?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Let me check what analytical frameworks we have for this.</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_search</span>("customer churn prediction retention") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Good news — we have the <strong>customer-segmentation-rfm</strong> PAX installed, which covers RFM analysis for segmentation. But I also see a gap: we don't have a dedicated churn prediction PAX. Let me check the marketplace for one.</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_search_pax</span>("churn retention customer lifetime") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0; font-size: 0.875rem;">The <strong>credit-risk-ml</strong> PAX shares relevant constructs — both domains use logistic regression and random forest on binary outcomes with behavioral features. Its <code>prediction_accuracy</code> and <code>false_positive_rate</code> constructs directly apply to churn modeling. Want me to explore what we can pull together?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">Yes — and while you're at it, I just read a paper about how customer satisfaction links to retention. Can you incorporate that into our knowledge base?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Sure, share the paper and I'll extract the key findings into our KB.</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_skill_incorporate</span>("Gustafsson et al. 2005 — Effects of customer satisfaction on retention") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Done. I extracted 3 constructs and 4 findings from the paper:</p>
+            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text-muted);">
+              <li><code>customer_satisfaction</code> — overall satisfaction score (positive → retention)</li>
+              <li><code>switching_barriers</code> — contractual/procedural lock-in (positive → retention, but weaker)</li>
+              <li><code>affective_commitment</code> — emotional bond with brand (strongest individual predictor)</li>
+            </ul>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Key finding: <strong>affective commitment mediates 60% of the satisfaction-retention link</strong>. Customers don't stay because they're satisfied — they stay because they feel connected. This changes the intervention target from "make them happy" to "make them feel belonging."</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">That's a great insight. Now can you build a churn prediction model using our customer data and test whether satisfaction or commitment is the better predictor?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_run_engine</span>("logistic_regression", outcome="churn", predictors=["customer_satisfaction", "affective_commitment", "recency", "frequency", "monetary"]) <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Logistic regression on 12,400 customer records:</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem; font-size: 0.8rem; margin-bottom: 0.5rem;">
+              <div><code>affective_commitment</code>: <strong style="color: var(--color-topic);">&#946; = -0.71</strong> (p &lt; 0.001) — strongest predictor of retention</div>
+              <div><code>customer_satisfaction</code>: <strong style="color: var(--color-text-muted);">&#946; = -0.12</strong> (p = 0.08) — not significant after controlling for commitment</div>
+              <div><code>recency</code>: <strong style="color: #ef4444;">&#946; = +0.54</strong> (p &lt; 0.001) — longer since last purchase = higher churn risk</div>
+            </div>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_compare_to_literature</span> <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0; font-size: 0.875rem;"><strong>KB Comparison:</strong> Your result <strong>confirms</strong> Gustafsson et al.'s finding — commitment dominates satisfaction as a retention driver. Your recency effect is consistent with the RFM literature. Recommendation: <strong>focus retention interventions on community and belonging programs, not just satisfaction surveys.</strong></p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">This is great. Package everything we just did into a PAX so the rest of the analytics team can use it.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_create_pax</span>("customer-churn-prediction", pax_type="enterprise", ...) <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0; font-size: 0.875rem;">Done. Created <strong>customer-churn-prediction</strong> PAX with 5 constructs, 4 findings, and a quick-start playbook that reproduces your analysis. Anyone on the team who installs this PAX gets your constructs, the literature findings, and the playbook — they can run the same analysis on new data without starting from scratch.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MATERIALS DISCOVERY DEMO -->
+    <div class="use-case-chat" id="chat-materials" data-case="materials" style="display:none;">
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1rem;">
+
+        <!-- Exchange 1: Install -->
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">I'm trying to accelerate stable cathode material discovery for solid-state batteries. We generate 50,000 candidate structures but DFT screening is too expensive at scale. I've heard you can help with ML-based pre-screening. Where do I start?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Great use case — this is exactly the problem Matbench Discovery was designed around. Let me search for a relevant knowledge pack.</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_search_pax</span>("crystal stability materials discovery") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Found one: <strong>ml-materials-discovery</strong> (field PAX, v1.0.2) — machine learning for crystal stability prediction and high-throughput screening, built on the Matbench and Matbench Discovery benchmark suites. Installing now.</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_install_pax</span>("ml-materials-discovery") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;"><strong>Installed.</strong> What you just got:</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem; font-size: 0.8rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 1rem;">
+                <span style="color: var(--color-text-muted);">Constructs</span><span style="font-weight: 600;">7</span>
+                <span style="color: var(--color-text-muted);">Empirical findings</span><span style="font-weight: 600;">10</span>
+                <span style="color: var(--color-text-muted);">Peer-reviewed sources</span><span style="font-weight: 600;">3</span>
+                <span style="color: var(--color-text-muted);">Runnable engines</span><span style="font-weight: 600;">5 (sklearn)</span>
+                <span style="color: var(--color-text-muted);">GNN catalog engines</span><span style="font-weight: 600;">6 (external infra)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exchange 2: Knowledge -->
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">What concepts does the system actually know about?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_query_constructs</span>(domain="ml_materials_discovery") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Seven constructs — the atomic building blocks linking your data to the literature:</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem; font-size: 0.78rem; display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 0.5rem;">
+              <div><code>formation_energy_per_atom</code> — <span style="color: var(--color-text-muted);">Energy released forming a crystal from elements (eV/atom). Primary regression target.</span></div>
+              <div><code>energy_above_convex_hull</code> — <span style="color: var(--color-text-muted);">Thermodynamic distance from the stability boundary. Zero = stable.</span></div>
+              <div><code>thermodynamic_stability</code> — <span style="color: var(--color-text-muted);">Binary: is the material on the convex hull? 15.3% of WBM structures are stable.</span></div>
+              <div><code>discovery_acceleration_factor</code> — <span style="color: var(--color-text-muted);">How many more stable materials a model finds per DFT call vs. random. Top models: ~6×.</span></div>
+              <div><code>gnn_interatomic_potential</code> — <span style="color: var(--color-text-muted);">ML force field (MACE-MP, CHGNet) mapping crystal graphs to energies and forces.</span></div>
+            </div>
+            <p style="margin: 0; font-size: 0.875rem;">Key KB finding (Riebesell 2025, <em>Nature Machine Intelligence</em>): GNN potentials achieve <strong>5–6× Discovery Acceleration Factor</strong> on the WBM test set versus ~1× for random DFT screening. That's your target to beat with the tabular models.</p>
+          </div>
+        </div>
+
+        <!-- Exchange 3: Run playbook -->
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">I have WBM-format data — material IDs, formation energies, hull distances, band gaps, stability labels. Run the analysis.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_ingest_data</span>(source="riebesell_2025_wbm", constructs=["formation_energy_per_atom", "energy_above_convex_hull", "thermodynamic_stability", "band_gap"]) <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Ingested 20 materials, 80 observations. Running the full <strong>Materials Discovery Quick Start</strong> playbook — 5 steps from linear baseline to ensemble models:</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+              <span style="color: var(--color-accent);">praxis_run_playbook</span>("ml-materials-discovery", "quick_start") <span style="color: var(--color-topic);">&#10003;</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Best result — <strong>Random Forest: Stability Classification</strong> (Step 5):</p>
+            <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem; font-size: 0.8rem; margin-bottom: 0.5rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 1rem; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-text-muted);">OOB Accuracy</span><span style="font-weight: 700; color: var(--color-topic);">1.000</span>
+                <span style="color: var(--color-text-muted);">Trees</span><span style="font-weight: 600;">200</span>
+              </div>
+              <div style="border-top: 1px solid var(--color-border); padding-top: 0.375rem;">
+                <div><code>energy_above_hull</code>: <strong style="color: var(--color-topic);">57.9%</strong> importance — <span style="color: var(--color-text-muted);">dominant predictor (matches KB)</span></div>
+                <div><code>band_gap</code>: <strong>23.6%</strong> importance — <span style="color: var(--color-text-muted);">unstable materials often have unusual electronic structure</span></div>
+                <div><code>formation_energy</code>: <strong>18.5%</strong> importance</div>
+              </div>
+            </div>
+            <p style="margin: 0; font-size: 0.875rem;"><strong>KB Comparison:</strong> Hull distance dominance <strong>confirms</strong> Riebesell 2025. <strong>This is your initial screening model</strong> — use it to cut 50,000 → 500 candidates before committing any DFT compute.</p>
+          </div>
+        </div>
+
+        <!-- Exchange 4: Extend -->
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">You</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0; font-size: 0.875rem;">How do I scale this up and integrate the GNN force fields for the final candidates?</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--color-bg); flex-shrink: 0;">AI</div>
+          <div style="background: var(--color-bg); border-radius: 0.5rem; padding: 0.75rem 1rem; max-width: 85%;">
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Three-step ladder:</p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;">
+              <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem;">
+                <div style="font-weight: 700; margin-bottom: 0.25rem;">1. Scale the data</div>
+                <div style="color: var(--color-text-muted);">Stream the full WBM CSV (256,963 materials) via Figshare URL — same <code>praxis_ingest_data</code> call, ~5 min. R² figures will match published Matbench numbers at full scale.</div>
+              </div>
+              <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem;">
+                <div style="font-weight: 700; margin-bottom: 0.25rem;">2. Add cathode-specific constructs</div>
+                <div style="color: var(--color-text-muted);">Extend the PAX with <code>lithium_diffusion_barrier</code>, <code>voltage_vs_li</code>, <code>volume_change_on_cycling</code> — then build a multi-objective screening model predicting all four.</div>
+              </div>
+              <div style="background: var(--color-surface); border-radius: 0.375rem; padding: 0.625rem 0.75rem;">
+                <div style="font-weight: 700; margin-bottom: 0.25rem;">3. GNN force fields on your top 500</div>
+                <div style="color: var(--color-text-muted);">The PAX catalog includes MACE-MP (~6× DAF) and CHGNet (~5× DAF) with full setup docs. Praxis tabular models cut 50k → 500 candidates; GNN relaxation handles the final stability check. You've reduced DFT calls by <strong>99%</strong> before they're needed.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      var pills   = document.querySelectorAll('.use-case-pill');
+      var chats   = document.querySelectorAll('.use-case-chat');
+      var ctxText = document.getElementById('demo-context-text');
+      var ctxBar  = document.getElementById('demo-context-bar');
+
+      function switchCase(targetCase) {
+        var incoming = null;
+        chats.forEach(function (c) { if (c.dataset.case === targetCase) incoming = c; });
+        if (!incoming || incoming.style.display !== 'none') return;
+
+        var current = null;
+        chats.forEach(function (c) { if (c.style.display !== 'none') current = c; });
+
+        pills.forEach(function (p) {
+          p.setAttribute('aria-selected', p.dataset.case === targetCase ? 'true' : 'false');
+        });
+        ctxBar.style.opacity = '0';
+
+        if (current) {
+          current.classList.add('fading');
+          setTimeout(function () {
+            current.style.display = 'none';
+            current.classList.remove('fading');
+            incoming.style.opacity = '0';
+            incoming.style.display = '';
+            void incoming.offsetHeight;
+            incoming.style.opacity = '';
+            var active = document.querySelector('.use-case-pill[aria-selected="true"]');
+            if (active) ctxText.textContent = active.dataset.persona + ' — ' + active.dataset.description;
+            ctxBar.style.opacity = '';
+          }, 150);
+        } else {
+          incoming.style.display = '';
+          var active = document.querySelector('.use-case-pill[aria-selected="true"]');
+          if (active) ctxText.textContent = active.dataset.persona + ' — ' + active.dataset.description;
+          ctxBar.style.opacity = '';
+        }
+      }
+
+      pills.forEach(function (pill) {
+        pill.addEventListener('click', function () { switchCase(this.dataset.case); });
+      });
+    })();
+    </script>
+  </div>
+  <!-- /USE CASE SELECTOR -->
+
+  <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 3rem; font-style: italic;">The full loop: ask a question, search the knowledge base, incorporate new research, run an analysis with automatic literature comparison, and package everything into a reusable PAX. All in natural conversation.</p>
+
+  <!-- SET UP YOUR OWN INSTANCE -->
+  <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">Set Up Your Own Instance</h2>
+  <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Ready to try it? Here's how to get Praxis running and connect it to your agent.</p>
+
+  <div class="section">
+    <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 1rem; font-weight: 700; color: var(--color-accent); font-family: var(--font-mono);">01</span>
+      Install Praxis
+    </h3>
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem; margin-top: 0.75rem;">
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.8; color: var(--color-text);">git clone https://github.com/JELambert/praxis.git
+cd praxis && uv sync
+uv run python -m praxis.mcp_server</code></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 1rem; font-weight: 700; color: var(--color-accent); font-family: var(--font-mono);">02</span>
+      Connect Your Agent
+    </h3>
+    <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 0.75rem;">Add Praxis to your Claude Code MCP config:</p>
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem;">
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.6; color: var(--color-text);">{
+  "mcpServers": {
+    "praxis": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/praxis",
+               "python", "-m", "praxis.mcp_server"]
+    }
+  }
+}</code></pre>
+    </div>
+    <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-top: 0.5rem;">Works with any MCP-compatible agent — Claude Code, Codex CLI, or custom agents via the Agent SDK.</p>
+  </div>
+
+  <div class="section">
+    <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 1rem; font-weight: 700; color: var(--color-accent); font-family: var(--font-mono);">03</span>
+      Install PAX from the Marketplace
+    </h3>
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem;">
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.8; color: var(--color-text);">curl -O https://pax-market.com/pax/happiness-economics.pax.tar.gz
+praxis_import_pax("happiness-economics.pax.tar.gz", install=True)</code></pre>
+    </div>
+    <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-top: 0.5rem;">Or just ask your agent: <em>"Install the happiness-economics PAX from the marketplace."</em></p>
+  </div>
+
+  <div class="section">
+    <h3 style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 1rem; font-weight: 700; color: var(--color-accent); font-family: var(--font-mono);">04</span>
+      Start Talking
+    </h3>
+    <p style="color: var(--color-text-muted); font-size: 0.875rem;">That's it. Ask your agent anything about the domains you've installed. It has 73 Praxis tools available — knowledge search, cross-domain pathways, 18 analytical engines, paper incorporation, and PAX creation. You saw how it works above.</p>
+  </div>
+
+  <!-- Links -->
+  <div class="section">
+    <h3>More Resources</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+      <a href="/pax/" class="download-btn" style="text-decoration: none; font-size: 0.85rem;">Browse PAX</a>
+      <a href="/api/" style="text-decoration: none; padding: 0.75rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-size: 0.85rem;">API Docs</a>
+      <a href="/graph/" style="text-decoration: none; padding: 0.75rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-size: 0.85rem;">Knowledge Graph</a>
+      <a href="/constructs/" style="text-decoration: none; padding: 0.75rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-size: 0.85rem;">Constructs</a>
+      <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" style="text-decoration: none; padding: 0.75rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; color: var(--color-text); font-size: 0.85rem;">GitHub</a>
+    </div>
+  </div>
+</div>
+{{ end }}

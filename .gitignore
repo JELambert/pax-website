@@ -1,0 +1,22 @@
+# Generated content (from registry artifacts)
+content/pax/
+static/pax/*.pax.tar.gz
+data/registry.json
+data/constructs.json
+
+# Artifacts directory
+artifacts/
+
+# Hugo build output
+public/
+
+# Python
+__pycache__/
+*.pyc
+
+# Upload service credentials
+upload-service/.env
+
+# macOS
+.DS_Store
+._*

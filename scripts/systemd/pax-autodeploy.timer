@@ -1,0 +1,12 @@
+[Unit]
+Description=PAX Marketplace Auto-Deploy Timer
+Documentation=https://github.com/JELambert/pax-market
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Persistent=true
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

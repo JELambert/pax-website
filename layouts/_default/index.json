@@ -1,0 +1,36 @@
+{{ $packs := slice }}
+{{ range where .Site.RegularPages "Section" "pax" }}
+  {{ $pack := dict
+    "name" .Params.pax_name
+    "title" .Title
+    "version" .Params.version
+    "pax_type" .Params.pax_type
+    "description" .Params.description
+    "author" .Params.author
+    "license" .Params.license
+    "tags" .Params.tags
+    "schema_version" "2.0"
+    "constructs" .Params.constructs
+    "construct_count" .Params.construct_count
+    "finding_count" .Params.finding_count
+    "proposition_count" .Params.proposition_count
+    "has_playbooks" .Params.has_playbooks
+    "has_data_sources" .Params.has_data_sources
+    "engines" .Params.engines
+    "domain" .Params.domain
+    "constructs_detail" .Params.constructs_detail
+    "findings_detail" .Params.findings_detail
+    "propositions_detail" .Params.propositions_detail
+    "sources_detail" .Params.sources_detail
+    "playbooks_detail" .Params.playbooks_detail
+    "related_packs" .Params.related_packs
+    "download_url" .Params.download_url
+    "download_size" .Params.download_size
+    "quality_score" .Params.quality_score
+    "published_at" .Params.published_at
+    "published_by" .Params.published_by
+    "url" .RelPermalink
+  }}
+  {{ $packs = $packs | append $pack }}
+{{ end }}
+{{ $packs | jsonify (dict "indent" "  ") }}

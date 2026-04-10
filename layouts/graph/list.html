@@ -1,0 +1,177 @@
+{{ define "main" }}
+<section style="padding: 2rem 0 1rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Knowledge Graph</h1>
+  <p style="color: var(--color-text-muted);">424 constructs connected by 469 finding-implied edges across 97 domains. Each node is a construct, each edge means at least one finding links them. Color = domain. Size = number of connections.</p>
+</section>
+
+<div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+  <input type="text" class="search-input" id="graph-search" placeholder="Search constructs..." style="max-width: 300px;">
+  <label style="font-size: 0.8rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.375rem;">
+    <input type="checkbox" id="labels-toggle"> Show labels
+  </label>
+  <span id="hover-info" style="font-size: 0.85rem; color: var(--color-accent); margin-left: auto;"></span>
+</div>
+
+<div id="graph-container" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; position: relative; width: 100%; height: 600px;"></div>
+
+<div id="domain-legend" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;"></div>
+{{ end }}
+
+{{ define "scripts" }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+(function() {
+  const container = document.getElementById('graph-container');
+  const width = container.clientWidth;
+  const height = 600;
+
+  const svg = d3.select('#graph-container')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('viewBox', [0, 0, width, height]);
+
+  // Zoom
+  const g = svg.append('g');
+  svg.call(d3.zoom()
+    .scaleExtent([0.2, 5])
+    .on('zoom', (e) => g.attr('transform', e.transform)));
+
+  fetch('/graph.json')
+    .then(r => r.json())
+    .then(data => {
+      const nodes = data.nodes;
+      const edges = data.edges;
+
+      // Compute degree for sizing
+      const degree = {};
+      edges.forEach(e => {
+        degree[e.source] = (degree[e.source] || 0) + 1;
+        degree[e.target] = (degree[e.target] || 0) + 1;
+      });
+
+      // Domain color map
+      const domainSet = [...new Set(nodes.map(n => n.domain))].sort();
+      const palette = ['#38bdf8','#a78bfa','#34d399','#fb923c','#f472b6','#facc15',
+        '#ef4444','#6ee7b7','#c084fc','#f97316','#22d3ee','#a3e635','#818cf8',
+        '#f9a8d4','#fbbf24','#2dd4bf','#e879f9','#84cc16','#fb7185','#67e8f9'];
+      const domainColor = {};
+      domainSet.forEach((d, i) => domainColor[d] = palette[i % palette.length]);
+
+      // Legend — top 15 domains by node count
+      const domainCounts = {};
+      nodes.forEach(n => domainCounts[n.domain] = (domainCounts[n.domain] || 0) + 1);
+      const topDomains = Object.entries(domainCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15);
+
+      const legend = document.getElementById('domain-legend');
+      topDomains.forEach(([name, count]) => {
+        const el = document.createElement('span');
+        el.style.cssText = 'display:inline-flex;align-items:center;gap:0.25rem;font-size:0.7rem;color:var(--color-text-muted);';
+        el.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${domainColor[name]};display:inline-block;"></span>${name} (${count})`;
+        legend.appendChild(el);
+      });
+
+      // Simulation
+      const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(edges).id(d => d.id).distance(60).strength(0.3))
+        .force('charge', d3.forceManyBody().strength(-40))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(d => Math.sqrt(degree[d.id] || 1) * 2 + 4));
+
+      // Edges
+      const link = g.append('g')
+        .selectAll('line')
+        .data(edges)
+        .join('line')
+        .attr('stroke', 'rgba(148, 163, 184, 0.15)')
+        .attr('stroke-width', d => Math.min(d.weight, 3));
+
+      // Nodes
+      const node = g.append('g')
+        .selectAll('circle')
+        .data(nodes)
+        .join('circle')
+        .attr('r', d => Math.sqrt(degree[d.id] || 1) * 2 + 3)
+        .attr('fill', d => domainColor[d.domain] || '#94a3b8')
+        .attr('stroke', 'rgba(15, 23, 42, 0.5)')
+        .attr('stroke-width', 0.5)
+        .style('cursor', 'pointer')
+        .call(d3.drag()
+          .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+          .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+          .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+      // Labels (hidden by default)
+      const label = g.append('g')
+        .selectAll('text')
+        .data(nodes)
+        .join('text')
+        .text(d => d.name)
+        .attr('font-size', '6px')
+        .attr('fill', 'var(--color-text-muted)')
+        .attr('dx', 8)
+        .attr('dy', 3)
+        .style('display', 'none')
+        .style('pointer-events', 'none');
+
+      // Hover
+      const hoverInfo = document.getElementById('hover-info');
+      node.on('mouseover', function(e, d) {
+        d3.select(this).attr('stroke', '#fff').attr('stroke-width', 2);
+        const deg = degree[d.id] || 0;
+        hoverInfo.textContent = `${d.name} — ${d.domain} (${deg} connections)`;
+        // Highlight connected
+        const connected = new Set();
+        edges.forEach(edge => {
+          const s = typeof edge.source === 'object' ? edge.source.id : edge.source;
+          const t = typeof edge.target === 'object' ? edge.target.id : edge.target;
+          if (s === d.id) connected.add(t);
+          if (t === d.id) connected.add(s);
+        });
+        node.attr('opacity', n => connected.has(n.id) || n.id === d.id ? 1 : 0.15);
+        link.attr('opacity', l => {
+          const s = typeof l.source === 'object' ? l.source.id : l.source;
+          const t = typeof l.target === 'object' ? l.target.id : l.target;
+          return s === d.id || t === d.id ? 1 : 0.05;
+        }).attr('stroke', l => {
+          const s = typeof l.source === 'object' ? l.source.id : l.source;
+          const t = typeof l.target === 'object' ? l.target.id : l.target;
+          return s === d.id || t === d.id ? 'rgba(56, 189, 248, 0.6)' : 'rgba(148, 163, 184, 0.15)';
+        });
+      }).on('mouseout', function() {
+        d3.select(this).attr('stroke', 'rgba(15, 23, 42, 0.5)').attr('stroke-width', 0.5);
+        hoverInfo.textContent = '';
+        node.attr('opacity', 1);
+        link.attr('opacity', 1).attr('stroke', 'rgba(148, 163, 184, 0.15)');
+      });
+
+      // Tick
+      simulation.on('tick', () => {
+        link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+        node.attr('cx', d => d.x).attr('cy', d => d.y);
+        label.attr('x', d => d.x).attr('y', d => d.y);
+      });
+
+      // Search
+      document.getElementById('graph-search').addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        if (!q) {
+          node.attr('opacity', 1).attr('r', d => Math.sqrt(degree[d.id] || 1) * 2 + 3);
+          link.attr('opacity', 1);
+          return;
+        }
+        node.attr('opacity', d => d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q) ? 1 : 0.1)
+            .attr('r', d => (d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q)) ? Math.sqrt(degree[d.id] || 1) * 3 + 6 : Math.sqrt(degree[d.id] || 1) * 2 + 3);
+      });
+
+      // Labels toggle
+      document.getElementById('labels-toggle').addEventListener('change', function() {
+        label.style('display', this.checked ? null : 'none');
+      });
+    });
+})();
+</script>
+{{ end }}

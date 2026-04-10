@@ -1,0 +1,117 @@
+{{ define "main" }}
+<div style="padding: 3rem 0; max-width: 800px;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">API</h1>
+  <p style="color: var(--color-text-muted); margin-bottom: 2rem;">The PAX Marketplace exposes two JSON endpoints for programmatic access. Agents and applications can query these to discover, evaluate, and install PAX without visiting the website.</p>
+
+  <!-- Endpoint 1: Registry -->
+  <div class="section">
+    <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; padding: 0.25rem 0.5rem; background: rgba(52, 211, 153, 0.15); color: var(--color-topic); border-radius: 0.25rem;">GET</span>
+      /index.json
+    </h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">Full registry of all published PAX with enriched knowledge detail. Schema version 2.0.</p>
+
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+      <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">Example</div>
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.5; color: var(--color-text);">curl -s https://pax-market.com/index.json | jq '.[0]'</code></pre>
+    </div>
+
+    <div class="content-body">
+      <p>Each entry contains:</p>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>string</td><td>Kebab-case PAX identifier</td></tr>
+          <tr><td><code>pax_type</code></td><td>string</td><td><code>paper</code> | <code>topic</code> | <code>field</code> | <code>engine</code></td></tr>
+          <tr><td><code>domain</code></td><td>object</td><td>Domain metadata: <code>display_name</code>, <code>description</code>, <code>research_questions[]</code>, <code>temporal_scope</code>, <code>population</code></td></tr>
+          <tr><td><code>constructs_detail</code></td><td>array</td><td>Full construct definitions with <code>id</code>, <code>display_name</code>, <code>definition</code>, <code>aliases[]</code></td></tr>
+          <tr><td><code>findings_detail</code></td><td>array</td><td>Empirical findings with <code>finding_text</code>, <code>direction</code>, <code>effect_size</code>, <code>confidence</code>, <code>method_used</code></td></tr>
+          <tr><td><code>propositions_detail</code></td><td>array</td><td>Theoretical claims: <code>proposition_text</code>, <code>construct_from</code>, <code>construct_to</code>, <code>direction</code></td></tr>
+          <tr><td><code>playbooks_detail</code></td><td>array</td><td>Analysis recipes: <code>display_name</code>, <code>description</code>, <code>estimated_runtime</code>, <code>step_count</code>, <code>engines_used[]</code></td></tr>
+          <tr><td><code>sources_detail</code></td><td>array</td><td>Bibliographic info: <code>title</code>, <code>authors</code>, <code>year</code>, <code>doi</code></td></tr>
+          <tr><td><code>related_packs</code></td><td>array</td><td>Up to 3 related PAX names (computed from shared constructs)</td></tr>
+          <tr><td><code>download_url</code></td><td>string</td><td>Path to <code>.pax.tar.gz</code> archive</td></tr>
+          <tr><td><code>download_sha256</code></td><td>string</td><td>SHA-256 checksum of the archive</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Endpoint 2: Constructs -->
+  <div class="section">
+    <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; padding: 0.25rem 0.5rem; background: rgba(52, 211, 153, 0.15); color: var(--color-topic); border-radius: 0.25rem;">GET</span>
+      /pax/index.json
+    </h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">Same as above — available at the section level.</p>
+  </div>
+
+  <!-- Endpoint 3: Graph -->
+  <div class="section">
+    <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; padding: 0.25rem 0.5rem; background: rgba(52, 211, 153, 0.15); color: var(--color-topic); border-radius: 0.25rem;">GET</span>
+      /graph.json
+    </h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">Full knowledge graph — all constructs as nodes and finding-implied edges. Powers the <a href="/graph/">interactive visualization</a>.</p>
+
+    <div class="content-body">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>nodes[]</code></td><td>array</td><td>Constructs: <code>id</code>, <code>name</code>, <code>domain</code>, <code>color</code></td></tr>
+          <tr><td><code>edges[]</code></td><td>array</td><td>Finding-implied connections: <code>source</code>, <code>target</code>, <code>weight</code></td></tr>
+          <tr><td><code>domains[]</code></td><td>array</td><td>Domain summary: <code>name</code>, <code>color</code>, <code>count</code></td></tr>
+          <tr><td><code>stats</code></td><td>object</td><td><code>nodes</code>, <code>edges</code>, <code>domains</code> counts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Endpoint 4: Archives -->
+  <div class="section">
+    <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; padding: 0.25rem 0.5rem; background: rgba(52, 211, 153, 0.15); color: var(--color-topic); border-radius: 0.25rem;">GET</span>
+      /pax/{name}.pax.tar.gz
+    </h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">Downloadable PAX archive. Contains <code>pax.yaml</code>, <code>knowledge/</code>, <code>engines/</code>, <code>playbooks/</code>, and <code>data/</code>. Verify integrity with the <code>download_sha256</code> from the registry.</p>
+
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem;">
+      <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">Install a PAX</div>
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.6; color: var(--color-text);"># Download
+curl -O https://pax-market.com/pax/happiness-economics.pax.tar.gz
+
+# Import into Praxis
+praxis_import_pax("happiness-economics.pax.tar.gz", install=True)</code></pre>
+    </div>
+  </div>
+
+  <!-- Agent usage -->
+  <div class="section">
+    <h2>Agent Usage</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">AI agents can discover and install PAX programmatically:</p>
+
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1.25rem;">
+      <pre style="background: var(--color-bg); padding: 1rem; border-radius: 0.375rem; overflow-x: auto; margin: 0;"><code style="font-size: 0.8rem; line-height: 1.6; color: var(--color-text);"># 1. Discover PAX that cover "income" constructs
+registry = fetch("https://pax-market.com/index.json")
+matches = [p for p in registry
+           if any("income" in c["id"] for c in p["constructs_detail"])]
+
+# 2. Check what a PAX provides before installing
+pax = matches[0]
+print(pax["domain"]["research_questions"])
+print([f["finding_text"] for f in pax["findings_detail"]])
+
+# 3. Download and install
+praxis_import_pax(f"https://pax-market.com{pax['download_url']}", install=True)
+
+# 4. Publish your own PAX back to the marketplace
+praxis_create_pax("my-research", ...)
+praxis_publish_pax("my-research")  # → live on pax-market.com</code></pre>
+    </div>
+  </div>
+</div>
+{{ end }}

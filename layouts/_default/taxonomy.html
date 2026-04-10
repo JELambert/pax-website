@@ -1,0 +1,12 @@
+{{ define "main" }}
+<section style="padding: 3rem 0 1rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">{{ .Title }}</h1>
+  <p style="color: var(--color-text-muted);">{{ len .Pages }} items</p>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem;">
+  {{ range .Pages }}
+    <a href="{{ .RelPermalink }}" class="tag" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">{{ .Title }}{{ with .Pages }} ({{ len . }}){{ end }}</a>
+  {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,15 @@
+{{ define "main" }}
+<section style="padding: 3rem 0 1rem;">
+  <div style="margin-bottom: 1rem;">
+    <a href="/pax/" style="font-size: 0.875rem; color: var(--color-text-muted);">&larr; Browse all PAX</a>
+  </div>
+  <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">{{ .Title }}</h1>
+  <p style="color: var(--color-text-muted);">{{ len .Pages }} PAX tagged "{{ .Title }}"</p>
+</section>
+
+<div class="pack-grid">
+  {{ range .Pages }}
+    {{ partial "pack-card.html" . }}
+  {{ end }}
+</div>
+{{ end }}
