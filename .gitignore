@@ -9,6 +9,8 @@ artifacts/
 
 # Hugo build output
 public/
+.hugo_build.lock
+static/registry.json
 
 # Python
 __pycache__/
