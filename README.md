@@ -1,0 +1,60 @@
+# PAX Website
+
+Frontend for [pax-market.com](https://pax-market.com) — the PAX Marketplace where users browse, download, and submit Portable Analytical eXpertise packages.
+
+## Architecture
+
+This repo contains the **website only**. Pack data comes from the [pax-market](https://github.com/JELambert/pax-market) registry repo via GitHub Releases.
+
+```
+pax-market (registry)                    pax-website (this repo)
+├── pax/         64 pack dirs            ├── layouts/       Hugo templates
+├── scripts/                             ├── content/       Static pages
+│   └── generate-registry.py             ├── upload-service/ FastAPI upload app
+└── .github/workflows/                   ├── scripts/
+    └── publish-artifacts.yml               ├── generate-content.py
+         ↓                                  ├── fetch-artifacts.sh
+    GitHub Release                          └── ct105-autodeploy.sh
+    (registry.json, full-catalog.json,
+     constructs.json, pax-archives.tar)
+         ↓
+    Website fetches artifacts → generates Hugo pages → builds → deploys
+```
+
+## Build
+
+```bash
+# Fetch latest pack data from registry
+bash scripts/fetch-artifacts.sh
+
+# Generate Hugo content pages from catalog
+python3 scripts/generate-content.py
+
+# Build the site
+hugo --minify
+```
+
+## What's Here
+
+| Directory | Purpose |
+|-----------|---------|
+| `layouts/` | Hugo templates (baseof, pack single/list, guide, about, etc.) |
+| `content/` | Static content pages (about, guide, showcase, graph, api) |
+| `static/` | Static assets (PAX_CREATION_GUIDE.md, PAX_USAGE_GUIDE.md, graph.json) |
+| `upload-service/` | FastAPI app at submit.pax-market.com for community pack uploads |
+| `scripts/` | Build and deploy scripts |
+| `.github/workflows/` | CI: build verification on push |
+
+## Deploy
+
+The site is deployed on Proxmox infrastructure:
+- **CT 105** — builds the site and runs the upload service (port 8000)
+- **CT 110** — nginx serves the static site via Cloudflare tunnel
+- **Autodeploy** — systemd timer on CT 105 polls every 5 min for new registry releases or website commits
+
+## Related Repos
+
+| Repo | Purpose |
+|------|---------|
+| [pax-market](https://github.com/JELambert/pax-market) | Pack registry — source of truth for all PAX packages |
+| [praxis](https://github.com/JELambert/praxis) | The Praxis framework — MCP server, engines, PAX system |
