@@ -4,10 +4,10 @@
 # Downloads registry.json, constructs.json, full-catalog.json, and pack archives
 # from the latest GitHub Release on JELambert/pax-market.
 #
+# Uses curl (no gh CLI auth required — pax-market is a public repo).
+#
 # Usage:
 #   scripts/fetch-artifacts.sh
-#
-# Requires: gh CLI (authenticated) OR curl + jq
 
 set -euo pipefail
 
@@ -19,22 +19,27 @@ echo "Fetching latest registry artifacts from $REPO..."
 
 mkdir -p "$ARTIFACTS_DIR" "$STATIC_PAX_DIR"
 
-# Try gh CLI first, fall back to curl
-if command -v gh &>/dev/null; then
-    gh release download latest -R "$REPO" -D "$ARTIFACTS_DIR" --clobber
+# Get download URLs from the latest release
+RELEASE_JSON=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest")
+if echo "$RELEASE_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'assets' in d" 2>/dev/null; then
+    URLS=$(echo "$RELEASE_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for asset in data.get('assets', []):
+    print(asset['browser_download_url'])
+")
 else
-    echo "gh CLI not found, using curl..."
-    RELEASE_URL=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | jq -r '.assets[] | .browser_download_url' 2>/dev/null)
-    if [ -z "$RELEASE_URL" ]; then
-        echo "ERROR: Could not fetch release URL"
-        exit 1
-    fi
-    for url in $RELEASE_URL; do
-        filename=$(basename "$url")
-        echo "  Downloading $filename..."
-        curl -sL "$url" -o "$ARTIFACTS_DIR/$filename"
-    done
+    echo "ERROR: Could not fetch release data from $REPO"
+    echo "$RELEASE_JSON" | head -5
+    exit 1
 fi
+
+# Download each asset
+for url in $URLS; do
+    filename=$(basename "$url")
+    echo "  Downloading $filename..."
+    curl -sL "$url" -o "$ARTIFACTS_DIR/$filename"
+done
 
 # Verify required files
 for f in registry.json constructs.json full-catalog.json pax-archives.tar; do

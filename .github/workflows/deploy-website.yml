@@ -22,10 +22,7 @@ jobs:
         run: pip install pyyaml
 
       - name: Fetch registry artifacts
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          bash scripts/fetch-artifacts.sh
+        run: bash scripts/fetch-artifacts.sh
 
       - name: Generate Hugo content from catalog
         run: python3 scripts/generate-content.py
