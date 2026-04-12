@@ -414,6 +414,18 @@ details.meta-accordion > summary::-webkit-details-marker { display: none; }
           {{ with .effect_size }}<span><strong>Effect:</strong> {{ . }}</span>{{ end }}
           {{ with .method_used }}<span><strong>Method:</strong> {{ . }}</span>{{ end }}
         </div>
+        {{ $hasStats := or .effect_size_value .p_value .sample_size .r_squared }}
+        {{ if $hasStats }}
+        {{ $f := . }}
+        <div class="finding-stats">
+          {{ with $f.effect_size_value }}{{ if $f.effect_size_type }}<span><strong>{{ $f.effect_size_type }}</strong> = {{ . }}</span>{{ else }}<span><strong>Effect</strong> = {{ . }}</span>{{ end }}{{ end }}
+          {{ with $f.effect_size_se }}<span><strong>SE</strong> = {{ . }}</span>{{ end }}
+          {{ if and $f.ci_lower $f.ci_upper }}<span><strong>95% CI</strong> [{{ $f.ci_lower }}, {{ $f.ci_upper }}]</span>{{ end }}
+          {{ with $f.p_value }}<span><strong>p</strong> = {{ . }}</span>{{ end }}
+          {{ with $f.r_squared }}<span><strong>R²</strong> = {{ . }}</span>{{ end }}
+          {{ with $f.sample_size }}<span><strong>N</strong> = {{ . }}</span>{{ end }}
+        </div>
+        {{ end }}
       </div>
       {{ end }}
       <div class="findings-overflow" hidden>
@@ -452,6 +464,18 @@ details.meta-accordion > summary::-webkit-details-marker { display: none; }
           {{ with .effect_size }}<span><strong>Effect:</strong> {{ . }}</span>{{ end }}
           {{ with .method_used }}<span><strong>Method:</strong> {{ . }}</span>{{ end }}
         </div>
+        {{ $hasStats := or .effect_size_value .p_value .sample_size .r_squared }}
+        {{ if $hasStats }}
+        {{ $f := . }}
+        <div class="finding-stats">
+          {{ with $f.effect_size_value }}{{ if $f.effect_size_type }}<span><strong>{{ $f.effect_size_type }}</strong> = {{ . }}</span>{{ else }}<span><strong>Effect</strong> = {{ . }}</span>{{ end }}{{ end }}
+          {{ with $f.effect_size_se }}<span><strong>SE</strong> = {{ . }}</span>{{ end }}
+          {{ if and $f.ci_lower $f.ci_upper }}<span><strong>95% CI</strong> [{{ $f.ci_lower }}, {{ $f.ci_upper }}]</span>{{ end }}
+          {{ with $f.p_value }}<span><strong>p</strong> = {{ . }}</span>{{ end }}
+          {{ with $f.r_squared }}<span><strong>R²</strong> = {{ . }}</span>{{ end }}
+          {{ with $f.sample_size }}<span><strong>N</strong> = {{ . }}</span>{{ end }}
+        </div>
+        {{ end }}
       </div>
       {{ end }}
     {{ end }}
