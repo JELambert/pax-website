@@ -86,15 +86,19 @@ if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
 fi
 
 # Check 2: registry releases
+# Compare updated_at timestamp — tag_name is always "latest" (rolling tag) so it
+# never changes. updated_at reflects when artifacts were last uploaded.
 log "Checking registry releases..."
-CURRENT_TAG=""
+CURRENT_TS=""
 if [ -f "$RELEASE_TAG_FILE" ]; then
-    CURRENT_TAG=$(cat "$RELEASE_TAG_FILE")
+    CURRENT_TS=$(cat "$RELEASE_TAG_FILE")
 fi
-LATEST_TAG=$(curl -sL "https://api.github.com/repos/$REGISTRY_REPO/releases/latest" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name',''))" 2>/dev/null || echo "")
+RELEASE_JSON=$(curl -sL "https://api.github.com/repos/$REGISTRY_REPO/releases/latest" 2>/dev/null || echo "")
+LATEST_TAG=$(echo "$RELEASE_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tag_name',''))" 2>/dev/null || echo "")
+LATEST_TS=$(echo "$RELEASE_JSON"  | python3 -c "import sys,json; print(json.load(sys.stdin).get('updated_at',''))" 2>/dev/null || echo "")
 
-if [ -n "$LATEST_TAG" ] && [ "$LATEST_TAG" != "$CURRENT_TAG" ]; then
-    log "Registry has new release: $CURRENT_TAG → $LATEST_TAG"
+if [ -n "$LATEST_TS" ] && [ "$LATEST_TS" != "$CURRENT_TS" ]; then
+    log "Registry has new artifacts: ${CURRENT_TS:-none} → $LATEST_TS (tag: $LATEST_TAG)"
     NEEDS_BUILD=true
 fi
 
@@ -179,9 +183,9 @@ if ! rsync -a --delete "$STAGING_DIR/" "$CT110_WEBROOT" >>"$LOG_FILE" 2>&1; then
     exit 1
 fi
 
-# Save release tag
-if [ -n "$LATEST_TAG" ]; then
-    echo "$LATEST_TAG" > "$RELEASE_TAG_FILE"
+# Save release timestamp so next run knows we're current
+if [ -n "$LATEST_TS" ]; then
+    echo "$LATEST_TS" > "$RELEASE_TAG_FILE"
 fi
 
 log "Deploy complete. ${HTML_COUNT} pages, ${PACK_COUNT} packs live."
