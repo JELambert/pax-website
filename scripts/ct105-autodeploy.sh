@@ -16,13 +16,17 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 REPO_DIR="/opt/pax-website"
 REGISTRY_REPO="JELambert/pax-market"
-CT110_WEBROOT="root@192.168.68.110:/var/www/marketplace/"
+CT110_HOST="root@192.168.68.110"
+CT110_WEBROOT="${CT110_HOST}:/var/www/marketplace/"
+CT110_BACKUP_WEBROOT="${CT110_HOST}:/var/www/marketplace-backup/"
 STAGING_DIR="/tmp/pax-marketplace-staging"
 LOG_FILE="/var/log/pax-autodeploy.log"
 PYTHON_BIN="/opt/pax-website/.venv/bin/python"
 HUGO_BIN="/opt/praxis/bin/hugo"
 LOCK_FILE="/var/run/pax-autodeploy.lock"
 RELEASE_TAG_FILE="/opt/pax-website/.last-registry-release"
+# Optional: set PAX_ALERT_WEBHOOK to a URL to receive failure POSTs
+PAX_ALERT_WEBHOOK="${PAX_ALERT_WEBHOOK:-}"
 
 # Fall back to system python3 if venv not present
 if [ ! -f "$PYTHON_BIN" ]; then
@@ -35,6 +39,25 @@ fi
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
 }
+
+# ---------------------------------------------------------------------------
+# Failure notification + trap
+# ---------------------------------------------------------------------------
+notify_failure() {
+    local msg="pax-autodeploy FAILED on $(hostname) at $(date '+%Y-%m-%d %H:%M:%S'): $*"
+    log "ALERT: $msg"
+    if [ -n "$PAX_ALERT_WEBHOOK" ]; then
+        curl -sS -X POST "$PAX_ALERT_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\":\"$msg\"}" \
+            >> "$LOG_FILE" 2>&1 || true
+    fi
+}
+
+on_error() {
+    notify_failure "script exited with error on line $1"
+}
+trap 'on_error $LINENO' ERR
 
 # ---------------------------------------------------------------------------
 # Lock: prevent overlapping runs
@@ -132,11 +155,27 @@ if [ "$HTML_COUNT" -lt 10 ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Snapshot current CT 110 webroot for rollback
+# ---------------------------------------------------------------------------
+log "Snapshotting current CT 110 webroot for rollback..."
+if ssh "${CT110_HOST}" "test -d /var/www/marketplace && cp -a /var/www/marketplace/. /var/www/marketplace-backup/" >>"$LOG_FILE" 2>&1; then
+    log "Snapshot saved to ${CT110_HOST}:/var/www/marketplace-backup/"
+else
+    log "WARNING: Could not snapshot CT 110 webroot — continuing without rollback capability"
+fi
+
+# ---------------------------------------------------------------------------
 # rsync to CT 110
 # ---------------------------------------------------------------------------
 log "Deploying to CT 110 via rsync..."
 if ! rsync -a --delete "$STAGING_DIR/" "$CT110_WEBROOT" >>"$LOG_FILE" 2>&1; then
-    log "ERROR: rsync to CT 110 failed."
+    log "ERROR: rsync to CT 110 failed. Attempting rollback..."
+    if ssh "${CT110_HOST}" "test -d /var/www/marketplace-backup && rsync -a --delete /var/www/marketplace-backup/. /var/www/marketplace/" >>"$LOG_FILE" 2>&1; then
+        log "Rollback succeeded — CT 110 restored to last-good state."
+    else
+        log "ERROR: Rollback also failed. CT 110 may be in a degraded state. Manual intervention required."
+    fi
+    notify_failure "rsync to CT 110 failed"
     exit 1
 fi
 
