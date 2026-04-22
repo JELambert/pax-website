@@ -115,12 +115,35 @@ def main():
     packs = json.loads(catalog_path.read_text())
     print(f"Loaded {len(packs)} packs from {catalog_path}")
 
-    # Write Hugo content pages
+    valid_names = {p["name"] for p in packs}
+
+    # Prune stale content dirs for packs no longer in the catalog
     CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+    removed_content = 0
+    for child in CONTENT_DIR.iterdir():
+        if child.is_dir() and child.name not in valid_names:
+            shutil.rmtree(child)
+            removed_content += 1
+    if removed_content:
+        print(f"Pruned {removed_content} stale content dirs from {CONTENT_DIR}")
+
+    # Write Hugo content pages
     for pack in packs:
         body = generate_body(pack)
         write_content_page(pack, body)
     print(f"Wrote {len(packs)} content pages to {CONTENT_DIR}")
+
+    # Prune stale archives in static/pax/ for packs no longer in the catalog
+    static_pax = STATIC_DIR / "pax"
+    if static_pax.exists():
+        removed_archives = 0
+        for archive in static_pax.glob("*.pax.tar.gz"):
+            name = archive.name[: -len(".pax.tar.gz")]
+            if name not in valid_names:
+                archive.unlink()
+                removed_archives += 1
+        if removed_archives:
+            print(f"Pruned {removed_archives} stale archives from {static_pax}")
 
     # Copy data files
     DATA_DIR.mkdir(parents=True, exist_ok=True)

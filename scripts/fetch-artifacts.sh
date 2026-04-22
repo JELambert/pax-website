@@ -50,7 +50,9 @@ for f in registry.json constructs.json full-catalog.json pax-archives.tar; do
 done
 
 # Unpack pack archives into static/pax/
+# Wipe existing archives first so pruned packs don't linger from prior runs.
 echo "Unpacking pack archives..."
+find "$STATIC_PAX_DIR" -maxdepth 1 -name '*.pax.tar.gz' -delete
 tar -xf "$ARTIFACTS_DIR/pax-archives.tar" -C "$STATIC_PAX_DIR" --strip-components=1
 
 # Copy data files
