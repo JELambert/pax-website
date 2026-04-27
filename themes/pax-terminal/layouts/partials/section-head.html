@@ -1,0 +1,9 @@
+{{- /* Expects: dict "caption" "" "title" "" "kicker" "" "right" "" */ -}}
+<div class="t-section-head">
+  <div class="t-section-head-left">
+    {{ with .caption }}<div class="t-caption">// {{ . }}</div>{{ end }}
+    <div class="t-section-title">{{ .title }}</div>
+    {{ with .kicker }}<div class="t-section-kicker">{{ . }}</div>{{ end }}
+  </div>
+  {{ with .right }}<div class="t-section-right">{{ . | safeHTML }}</div>{{ end }}
+</div>

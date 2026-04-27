@@ -1,0 +1,8 @@
+{{- /* Expects: dict "lang" "bash" "content" "..." */ -}}
+<div class="t-code-block">
+  <div class="t-code-block-bar">
+    <span>{{ .lang | default "bash" }}</span>
+    <span>copy</span>
+  </div>
+  <pre>{{ .content }}</pre>
+</div>

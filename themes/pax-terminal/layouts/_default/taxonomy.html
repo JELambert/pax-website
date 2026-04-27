@@ -1,0 +1,12 @@
+{{ define "main" }}
+<section class="t-page">
+  <h1 style="font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-bottom:24px;">{{ .Title }}</h1>
+  <div class="t-prose">{{ .Content }}</div>
+  {{ range .Pages }}
+    <div style="padding:8px 0; border-bottom:1px solid var(--pt-line);">
+      <a href="{{ .RelPermalink }}" style="color:var(--term-accent);">{{ .Title }}</a>
+    </div>
+  {{ end }}
+</section>
+{{ partial "footer.html" . }}
+{{ end }}

@@ -1,0 +1,13 @@
+{{- /* Wave 1 fills this. Stub for now. */ -}}
+{{- /* Expects: dict "page" (Hugo page) "idx" N */ -}}
+{{- $p := .page -}}
+<div style="display:grid; grid-template-columns: 36px 100px 1fr 80px 80px; gap:14px; padding:12px 18px; border-bottom:1px solid var(--pt-line); font-size:12px; align-items:center;">
+  <span style="color:var(--pt-dim)">{{ printf "%03d" (add .idx 1) }}</span>
+  {{ partial "pack-type-chip.html" (dict "type" ($p.Params.pax_type | default "field")) }}
+  <div>
+    <div style="font-weight:600">{{ $p.Title }}</div>
+    <div style="color:var(--pt-dim); font-size:11px">./ {{ $p.File.ContentBaseName }}/</div>
+  </div>
+  <span style="color:var(--pt-dim); text-align:right">{{ $p.Params.construct_count | default 0 }} C</span>
+  <span style="color:var(--pt-dim); text-align:right">{{ $p.Params.finding_count | default 0 }} F</span>
+</div>

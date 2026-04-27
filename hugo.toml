@@ -2,6 +2,7 @@ baseURL = 'https://pax-market.com/'
 languageCode = 'en-us'
 title = 'PAX Marketplace'
 description = 'Browse and discover PAX — Portable Analytical eXpertise for structured research'
+theme = 'pax-terminal'
 
 [params]
   tagline = 'Portable Analytical eXpertise'
@@ -22,22 +23,38 @@ description = 'Browse and discover PAX — Portable Analytical eXpertise for str
 
 [menu]
   [[menu.main]]
-    name = 'Explore'
-    url = '/showcase/'
+    name = 'home'
+    url = '/'
     weight = 1
   [[menu.main]]
-    name = 'Browse PAX'
+    name = 'browse'
     url = '/pax/'
     weight = 2
   [[menu.main]]
-    name = 'Create a PAX'
-    url = '/guide/'
+    name = 'constructs'
+    url = '/constructs/'
     weight = 3
   [[menu.main]]
-    name = 'About'
-    url = '/about/'
+    name = 'graph'
+    url = '/graph/'
     weight = 4
   [[menu.main]]
-    name = 'Submit'
-    url = 'https://submit.pax-market.com'
+    name = 'showcase'
+    url = '/showcase/'
     weight = 5
+  [[menu.main]]
+    name = 'start'
+    url = '/getting-started/'
+    weight = 6
+  [[menu.main]]
+    name = 'guide'
+    url = '/guide/'
+    weight = 7
+  [[menu.main]]
+    name = 'about'
+    url = '/about/'
+    weight = 8
+  [[menu.main]]
+    name = 'api'
+    url = '/api/'
+    weight = 9

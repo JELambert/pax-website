@@ -1,0 +1,7 @@
+{{ define "main" }}
+<section class="t-page">
+  <h1 style="font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-bottom:24px;">{{ .Title }}</h1>
+  <div class="t-prose">{{ .Content }}</div>
+</section>
+{{ partial "footer.html" . }}
+{{ end }}

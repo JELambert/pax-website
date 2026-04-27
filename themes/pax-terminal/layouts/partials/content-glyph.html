@@ -1,0 +1,3 @@
+{{- /* Expects: dict "type" "construct|finding|source|proposition|playbook" */ -}}
+{{- $glyphs := dict "construct" "C" "finding" "F" "source" "S" "proposition" "P" "playbook" "B" -}}
+<span class="t-content-glyph" data-type="{{ .type }}">{{ index $glyphs .type }}</span>

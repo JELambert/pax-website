@@ -1,0 +1,8 @@
+{{- /* Expects: dict "type" "paper|topic|field|enterprise|engine" */ -}}
+{{- $labels := dict "paper" "paper" "topic" "topic" "field" "field" "enterprise" "ent" "engine" "engine" -}}
+{{- $glyphs := dict "paper" "P" "topic" "T" "field" "F" "enterprise" "E" "engine" "X" -}}
+{{- $type := .type | default "field" -}}
+<span class="t-pack-chip" data-type="{{ $type }}">
+  <span class="t-pack-chip-glyph">{{ index $glyphs $type }}</span>
+  <span>{{ index $labels $type }}</span>
+</span>

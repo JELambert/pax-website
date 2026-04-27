@@ -1,0 +1,9 @@
+{{- /* Wave 1 fills this properly. Stub for now. */ -}}
+{{- /* Expects: dict "finding" (frontmatter finding obj) "idx" N */ -}}
+{{- $text := "" -}}
+{{- with .finding -}}
+  {{- if .text }}{{ $text = .text }}{{ else if .claim }}{{ $text = .claim }}{{ end -}}
+{{- end -}}
+<div style="padding: 12px 0; border-bottom: 1px solid var(--pt-line); font-size: 12px; color: var(--pt-dim);">
+  F{{ printf "%03d" (add .idx 1) }} &mdash; {{ $text }}
+</div>

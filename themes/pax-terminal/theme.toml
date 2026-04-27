@@ -1,0 +1,4 @@
+name = "PAX Terminal"
+license = "MIT"
+min_version = "0.120.0"
+description = "Terminal-aesthetic registry theme for pax-market.com"

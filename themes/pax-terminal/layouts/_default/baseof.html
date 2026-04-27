@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" data-pt-theme="cobalt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ if .IsHome }}pax-market — registry of verified knowledge for AI agents{{ else }}{{ .Title }} — pax-market{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Params.description }}{{ . }}{{ else }}pax-market: portable analytic exchange — verified knowledge packs for AI agents{{ end }}{{ end }}">
+  <meta property="og:title" content="{{ if .IsHome }}pax-market{{ else }}{{ .Title }} — pax-market{{ end }}">
+  <meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Params.description }}{{ . }}{{ else }}pax-market: portable analytic exchange{{ end }}{{ end }}">
+  <meta property="og:type" content="{{ if .IsHome }}website{{ else }}article{{ end }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%235c91e6'/><g fill='%230b0b08'><rect x='4' y='4' width='3' height='16'/><rect x='4' y='4' width='11' height='3'/><rect x='4' y='10' width='9' height='3'/><rect x='13' y='4' width='3' height='9'/><rect x='17' y='14' width='3' height='6'/></g></svg>">
+  {{ $css := resources.Get "css/terminal.css" | resources.Minify | resources.Fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+</head>
+<body>
+  {{ partial "header.html" . }}
+  <div class="t-page-wrap">
+    {{ block "main" . }}{{ end }}
+  </div>
+  {{ $js := resources.Get "js/terminal.js" | resources.Minify | resources.Fingerprint }}
+  <script src="{{ $js.RelPermalink }}"></script>
+  {{ block "scripts" . }}{{ end }}
+</body>
+</html>

@@ -1,0 +1,53 @@
+{{ define "main" }}
+{{- $paxType := .Params.pax_type | default "field" -}}
+<section style="padding:32px 28px 24px; border-bottom:1px solid var(--pt-line);">
+  <div style="font-size:10px; color:var(--pt-dim); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">// /pax/{{ .File.ContentBaseName }}/</div>
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+    {{ partial "pack-type-chip.html" (dict "type" $paxType) }}
+    <span style="font-size:11px; color:var(--pt-dim);">v{{ .Params.version | default "1.0.0" }}</span>
+  </div>
+  <h1 style="font-size:44px; font-weight:700; letter-spacing:-0.025em; line-height:1.05; margin-bottom:14px;">{{ .Title }}</h1>
+  <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:17px; line-height:1.55; color:var(--pt-ink); max-width:760px; margin-bottom:14px;">
+    {{ .Params.description | default .Summary }}
+  </p>
+  <div style="display:flex; gap:18px; font-size:11px; color:var(--pt-dim);">
+    <span>by <span style="color:var(--pt-ink)">{{ .Params.author | default "pax collective" }}</span></span>
+    {{ with .Params.domain }}<span>&middot; {{ . }}</span>{{ end }}
+    {{ with .Params.version }}<span>&middot; v{{ . }}</span>{{ end }}
+  </div>
+</section>
+<section class="t-page">
+  <div class="t-prose">{{ .Content }}</div>
+  {{ if .Params.constructs_detail }}
+  <div style="margin-top:32px;">
+    <div class="t-section-head">
+      <div class="t-section-head-left">
+        <div class="t-caption">// constructs</div>
+        <div class="t-section-title">{{ len .Params.constructs_detail }} constructs</div>
+      </div>
+    </div>
+    {{ range .Params.constructs_detail }}
+    <div style="padding:10px 0; border-bottom:1px solid var(--pt-line); font-size:12px;">
+      <span style="font-weight:600; color:var(--pt-ink);">{{ .name | default .id }}</span>
+      {{ with .kind }}<span style="margin-left:8px; color:var(--pt-dim);">{{ . }}</span>{{ end }}
+      {{ with .units }}<span style="margin-left:8px; color:var(--pt-dim);">{{ . }}</span>{{ end }}
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+  {{ if .Params.findings_detail }}
+  <div style="margin-top:32px;">
+    <div class="t-section-head">
+      <div class="t-section-head-left">
+        <div class="t-caption">// findings</div>
+        <div class="t-section-title">{{ len .Params.findings_detail }} findings</div>
+      </div>
+    </div>
+    {{ range $i, $f := .Params.findings_detail }}
+    {{ partial "finding-entry.html" (dict "finding" $f "idx" $i) }}
+    {{ end }}
+  </div>
+  {{ end }}
+</section>
+{{ partial "footer.html" . }}
+{{ end }}

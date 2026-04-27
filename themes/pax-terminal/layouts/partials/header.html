@@ -1,0 +1,78 @@
+{{- $paxCount := len (where .Site.RegularPages "Section" "pax") -}}
+{{- $graphData := .Site.Data.graph -}}
+{{- $constructCount := 424 -}}
+{{- $findingCount := 469 -}}
+{{- $domainCount := 97 -}}
+{{- if $graphData -}}
+  {{- with $graphData.stats -}}
+    {{- with .constructs }}{{ $constructCount = . }}{{ end -}}
+    {{- with .findings }}{{ $findingCount = . }}{{ end -}}
+    {{- with .domains }}{{ $domainCount = . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $currentPath := .RelPermalink -}}
+<header class="t-header">
+  <!-- Row 1: marquee strip (hidden <900px) -->
+  <div class="t-header-marquee">
+    <span>pax registry &middot; build abc123 &middot; {{ now.Format "2006-01-02" }}</span>
+    <span>{{ $paxCount }} paxes &middot; {{ $constructCount }} constructs &middot; {{ $findingCount }} findings &middot; {{ $domainCount }} domains</span>
+    <span><span class="t-live-dot">&#x25CF;</span> open registry &middot; CC-BY by default</span>
+  </div>
+
+  <!-- Row 2: nav row -->
+  <div class="t-header-row">
+    <!-- Logo -->
+    <a href="/" class="t-logo">
+      <svg class="t-logo-mark" width="26" height="26" viewBox="0 0 24 24" aria-label="PAX mark">
+        <rect x="0" y="0" width="24" height="24" fill="var(--term-accent)"/>
+        <g fill="var(--pt-bg)">
+          <rect x="4" y="4" width="3" height="16"/>
+          <rect x="4" y="4" width="11" height="3"/>
+          <rect x="4" y="10" width="9" height="3"/>
+          <rect x="13" y="4" width="3" height="9"/>
+          <rect x="17" y="14" width="3" height="6"/>
+        </g>
+      </svg>
+      <span class="t-logo-word">pax<span class="t-dim">&middot;market</span></span>
+    </a>
+
+    <!-- Search -->
+    <div class="t-search-wrap">
+      <span class="t-search-prefix">$</span>
+      <input
+        type="search"
+        id="t-search"
+        class="t-search-input"
+        placeholder="grep ./pax/  &middot;  try 'risk', 'climate', 'gdp_per_capita'"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter'&&this.value){window.location='/pax/?q='+encodeURIComponent(this.value)}"
+      >
+      <span class="t-search-hint">&#x2318;K</span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="t-nav" aria-label="Site navigation">
+      {{- $navItems := slice
+        (dict "label" "home"       "url" "/")
+        (dict "label" "browse"     "url" "/pax/")
+        (dict "label" "constructs" "url" "/constructs/")
+        (dict "label" "graph"      "url" "/graph/")
+        (dict "label" "showcase"   "url" "/showcase/")
+        (dict "label" "start"      "url" "/getting-started/")
+        (dict "label" "guide"      "url" "/guide/")
+        (dict "label" "about"      "url" "/about/")
+        (dict "label" "api"        "url" "/api/")
+      -}}
+      {{- range $navItems -}}
+        {{- $active := eq $currentPath .url -}}
+        <a href="{{ .url }}" class="t-nav-item{{ if $active }} t-active{{ end }}">{{ .label }}</a>
+      {{- end -}}
+    </nav>
+
+    <!-- Install bag -->
+    <a href="/install/" class="t-install-bag-btn">
+      <span>install_bag</span>
+      <span class="t-bag-count" id="t-bag-count">0</span>
+    </a>
+  </div>
+</header>
