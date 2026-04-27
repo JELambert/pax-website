@@ -15,11 +15,11 @@ A **PAX** (Portable Analytical eXpertise) is a portable knowledge package that c
 
 Anyone can create a PAX from research papers, domain expertise, or business knowledge and submit it to the marketplace.
 
-<div style="padding: 1.25rem 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-left: 3px solid var(--color-accent); border-radius: 0.5rem; margin: 1.5rem 0;">
-  <p style="font-weight: 600; color: var(--color-text); margin-bottom: 0.25rem;">Create PAX packages with your AI assistant</p>
-  <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.75rem;">Download the full creation guide and feed it to any LLM (ChatGPT, Claude, Gemini, Llama) along with your source material — papers, reports, or internal data — and get a valid PAX out. No Praxis runtime required.</p>
-  <a href="/PAX_CREATION_GUIDE.md" download class="download-btn" style="text-decoration: none; font-size: 0.85rem;">Download Creation Guide</a>
-  <a href="/PAX_USAGE_GUIDE.md" download style="text-decoration: none; font-size: 0.85rem; padding: 0.75rem 1.5rem; background: var(--color-surface-hover); color: var(--color-text); font-weight: 600; border-radius: 0.5rem; border: 1px solid var(--color-border); margin-left: 0.5rem;">Download Usage Guide</a>
+<div style="padding: 1.25rem 1.5rem; background: var(--pt-panel); border: 1px solid var(--pt-line); border-left: 3px solid var(--term-accent); border-radius: 0; margin: 1.5rem 0;">
+  <p style="font-weight: 600; color: var(--pt-ink); margin-bottom: 0.25rem;">Create PAX packages with your AI assistant</p>
+  <p style="font-size: 0.9rem; color: var(--pt-dim); margin-bottom: 0.75rem;">Download the full creation guide and feed it to any LLM (ChatGPT, Claude, Gemini, Llama) along with your source material — papers, reports, or internal data — and get a valid PAX out. No Praxis runtime required.</p>
+  <a href="/PAX_CREATION_GUIDE.md" download class="t-guide-download-btn">Download Creation Guide</a>
+  <a href="/PAX_USAGE_GUIDE.md" download class="t-guide-download-btn" style="margin-left: 0.5rem;">Download Usage Guide</a>
 </div>
 
 ## PAX Types
@@ -67,7 +67,7 @@ schema_version: "2.0"
 pax_type: topic                  # paper | topic | field | enterprise | engine
 author: "Your Name"
 created: "2026-04-09"
-license: CC-BY-4.0
+license: ""                      # set per-pack; leave empty if unspecified
 tags: [economics, development]
 provides:
   constructs: [construct_id_1, construct_id_2]

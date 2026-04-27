@@ -3,11 +3,12 @@
 generate-content.py — Website-side Hugo content generator.
 
 Reads artifacts/full-catalog.json (produced by the registry) and writes:
-  - content/pax/<name>/index.md  (Hugo content pages)
-  - data/registry.json           (from artifacts/registry.json)
-  - static/registry.json         (from artifacts/registry.json)
-  - data/constructs.json         (from artifacts/constructs.json)
-  - static/pax/*.pax.tar.gz      (from artifacts/pax/)
+  - content/pax/<name>/index.md       (Hugo content pages)
+  - content/constructs/<id>/index.md  (Hugo construct detail pages)
+  - data/registry.json                (from artifacts/registry.json)
+  - static/registry.json              (from artifacts/registry.json)
+  - data/constructs.json              (from artifacts/constructs.json)
+  - static/pax/*.pax.tar.gz           (from artifacts/pax/)
 """
 
 import json
@@ -26,6 +27,8 @@ import yaml
 REPO_ROOT    = Path(__file__).resolve().parent.parent
 ARTIFACTS_DIR = Path(os.environ.get("PAX_ARTIFACTS_DIR", REPO_ROOT / "artifacts"))
 CONTENT_DIR  = REPO_ROOT / "content" / "pax"
+CONSTRUCTS_CONTENT_DIR = REPO_ROOT / "content" / "constructs"
+PLAYBOOKS_CONTENT_DIR  = REPO_ROOT / "content" / "playbooks"
 DATA_DIR     = REPO_ROOT / "data"
 STATIC_DIR   = REPO_ROOT / "static"
 
@@ -103,6 +106,179 @@ def write_content_page(pack: dict, body: str):
 
 
 # ---------------------------------------------------------------------------
+# Construct page generation
+# ---------------------------------------------------------------------------
+
+def slugify_construct_id(construct_id: str) -> str:
+    """Convert a construct id to a clean URL slug (lowercase, underscores→hyphens)."""
+    slug = construct_id.lower()
+    slug = slug.replace("_", "-")
+    # Strip any characters that aren't alphanumeric, hyphens, or dots
+    slug = re.sub(r"[^a-z0-9\-.]", "", slug)
+    # Collapse consecutive hyphens
+    slug = re.sub(r"-{2,}", "-", slug)
+    slug = slug.strip("-")
+    return slug
+
+
+def generate_construct_pages(constructs: dict):
+    """Write content/constructs/{id}/index.md for every construct in constructs.json."""
+    CONSTRUCTS_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Build set of valid slugs for pruning
+    valid_slugs = set()
+    for construct_id in constructs:
+        slug = slugify_construct_id(construct_id)
+        if slug:
+            valid_slugs.add(slug)
+
+    # Prune stale construct dirs not present in current data
+    removed = 0
+    for child in CONSTRUCTS_CONTENT_DIR.iterdir():
+        if child.is_dir() and child.name not in valid_slugs:
+            shutil.rmtree(child)
+            removed += 1
+    if removed:
+        print(f"Pruned {removed} stale construct dirs from {CONSTRUCTS_CONTENT_DIR}")
+
+    written = 0
+    skipped = 0
+    for construct_id, c in constructs.items():
+        slug = slugify_construct_id(construct_id)
+        if not slug:
+            print(f"  SKIP: construct id '{construct_id}' produced empty slug", file=sys.stderr)
+            skipped += 1
+            continue
+
+        is_bridge = (c.get("pack_count", 0) >= 2)
+        # Lower weight = higher priority; bridges sort before single-pax constructs
+        weight = 100 if is_bridge else 200
+
+        packs_list = []
+        for p in c.get("packs", []):
+            packs_list.append({
+                "pack": p.get("pack", ""),
+                "pack_title": p.get("pack_title", ""),
+                "direction": p.get("direction", None) or None,
+                "finding_count": p.get("finding_count", 0),
+            })
+
+        fm = {
+            "title": c.get("display_name", construct_id),
+            "construct_id": construct_id,
+            "display_name": c.get("display_name", construct_id),
+            "definition": c.get("definition", ""),
+            "aliases": c.get("aliases", []),
+            "pack_count": c.get("pack_count", 0),
+            "packs": packs_list,
+            "is_bridge": is_bridge,
+            "weight": weight,
+        }
+        # Include construct_type if available
+        if c.get("construct_type"):
+            fm["construct_type"] = c["construct_type"]
+
+        out_dir = CONSTRUCTS_CONTENT_DIR / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        lines = ["---"]
+        lines.append(yaml.dump(fm, default_flow_style=False, allow_unicode=True, sort_keys=False).strip())
+        lines.append("---")
+        lines.append("")
+        (out_dir / "index.md").write_text("\n".join(lines))
+        written += 1
+
+    print(f"Wrote {written} construct pages to {CONSTRUCTS_CONTENT_DIR}")
+    if skipped:
+        print(f"Skipped {skipped} constructs with unslugifiable ids")
+
+
+# ---------------------------------------------------------------------------
+# Playbook page generation
+# ---------------------------------------------------------------------------
+
+def slugify_playbook_id(playbook_id: str) -> str:
+    """Convert a playbook id to a clean URL slug (same rules as construct slugs)."""
+    slug = playbook_id.lower()
+    slug = slug.replace("_", "-")
+    slug = re.sub(r"[^a-z0-9\-.]", "", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    slug = slug.strip("-")
+    return slug
+
+
+def generate_playbook_pages(catalog: list):
+    """Write content/playbooks/{pax-slug}--{playbook-slug}/index.md for every playbook."""
+    PLAYBOOKS_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Build set of valid combined slugs for pruning
+    valid_slugs = set()
+    for pack in catalog:
+        pax_slug = pack["name"]
+        for pb in pack.get("playbooks_detail", []):
+            pb_slug = slugify_playbook_id(pb.get("id", ""))
+            if pb_slug:
+                combined = f"{pax_slug}--{pb_slug}"
+                valid_slugs.add(combined)
+
+    # Prune stale playbook dirs not present in current catalog
+    removed = 0
+    for child in PLAYBOOKS_CONTENT_DIR.iterdir():
+        if child.is_dir() and child.name not in valid_slugs:
+            shutil.rmtree(child)
+            removed += 1
+    if removed:
+        print(f"Pruned {removed} stale playbook dirs from {PLAYBOOKS_CONTENT_DIR}")
+
+    written = 0
+    skipped = 0
+    weight = 100
+
+    for pack in catalog:
+        pax_slug = pack["name"]
+        pax_title = pack.get("title", pax_slug)
+        pax_type = pack.get("pax_type", "field")
+
+        for pb in pack.get("playbooks_detail", []):
+            pb_id = pb.get("id", "")
+            pb_slug = slugify_playbook_id(pb_id)
+            if not pb_slug:
+                print(f"  SKIP: playbook id '{pb_id}' in '{pax_slug}' produced empty slug", file=sys.stderr)
+                skipped += 1
+                continue
+
+            combined = f"{pax_slug}--{pb_slug}"
+            out_dir = PLAYBOOKS_CONTENT_DIR / combined
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            fm = {
+                "title": pb.get("display_name", pb_id),
+                "playbook_id": pb_id,
+                "display_name": pb.get("display_name", pb_id),
+                "description": pb.get("description", ""),
+                "estimated_runtime": pb.get("estimated_runtime", ""),
+                "step_count": pb.get("step_count", 0),
+                "engines_used": pb.get("engines_used", []),
+                "parent_pax": pax_slug,
+                "parent_pax_title": pax_title,
+                "parent_pax_type": pax_type,
+                "weight": weight,
+            }
+
+            lines = ["---"]
+            lines.append(yaml.dump(fm, default_flow_style=False, allow_unicode=True, sort_keys=False).strip())
+            lines.append("---")
+            lines.append("")
+            (out_dir / "index.md").write_text("\n".join(lines))
+            written += 1
+            weight += 1
+
+    print(f"Wrote {written} playbook pages to {PLAYBOOKS_CONTENT_DIR}")
+    if skipped:
+        print(f"Skipped {skipped} playbooks with unslugifiable ids")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -154,6 +330,23 @@ def main():
             print(f"Copied {fname} -> data/")
         else:
             print(f"WARNING: {src} not found, skipping", file=sys.stderr)
+
+    # Generate playbook detail pages
+    generate_playbook_pages(packs)
+
+    # Generate construct detail pages
+    constructs_path = DATA_DIR / "constructs.json"
+    if constructs_path.exists():
+        constructs = json.loads(constructs_path.read_text())
+        generate_construct_pages(constructs)
+    else:
+        # Try from artifacts directly
+        constructs_src = ARTIFACTS_DIR / "constructs.json"
+        if constructs_src.exists():
+            constructs = json.loads(constructs_src.read_text())
+            generate_construct_pages(constructs)
+        else:
+            print("WARNING: constructs.json not found, skipping construct pages", file=sys.stderr)
 
     # Copy registry.json to static/ as well
     reg_src = ARTIFACTS_DIR / "registry.json"

@@ -1,0 +1,106 @@
+{{ define "main" }}
+{{- $p := . -}}
+{{- $params := $p.Params -}}
+{{- $paxSlug := $params.parent_pax | default "" -}}
+{{- $parent := site.GetPage (printf "/pax/%s" $paxSlug) -}}
+{{- $paxType := $params.parent_pax_type | default "field" -}}
+
+<div class="t-playbook-detail">
+
+  {{/* ── Breadcrumb ── */}}
+  <div class="t-caption t-playbook-breadcrumb">
+    <a href="/playbooks/" class="t-breadcrumb-link">// playbooks</a>
+    <span class="t-breadcrumb-sep">/</span>
+    <a href="/pax/{{ $paxSlug }}/" class="t-breadcrumb-link">{{ $paxSlug }}</a>
+    <span class="t-breadcrumb-sep">·</span>
+    <span class="t-breadcrumb-id">{{ $params.playbook_id }}</span>
+  </div>
+
+  {{/* ── Title block ── */}}
+  <div class="t-playbook-title-block">
+    <h1 class="t-playbook-detail-h1">{{ $p.Title }}</h1>
+
+    <div class="t-playbook-meta-line">
+      {{- with $params.step_count -}}
+        <span class="t-playbook-meta-steps" style="font-variant-numeric: tabular-nums;">step_count: {{ . }}</span>
+      {{- end -}}
+      {{- if $params.estimated_runtime -}}
+        <span class="t-playbook-meta-sep">·</span>
+        <span class="t-playbook-meta-runtime">runtime: {{ $params.estimated_runtime }}</span>
+      {{- else -}}
+        <span class="t-playbook-meta-sep">·</span>
+        <span class="t-playbook-meta-runtime t-dim">runtime: —</span>
+      {{- end -}}
+    </div>
+
+    {{- with $params.description -}}
+    <p class="t-playbook-description">{{ . }}</p>
+    {{- end -}}
+  </div>
+
+  {{/* ── From pax callout ── */}}
+  <div class="t-playbook-pax-callout">
+    <div class="t-caption" style="margin-bottom:10px;">// from pax</div>
+    <div class="t-construct-pax-card t-playbook-parent-card">
+      <div class="t-construct-pax-card-header">
+        {{ partial "pack-type-chip.html" (dict "type" $paxType) }}
+        <a class="t-construct-pax-title" href="/pax/{{ $paxSlug }}/">
+          {{- if $parent -}}
+            {{ $parent.Title }}
+          {{- else -}}
+            {{ $params.parent_pax_title | default $paxSlug }}
+          {{- end -}}
+        </a>
+      </div>
+      {{- if $parent -}}
+      {{- with $parent.Params.domain -}}
+      {{- with .display_name -}}
+      <div class="t-construct-pax-card-meta">
+        <span class="t-construct-direction-null">{{ . }}</span>
+      </div>
+      {{- end -}}
+      {{- end -}}
+      {{- end -}}
+    </div>
+  </div>
+
+  {{/* ── Engines used ── */}}
+  {{- with $params.engines_used -}}
+  {{- if gt (len .) 0 -}}
+  <div class="t-playbook-engines-section">
+    <div class="t-caption" style="margin-bottom:10px;">// engines</div>
+    <div class="t-playbook-engine-chips">
+      {{- range . -}}
+      <span class="t-dep t-playbook-engine-chip">engine.{{ . }}</span>
+      {{- end -}}
+    </div>
+  </div>
+  {{- end -}}
+  {{- end -}}
+
+  {{/* ── Note panel ── */}}
+  <div class="t-playbook-note-panel">
+    <div class="t-caption" style="margin-bottom:8px;">// note</div>
+    <div class="t-playbook-note-body">
+      playbook step bodies live in the .pax archive — download the parent pax to inspect.
+    </div>
+    {{- if $parent -}}
+    {{- with $parent.Params.download_url -}}
+    <div style="margin-top:12px;">
+      <a href="{{ . }}" class="t-btn-secondary t-playbook-dl-btn" download>
+        [ download {{ $paxSlug }}.pax.tar.gz ]
+      </a>
+    </div>
+    {{- end -}}
+    {{- end -}}
+  </div>
+
+  {{/* ── Back link ── */}}
+  <div class="t-playbook-back">
+    <a href="/playbooks/" class="t-playbook-back-link">← back to playbook index</a>
+  </div>
+
+</div>{{/* end .t-playbook-detail */}}
+
+{{ partial "footer.html" . }}
+{{ end }}

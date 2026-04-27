@@ -1,0 +1,353 @@
+{{ define "main" }}
+{{- $paxPages := where .Site.RegularPages "Section" "pax" -}}
+{{- $paxCount := len $paxPages -}}
+{{- $graphData := .Site.Data.graph -}}
+{{- $constructCount := 0 -}}
+{{- $findingCount := 0 -}}
+{{- $sourceCount := 0 -}}
+{{- range $paxPages -}}
+  {{- $constructCount = add $constructCount (int (.Params.construct_count | default 0)) -}}
+  {{- $findingCount = add $findingCount (int (.Params.finding_count | default 0)) -}}
+  {{- with .Params.sources_detail -}}
+    {{- $sourceCount = add $sourceCount (len .) -}}
+  {{- end -}}
+{{- end -}}
+{{- $domainCount := 0 -}}
+{{- if $graphData -}}
+  {{- with $graphData.stats -}}
+    {{- with .domains }}{{ $domainCount = . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- if eq $domainCount 0 -}}
+  {{- /* fallback: count distinct pax domains */ -}}
+  {{- $domSet := dict -}}
+  {{- range $paxPages -}}
+    {{- with .Params.domain -}}
+      {{- with .id -}}{{ $domSet = merge $domSet (dict . true) }}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $domainCount = len $domSet -}}
+{{- end -}}
+
+{{- /* Featured pax IDs — curated list */ -}}
+{{- $featuredIDs := slice "bartel-comp-materials" "pmsc-market-for-force" "military-coup-prediction" "global-supply-chain-risk" "ml-materials-discovery" -}}
+{{- $featuredPages := slice -}}
+{{- range $featuredIDs -}}
+  {{- $pg := site.GetPage (printf "/pax/%s" .) -}}
+  {{- if $pg -}}
+    {{- $featuredPages = $featuredPages | append $pg -}}
+  {{- end -}}
+{{- end -}}
+{{- /* Backfill from first pax if some featured are missing */ -}}
+{{- if lt (len $featuredPages) 5 -}}
+  {{- range first 5 $paxPages -}}
+    {{- if not (in $featuredPages .) -}}
+      {{- if lt (len $featuredPages) 5 -}}
+        {{- $featuredPages = $featuredPages | append . -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+<!-- ─── HERO ─────────────────────────────────────────────────────── -->
+<section class="t-hero">
+  <div class="t-hero-grid">
+
+    <div>
+      <div class="t-hero-eyebrow">// pax-market</div>
+      <h1>
+        The registry of<br>
+        <span class="t-hero-highlight">verified&nbsp;knowledge</span><br>
+        <span class="t-hero-serif">for AI agents.</span>
+      </h1>
+      <p class="t-hero-desc">
+        <strong>pax</strong>&nbsp;&mdash; <em>Portable Analytic eXpertise</em> &mdash; is a knowledge format
+        that bundles constructs, findings, propositions, sources, and analytical playbooks into a single inspectable
+        folder. Hand one to an agent, and it reasons with the field's evidence, not the model's vibes.
+      </p>
+      <div class="t-hero-actions">
+        <a href="/pax/" class="t-btn-primary">browse {{ $paxCount }} pax &rarr;</a>
+        <a href="/getting-started/" class="t-btn-secondary">how to use a pax</a>
+        <a href="/guide/" class="t-btn-ghost">author a pax</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Stat strip -->
+  <div class="t-hero-stats">
+    {{ partial "stat-tile.html" (dict "value" (string $paxCount) "label" "published pax" "sub" "across 5 pax types") }}
+    {{ partial "stat-tile.html" (dict "value" (string $constructCount) "label" "constructs indexed" "sub" "with units, defs, kinds") }}
+    {{ partial "stat-tile.html" (dict "value" (string $findingCount) "label" "findings" "sub" "beta &middot; se &middot; p &middot; N &middot; design") }}
+    {{ partial "stat-tile.html" (dict "value" (string $domainCount) "label" "domains" "sub" "econ &middot; health &middot; climate &middot; ...") }}
+    {{ partial "stat-tile.html" (dict "value" (string $sourceCount) "label" "sources" "sub" "papers, datasets, reports") }}
+  </div>
+</section>
+
+<!-- ─── ANATOMY OF A PAX ──────────────────────────────────────────── -->
+<section class="t-anatomy">
+  {{ partial "section-head.html" (dict
+    "caption" "anatomy of a pax"
+    "title"   "One folder. Inspectable forever."
+    "kicker"  "A pax is a folder of YAML and JSON, not a service. You can read it. You can fork it. You can grep it."
+    "right"   "spec v2.0"
+  ) }}
+  <div class="t-anatomy-grid">
+
+    <div class="t-anatomy-card">
+      <div class="t-anatomy-head">
+        {{ partial "content-glyph.html" (dict "type" "construct") }}
+        <div class="t-anatomy-name">Constructs</div>
+      </div>
+      <div class="t-anatomy-filename">constructs.json</div>
+      <p class="t-anatomy-desc">Variables and concepts: gdp_per_capita, conflict_onset, cap_rate. Each typed (quantifiable, categorical, outcome) with units.</p>
+    </div>
+
+    <div class="t-anatomy-card">
+      <div class="t-anatomy-head">
+        {{ partial "content-glyph.html" (dict "type" "finding") }}
+        <div class="t-anatomy-name">Findings</div>
+      </div>
+      <div class="t-anatomy-filename">findings.json</div>
+      <p class="t-anatomy-desc">Empirical claims with effect size, standard error, p-value, sample size, and study design &mdash; directly grounded in sources.</p>
+    </div>
+
+    <div class="t-anatomy-card">
+      <div class="t-anatomy-head">
+        {{ partial "content-glyph.html" (dict "type" "source") }}
+        <div class="t-anatomy-name">Sources</div>
+      </div>
+      <div class="t-anatomy-filename">sources.json</div>
+      <p class="t-anatomy-desc">Underlying papers, datasets, reports. DOIs, design type, sample size &mdash; the evidentiary backing.</p>
+    </div>
+
+    <div class="t-anatomy-card">
+      <div class="t-anatomy-head">
+        {{ partial "content-glyph.html" (dict "type" "proposition") }}
+        <div class="t-anatomy-name">Propositions</div>
+      </div>
+      <div class="t-anatomy-filename">propositions.json</div>
+      <p class="t-anatomy-desc">Theoretical, methodological, and empirical claims that span findings &mdash; the field&rsquo;s &ldquo;rules of thumb.&rdquo;</p>
+    </div>
+
+    <div class="t-anatomy-card">
+      <div class="t-anatomy-head">
+        {{ partial "content-glyph.html" (dict "type" "playbook") }}
+        <div class="t-anatomy-name">Playbooks</div>
+      </div>
+      <div class="t-anatomy-filename">playbooks/quick_start.yaml</div>
+      <p class="t-anatomy-desc">Step-by-step analytical recipes (YAML) that an MCP-aware agent can execute end-to-end.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── PAX TIER TABLE ────────────────────────────────────────────── -->
+<section class="t-tiers">
+  {{ partial "section-head.html" (dict
+    "caption" "how pax scale"
+    "title"   "Five pax types."
+    "kicker"  "From a single paper to an entire field. Not every problem needs a 50-pax index. Sometimes you just need one paper."
+  ) }}
+  <div class="t-tiers-grid">
+
+    <div class="t-tier-cell">
+      <div class="t-tier-icon" style="background:var(--pt-paper-type)">P</div>
+      <div class="t-tier-label" style="color:var(--pt-paper-type)">paper</div>
+      <div class="t-tier-desc">A single peer-reviewed study, systematically extracted into constructs and findings.</div>
+      <div class="t-tier-example">5&ndash;15 constructs &middot; eg. deforestation-tropics</div>
+    </div>
+
+    <div class="t-tier-cell">
+      <div class="t-tier-icon" style="background:var(--pt-topic-type)">T</div>
+      <div class="t-tier-label" style="color:var(--pt-topic-type)">topic</div>
+      <div class="t-tier-desc">A coherent literature across several papers, unified by a research question.</div>
+      <div class="t-tier-example">15&ndash;50 constructs &middot; eg. minimum-wage</div>
+    </div>
+
+    <div class="t-tier-cell">
+      <div class="t-tier-icon" style="background:var(--pt-field-type)">F</div>
+      <div class="t-tier-label" style="color:var(--pt-field-type)">field</div>
+      <div class="t-tier-desc">A complete sub-discipline with canonical constructs, contested findings, and cross-topic propositions.</div>
+      <div class="t-tier-example">50+ constructs &middot; eg. health-disparities</div>
+    </div>
+
+    <div class="t-tier-cell">
+      <div class="t-tier-icon" style="background:var(--pt-enterprise-type)">E</div>
+      <div class="t-tier-label" style="color:var(--pt-enterprise-type)">enterprise</div>
+      <div class="t-tier-desc">Private proprietary constructs and findings, curated for a specific organizational context.</div>
+      <div class="t-tier-example">varies &middot; eg. commercial-real-estate</div>
+    </div>
+
+    <div class="t-tier-cell">
+      <div class="t-tier-icon" style="background:var(--pt-engine-type)">X</div>
+      <div class="t-tier-label" style="color:var(--pt-engine-type)">engine</div>
+      <div class="t-tier-desc">A reusable analytical method: statistical engines, playbook templates, and inference scaffolds.</div>
+      <div class="t-tier-example">method-first &middot; eg. panel-id</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FEATURED PAX ──────────────────────────────────────────────── -->
+{{ if ge (len $featuredPages) 1 }}
+<section class="t-featured">
+  {{ partial "section-head.html" (dict
+    "caption" "editorial picks"
+    "title"   "Featured pax"
+    "right"   (printf "<a href='/pax/' style='color:var(--term-accent)'>see all %d &rarr;</a>" $paxCount)
+  ) }}
+  <div class="t-featured-grid">
+
+    {{- $hero := index $featuredPages 0 -}}
+    <!-- Large featured hero -->
+    <a href="{{ $hero.RelPermalink }}" class="t-featured-hero" style="text-decoration:none; color:inherit;">
+      <div class="t-featured-hero-top">
+        {{ partial "pack-type-chip.html" (dict "type" ($hero.Params.pax_type | default "field")) }}
+        <span class="t-featured-hero-meta">v{{ $hero.Params.version | default "1.0.0" }}</span>
+      </div>
+      <div>
+        <div class="t-featured-hero-name">{{ $hero.Title }}</div>
+        <div class="t-featured-hero-author">by {{ $hero.Params.author | default "pax collective" }}</div>
+      </div>
+      <p class="t-featured-hero-desc">{{ $hero.Params.description | default $hero.Summary | truncate 200 }}</p>
+      <div class="t-featured-hero-counts">
+        {{- $heroSrcCount := 0 -}}
+        {{- with $hero.Params.sources_detail -}}{{- $heroSrcCount = len . -}}{{- end -}}
+        {{- $heroProCount := 0 -}}
+        {{- with $hero.Params.propositions_detail -}}{{- $heroProCount = len . -}}{{- else -}}{{- $heroProCount = int ($hero.Params.proposition_count | default 0) -}}{{- end -}}
+        {{- $heroPlayCount := 0 -}}
+        {{- with $hero.Params.playbooks_detail -}}{{- $heroPlayCount = len . -}}{{- else -}}{{- with $hero.Params.playbook_names -}}{{- $heroPlayCount = len . -}}{{- end -}}{{- end -}}
+        {{- $heroCounts := slice
+          (dict "label" "construct"   "val" ($hero.Params.construct_count | default 0))
+          (dict "label" "finding"     "val" ($hero.Params.finding_count | default 0))
+          (dict "label" "source"      "val" $heroSrcCount)
+          (dict "label" "proposition" "val" $heroProCount)
+          (dict "label" "playbook"    "val" $heroPlayCount)
+        -}}
+        {{- range $heroCounts -}}
+          <div class="t-featured-hero-count-cell">
+            <div class="t-featured-hero-count-label">
+              {{ partial "content-glyph.html" (dict "type" .label) }}
+              <span>{{ .label }}s</span>
+            </div>
+            <div class="t-featured-hero-count-val">{{ .val }}</div>
+          </div>
+        {{- end -}}
+      </div>
+      <div class="t-featured-hero-btn">view pax &rarr;</div>
+    </a>
+
+    <!-- Small featured cards -->
+    {{- range after 1 $featuredPages -}}
+      {{- $p := . -}}
+      {{- $pSrcCount := 0 -}}
+      {{- with $p.Params.sources_detail -}}{{- $pSrcCount = len . -}}{{- end -}}
+      {{- $pProCount := 0 -}}
+      {{- with $p.Params.propositions_detail -}}{{- $pProCount = len . -}}{{- else -}}{{- $pProCount = int ($p.Params.proposition_count | default 0) -}}{{- end -}}
+      {{- $pPlayCount := 0 -}}
+      {{- with $p.Params.playbooks_detail -}}{{- $pPlayCount = len . -}}{{- else -}}{{- with $p.Params.playbook_names -}}{{- $pPlayCount = len . -}}{{- end -}}{{- end -}}
+      <a href="{{ $p.RelPermalink }}" class="t-featured-card" style="text-decoration:none; color:inherit;">
+        <div class="t-featured-card-top">
+          {{ partial "pack-type-chip.html" (dict "type" ($p.Params.pax_type | default "field")) }}
+          <span class="t-featured-card-dl">{{ $p.Params.construct_count | default 0 }} C</span>
+        </div>
+        <div class="t-featured-card-name">{{ $p.Title }}</div>
+        <div class="t-featured-card-author">{{ $p.Params.author | default "pax collective" }}</div>
+        <div class="t-featured-card-desc">{{ $p.Params.description | default $p.Summary | truncate 110 }}</div>
+        <div class="t-featured-card-counts">
+          <span>{{ $p.Params.construct_count | default 0 }} C</span>
+          <span>{{ $p.Params.finding_count | default 0 }} F</span>
+          <span title="Propositions">{{ $pProCount }} P</span>
+          <span title="Playbooks">{{ $pPlayCount }} B</span>
+          <span title="Sources">{{ $pSrcCount }} S</span>
+        </div>
+      </a>
+    {{- end -}}
+
+  </div>
+</section>
+{{ end }}
+
+<!-- ─── SHOWCASE STRIP (inverted cream) ──────────────────────────── -->
+<section class="t-showcase">
+  <div class="t-showcase-head">
+    <div>
+      <div class="t-showcase-head-caption">// the bridge problem</div>
+      <div class="t-showcase-head-title">Independently authored. Joinable on shared constructs.</div>
+      <div class="t-showcase-head-kicker">The same construct used in a health-disparities pax and a civil-conflict pax becomes a bridge &mdash; agents can reason across them as one.</div>
+    </div>
+    <a href="/showcase/" style="font-size:11px; opacity:0.6; color:var(--pt-paper-ink); text-decoration:none;">see all narratives &rarr;</a>
+  </div>
+  <div class="t-showcase-grid">
+
+    <div class="t-showcase-card">
+      <div class="t-showcase-card-tag">case &middot; shared construct &middot; <span class="t-showcase-card-construct">gdp_per_capita</span></div>
+      <div class="t-showcase-card-title">Three pax, one analysis: tracing the inequality&ndash;conflict pathway</div>
+      <div class="t-showcase-card-paxes">
+        <span class="t-showcase-card-pax-tag">income-inequality-gini</span>
+        <span class="t-showcase-card-pax-tag">taxation-fiscal-policy</span>
+        <span class="t-showcase-card-pax-tag">equity-trading-markets</span>
+      </div>
+      <div class="t-showcase-card-count">47 findings on this construct</div>
+    </div>
+
+    <div class="t-showcase-card">
+      <div class="t-showcase-card-tag">case &middot; shared construct &middot; <span class="t-showcase-card-construct">conflict_onset</span></div>
+      <div class="t-showcase-card-title">From coup forecasting to risk pricing: a shared vocabulary</div>
+      <div class="t-showcase-card-paxes">
+        <span class="t-showcase-card-pax-tag">military-coup-prediction</span>
+        <span class="t-showcase-card-pax-tag">pmsc-market-for-force</span>
+      </div>
+      <div class="t-showcase-card-count">31 findings on this construct</div>
+    </div>
+
+    <div class="t-showcase-card">
+      <div class="t-showcase-card-tag">case &middot; shared construct &middot; <span class="t-showcase-card-construct">band_gap</span></div>
+      <div class="t-showcase-card-title">DFT databases and ML discovery: a shared materials vocabulary</div>
+      <div class="t-showcase-card-paxes">
+        <span class="t-showcase-card-pax-tag">bartel-comp-materials</span>
+        <span class="t-showcase-card-pax-tag">ml-materials-discovery</span>
+      </div>
+      <div class="t-showcase-card-count">22 findings on this construct</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── CONTRIBUTE STRIP ──────────────────────────────────────────── -->
+<section class="t-contribute">
+  <div>
+    <div class="t-caption">// contribute</div>
+    <h2>Publish your expertise.</h2>
+    <p class="t-contribute-desc">
+      PAX is open. Anyone can author and publish. If you have a research finding, a methodology,
+      or a literature review worth structuring &mdash; package it as a pax and submit it.
+      After review, it goes live for any AI agent to use.
+    </p>
+    <div class="t-contribute-actions">
+      <a href="/guide/" class="t-btn-primary">read the authoring guide</a>
+      <a href="https://github.com/JELambert/pax-market" class="t-btn-secondary" target="_blank" rel="noopener">view registry on github</a>
+    </div>
+  </div>
+
+  <div class="t-code-block">
+    <div class="t-code-block-bar">
+      <span>pax folder structure</span>
+    </div>
+    <pre>my-research-pax/
+&#x251C;&#x2500;&#x2500; pax.yaml             # name, version, license, domain
+&#x251C;&#x2500;&#x2500; constructs.json      # variables, kinds, definitions
+&#x251C;&#x2500;&#x2500; findings.json        # claims with effect size, p, N
+&#x251C;&#x2500;&#x2500; propositions.json    # rules of thumb across findings
+&#x251C;&#x2500;&#x2500; sources.json         # papers, datasets, DOIs
+&#x2514;&#x2500;&#x2500; playbooks/
+     &#x2514;&#x2500;&#x2500; quick_start.yaml # analytical recipe
+
+# zip the folder, drop it at submit.pax-market.com,
+# editorial review opens a PR on the registry.</pre>
+  </div>
+</section>
+
+{{ partial "footer.html" . }}
+{{ end }}

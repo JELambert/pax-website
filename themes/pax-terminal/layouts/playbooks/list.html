@@ -1,0 +1,176 @@
+{{ define "main" }}
+{{- $pages := .Pages -}}
+{{- $total := len $pages -}}
+
+<div class="t-playbooks-page">
+
+  {{/* ── Page header ── */}}
+  <div class="t-playbooks-header">
+    <div class="t-caption">// playbooks/</div>
+    <h1 class="t-playbooks-h1">Playbooks</h1>
+    <p class="t-playbooks-lede">
+      <span class="t-playbooks-total-count" style="font-variant-numeric: tabular-nums;">{{ $total }}</span> reproducible analysis workflows across the registry.
+    </p>
+
+    {{/* ── Filter row ── */}}
+    <div class="t-playbooks-filter-row">
+      <div class="t-playbook-search-wrap">
+        <span class="t-playbook-search-prefix">$ filter</span>
+        <input class="t-playbook-search" type="text" placeholder="playbook name, description, or engine…" autocomplete="off" spellcheck="false">
+      </div>
+      <span class="t-playbook-count" style="font-variant-numeric: tabular-nums;">{{ $total }} playbooks</span>
+    </div>
+
+    {{/* ── Type filter chips ── */}}
+    <div class="t-playbook-type-chips" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="t-playbook-type-chip is-active" data-type="">all types</button>
+      {{- $types := slice -}}
+      {{- range $pages -}}
+        {{- $t := .Params.parent_pax_type | default "field" -}}
+        {{- if not (in $types $t) -}}{{- $types = $types | append $t -}}{{- end -}}
+      {{- end -}}
+      {{- range $types -}}
+      <button class="t-playbook-type-chip" data-type="{{ . }}">{{ . }}</button>
+      {{- end -}}
+    </div>
+  </div>
+
+  {{/* ── Playbook list ── */}}
+  <div class="t-playbook-list" style="margin-top:24px;">
+
+    {{/* Column headers */}}
+    <div class="t-playbook-col-heads">
+      <span></span>
+      <span>playbook</span>
+      <span>pax</span>
+      <span>steps · runtime</span>
+      <span>engines</span>
+    </div>
+
+    {{- range $pages -}}
+    {{- $pb := . -}}
+    {{- $paxSlug := $pb.Params.parent_pax | default "" -}}
+    {{- $pbSlug := replace (lower ($pb.Params.playbook_id | default "")) "_" "-" -}}
+    {{- $paxType := $pb.Params.parent_pax_type | default "field" -}}
+    {{- $enginesStr := "" -}}
+    {{- range $pb.Params.engines_used -}}{{- $enginesStr = printf "%s %s" $enginesStr . -}}{{- end -}}
+    <a class="t-playbook-row"
+      href="{{ $pb.RelPermalink }}"
+      data-pb-name="{{ $pb.Params.display_name | lower }}"
+      data-pb-desc="{{ $pb.Params.description | lower }}"
+      data-pb-engines="{{ $enginesStr | lower }}"
+      data-pb-type="{{ $paxType }}"
+    >
+      {{/* Col 1: glyph */}}
+      <div class="t-playbook-glyph-wrap">
+        {{ partial "content-glyph.html" (dict "type" "playbook") }}
+      </div>
+
+      {{/* Col 2: display name */}}
+      <div class="t-playbook-identity">
+        <div class="t-playbook-name">{{ $pb.Params.display_name | default $pb.Params.playbook_id }}</div>
+        {{ with $pb.Params.description }}<div class="t-playbook-desc-preview">{{ . | truncate 90 "…" }}</div>{{ end }}
+      </div>
+
+      {{/* Col 3: parent pax chip */}}
+      <div class="t-playbook-parent">
+        <span class="t-playbook-pax-chip" data-pax-type="{{ $paxType }}">{{ $paxSlug }}</span>
+      </div>
+
+      {{/* Col 4: step count + runtime */}}
+      <div class="t-playbook-meta" style="font-variant-numeric: tabular-nums;">
+        {{ with $pb.Params.step_count }}<span class="t-playbook-steps">{{ . }}&#8239;steps</span>{{ end }}
+        {{ with $pb.Params.estimated_runtime }}<span class="t-playbook-runtime">· {{ . }}</span>{{ end }}
+      </div>
+
+      {{/* Col 5: engines */}}
+      <div class="t-playbook-engines-col">
+        {{- range $i, $e := $pb.Params.engines_used -}}
+          {{- if lt $i 3 -}}
+            {{- if gt $i 0 -}}, {{ end -}}
+            <span class="t-playbook-engine-name">{{ $e }}</span>
+          {{- end -}}
+        {{- end -}}
+        {{- if gt (len ($pb.Params.engines_used | default slice)) 3 -}}
+          <span class="t-pack-more">… {{ sub (len $pb.Params.engines_used) 3 }} more</span>
+        {{- end -}}
+      </div>
+    </a>
+    {{- end -}}
+
+    <div class="t-playbooks-empty-msg" style="display:none; padding:20px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; color:var(--pt-dim);">no playbooks match that filter</div>
+  </div>
+
+</div>{{/* end .t-playbooks-page */}}
+
+{{ partial "footer.html" . }}
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+(function () {
+  var rows        = Array.from(document.querySelectorAll('.t-playbook-row'));
+  var searchInput = document.querySelector('.t-playbook-search');
+  var countEl     = document.querySelector('.t-playbook-count');
+  var typeChips   = Array.from(document.querySelectorAll('.t-playbook-type-chip'));
+  var emptyMsg    = document.querySelector('.t-playbooks-empty-msg');
+  var activeType  = '';
+
+  function updateCount(n) {
+    if (countEl) countEl.textContent = n + ' playbook' + (n !== 1 ? 's' : '');
+  }
+
+  function applyFilters() {
+    var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    var visible = 0;
+
+    rows.forEach(function (row) {
+      var matchText = true;
+      var matchType = true;
+
+      if (query) {
+        var name    = (row.dataset.pbName    || '').toLowerCase();
+        var desc    = (row.dataset.pbDesc    || '').toLowerCase();
+        var engines = (row.dataset.pbEngines || '').toLowerCase();
+        matchText = name.includes(query) || desc.includes(query) || engines.includes(query);
+      }
+
+      if (activeType) {
+        matchType = row.dataset.pbType === activeType;
+      }
+
+      var show = matchText && matchType;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    updateCount(visible);
+    if (emptyMsg) emptyMsg.style.display = (visible === 0) ? '' : 'none';
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
+
+  typeChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      activeType = chip.dataset.type || '';
+      typeChips.forEach(function (c) { c.classList.toggle('is-active', c === chip); });
+      applyFilters();
+    });
+  });
+
+  // Hydrate from ?q=
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('q');
+    if (q && searchInput) {
+      searchInput.value = q;
+      applyFilters();
+    }
+  } catch (e) { /* no-op */ }
+
+  updateCount(rows.length);
+}());
+</script>
+{{ end }}

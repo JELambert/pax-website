@@ -1,0 +1,95 @@
+{{ define "main" }}
+
+{{- /* Hero on paper-cream background */ -}}
+<section class="t-about-hero">
+  <div class="t-about-hero-inner">
+    <div class="t-caption">// /about/</div>
+    <h1 class="t-about-hero-title">
+      Pax is open infrastructure for <em>verified</em> knowledge.
+    </h1>
+    <p class="t-about-hero-lede">
+      Portable Analytic eXpertise — a structured format for domain knowledge that AI agents can reason over without bluffing. Constructs, findings, propositions, sources, playbooks. All traceable. All composable across domains.
+    </p>
+  </div>
+</section>
+
+{{- /* Why this exists */ -}}
+<section class="t-about-why">
+  <div class="t-about-section-inner">
+    <div class="t-caption">// why this exists</div>
+    <div class="t-about-why-grid">
+      <p class="t-about-why-prose">
+        General-purpose AI sounds confident on every topic. It is rarely calibrated and almost never citable. For research, policy, and rigorous analysis, that is not enough — you need to know which paper a claim came from, what the effect size was, what the sample looked like.
+      </p>
+      <p class="t-about-why-prose">
+        Pax fixes the input side. Hand an agent a pax for a domain and it now has the field's evidence in front of it: real findings with real sources, real constructs with real definitions. The agent can synthesize across pax because constructs are the shared vocabulary. No bespoke glue. No retrieval gymnastics. The agent reasons with the literature, not the model's vibes.
+      </p>
+    </div>
+  </div>
+</section>
+
+{{- /* Six principles grid */ -}}
+<section class="t-about-principles">
+  <div class="t-about-section-inner">
+    <div class="t-caption">// principles</div>
+    <div class="t-about-principles-grid">
+      <div class="t-principle">
+        <div class="t-principle-number">01</div>
+        <div class="t-principle-title">Provenance over plausibility</div>
+        <p class="t-principle-body">Every finding links to a source. Every claim is falsifiable. We never ship summary prose you cannot verify.</p>
+      </div>
+
+      <div class="t-principle">
+        <div class="t-principle-number">02</div>
+        <div class="t-principle-title">Constructs are first-class</div>
+        <p class="t-principle-body">Constructs are the atoms of reasoning. Shared across pax, they become bridges. Agents synthesize without glue code.</p>
+      </div>
+
+      <div class="t-principle">
+        <div class="t-principle-number">03</div>
+        <div class="t-principle-title">Findings carry uncertainty</div>
+        <p class="t-principle-body">Effect sizes, confidence intervals, p-values, sample sizes — not just direction. Strength labels are policed by editors, not by hope.</p>
+      </div>
+
+      <div class="t-principle">
+        <div class="t-principle-number">04</div>
+        <div class="t-principle-title">Open by default</div>
+        <p class="t-principle-body">Open registry. Pax licenses set per pax. Forks are blessed. Mirrors are encouraged.</p>
+      </div>
+
+      <div class="t-principle">
+        <div class="t-principle-number">05</div>
+        <div class="t-principle-title">Composable, not monolithic</div>
+        <p class="t-principle-body">Pax are folders, not databases. No lock-in. Compose at the construct level, run where you want.</p>
+      </div>
+
+      <div class="t-principle">
+        <div class="t-principle-number">06</div>
+        <div class="t-principle-title">Built for agents</div>
+        <p class="t-principle-body">Praxis MCP server provides the runtime. Agents call get, search, query, align — and reason over your pax like a research assistant.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{- /* Maintainer */ -}}
+<section class="t-about-maintainer">
+  <div class="t-about-section-inner">
+    <div class="t-caption">// maintainer</div>
+    <div class="t-about-maintainer-row">
+      <div class="t-about-maintainer-name">
+        <a href="https://jelambert.com" target="_blank" rel="noopener">Joshua E. Lambert</a>
+      </div>
+      <div class="t-about-maintainer-links">
+        <a href="https://jelambert.com/contact/" target="_blank" rel="noopener">contact</a>
+        <span class="t-about-sep">&middot;</span>
+        <a href="https://www.linkedin.com/in/joshuaelambert/" target="_blank" rel="noopener">linkedin</a>
+        <span class="t-about-sep">&middot;</span>
+        <a href="https://github.com/JELambert" target="_blank" rel="noopener">github</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{ partial "footer.html" . }}
+{{ end }}

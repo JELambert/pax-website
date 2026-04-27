@@ -1,0 +1,105 @@
+{{ define "main" }}
+{{- $paxCount := len (where .Site.RegularPages "Section" "pax") -}}
+
+{{- /* Page header */ -}}
+<section class="t-api-header">
+  <div class="t-caption">// pax/v1</div>
+  <h1 class="t-api-title">API reference</h1>
+  <p class="t-api-lede">Machine-readable endpoints for AI agents and registry tooling. Open access, no auth required for read.</p>
+</section>
+
+{{- /* Endpoints table and examples */ -}}
+<section class="t-api-main">
+  <div class="t-api-left">
+    <h2 class="t-api-section-title">Endpoints</h2>
+    <table class="t-api-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Returns</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="t-api-method-get">GET</td>
+          <td><code>/registry.json</code></td>
+          <td>Full registry</td>
+          <td>{{ $paxCount }}-pax catalog with metadata and download URLs</td>
+        </tr>
+        <tr>
+          <td class="t-api-method-get">GET</td>
+          <td><code>/pax/{id}/index.json</code></td>
+          <td>Single pax</td>
+          <td>Full pax data: constructs, findings, sources, propositions, playbooks</td>
+        </tr>
+        <tr>
+          <td class="t-api-method-get">GET</td>
+          <td><code>/pax/index.json</code></td>
+          <td>Pax index</td>
+          <td>Lightweight list (id, name, type, version)</td>
+        </tr>
+        <tr>
+          <td class="t-api-method-get">GET</td>
+          <td><code>/constructs/index.json</code></td>
+          <td>Constructs</td>
+          <td>Cross-pax construct dictionary with usage counts</td>
+        </tr>
+        <tr>
+          <td class="t-api-method-get">GET</td>
+          <td><code>/pax/{id}.pax.tar.gz</code></td>
+          <td>Pax archive</td>
+          <td>Complete tarball for offline install</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="t-api-right">
+    {{- /* Example response */ -}}
+    <h2 class="t-api-section-title">Example response</h2>
+    {{ $codeSnippet := `{
+  "name": "global-supply-chain-risk",
+  "type": "field",
+  "version": "1.0.9",
+  "pax_version": "2.0",
+  "license": null,
+  "author": { "name": "Josh Lambert" },
+  "domain": "operations.risk",
+  "counts": {
+    "constructs": 38,
+    "findings": 113,
+    "sources": 47,
+    "playbooks": 8
+  },
+  "tarball": "https://pax-market.com/pax/global-supply-chain-risk.pax.tar.gz"
+}` }}
+    {{ partial "code-block.html" (dict "lang" "json" "code" $codeSnippet "id" "api-example") }}
+
+    {{- /* Rate limits */ -}}
+    <h2 class="t-api-section-title" style="margin-top: 28px;">Rate limits</h2>
+    <table class="t-api-limits-table">
+      <tbody>
+        <tr>
+          <td>Anonymous</td>
+          <td>60 req/min</td>
+        </tr>
+        <tr>
+          <td>With UA header</td>
+          <td>600 req/min</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="t-api-limits-note">CDN cache: 5 minutes. All requests are rate-limited per IP.</p>
+
+    {{- /* Stability */ -}}
+    <h2 class="t-api-section-title" style="margin-top: 28px;">Stability</h2>
+    <p class="t-api-stability-text">
+      v1 is stable. Schema additions are non-breaking; removals require deprecation period in registry status first.
+    </p>
+  </div>
+</section>
+
+{{ partial "footer.html" . }}
+{{ end }}

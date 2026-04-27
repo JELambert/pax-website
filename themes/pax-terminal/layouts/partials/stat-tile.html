@@ -1,0 +1,6 @@
+{{- /* Expects: dict "value" "" "label" "" "sub" "" */ -}}
+<div class="t-stat-tile">
+  <div class="t-stat-value">{{ .value }}</div>
+  <div class="t-stat-label">{{ .label }}</div>
+  {{ with .sub }}<div class="t-stat-sub">{{ . }}</div>{{ end }}
+</div>

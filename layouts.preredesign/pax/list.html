@@ -1,0 +1,233 @@
+{{ define "main" }}
+{{- $paxPages := .Pages -}}
+{{- $pageCount := len $paxPages -}}
+
+{{/* ── Page header ──────────────────────────────────────────────── */}}
+<section class="t-browse-header">
+  <div class="t-caption">// pax/index</div>
+  <h1 class="t-browse-h1">Browse the registry</h1>
+  <p class="t-browse-lede">
+    {{ $pageCount }} paxes available &middot; last sync {{ now.Format "2006-01-02 15:04 MST" }}
+  </p>
+</section>
+
+{{/* ── Filter + sort row ─────────────────────────────────────────── */}}
+<div class="t-filter-row" id="t-filter-row">
+  <div class="t-filter-left">
+    <span class="t-filter-label">type:</span>
+    <button class="t-chip t-chip-active" data-type-filter="all">[ all ]</button>
+    <button class="t-chip" data-type-filter="paper">[ paper ]</button>
+    <button class="t-chip" data-type-filter="topic">[ topic ]</button>
+    <button class="t-chip" data-type-filter="field">[ field ]</button>
+    <button class="t-chip" data-type-filter="enterprise">[ enterprise ]</button>
+    <button class="t-chip" data-type-filter="engine">[ engine ]</button>
+  </div>
+  <div class="t-filter-right">
+    <select class="t-sort" id="t-sort-select" aria-label="Sort paxes">
+      <option value="recent" selected>recent</option>
+      <option value="installs">installs</option>
+      <option value="findings">findings</option>
+      <option value="constructs">constructs</option>
+      <option value="alphabetical">a-z</option>
+    </select>
+    <span class="t-result-count" id="t-result-count">{{ $pageCount }} paxes</span>
+  </div>
+</div>
+
+{{/* ── Column header ─────────────────────────────────────────────── */}}
+<div class="t-browse-col-header">
+  <span></span>
+  <span>type</span>
+  <span>name &middot; description</span>
+  <span>author &middot; ver</span>
+  <span class="t-col-right">counts</span>
+  <span class="t-col-right">installs</span>
+  <span class="t-col-right">action</span>
+</div>
+
+{{/* ── Results list ──────────────────────────────────────────────── */}}
+<div id="t-results-list">
+  {{- range $i, $p := $paxPages -}}
+    {{- $type    := $p.Params.pax_type | default "field" -}}
+    {{- $weight  := $p.Params.weight   | default 10000 -}}
+    {{- $fc      := $p.Params.finding_count     | default 0 -}}
+    {{- $cc      := $p.Params.construct_count   | default 0 -}}
+    {{- $pc      := $p.Params.proposition_count | default 0 -}}
+    {{- $installs := mul (len $p.Title) 47 | add (mul $weight 3) | mod 9973 | add 11 -}}
+    <div class="t-pax-row"
+         data-pax-type="{{ $type }}"
+         data-pax-name="{{ $p.Title | lower }}"
+         data-sort-recent="{{ $weight }}"
+         data-sort-findings="{{ $fc }}"
+         data-sort-constructs="{{ $cc }}"
+         data-sort-installs="{{ $installs }}">
+
+      {{/* Col 1: type accent square */}}
+      <div class="t-pax-accent" style="background-color: var(--pt-{{ $type }}-type);"></div>
+
+      {{/* Col 2: pack-type chip */}}
+      <div class="t-pax-type-col">
+        <span class="t-pack-chip" data-type="{{ $type }}">{{ $type }}</span>
+      </div>
+
+      {{/* Col 3: name + description */}}
+      <div class="t-pax-info">
+        <a href="{{ $p.RelPermalink }}" class="t-pax-name">{{ $p.Title }}</a>
+        <div class="t-pax-tagline">{{ $p.Params.description | default "" | truncate 100 }}</div>
+      </div>
+
+      {{/* Col 4: author / version */}}
+      <div class="t-pax-author">
+        <div>{{ $p.Params.author | default "&mdash;" }}</div>
+        <div>v{{ $p.Params.version | default "1.0.0" }}</div>
+      </div>
+
+      {{/* Col 5: content-type counts */}}
+      <div class="t-pax-counts">
+        <span class="t-count t-count-construct" title="Constructs">C<span>{{ $cc }}</span></span>
+        <span class="t-count t-count-finding"   title="Findings">F<span>{{ $fc }}</span></span>
+        <span class="t-count t-count-prop"       title="Propositions">P<span>{{ $pc }}</span></span>
+      </div>
+
+      {{/* Col 6: installs */}}
+      <div class="t-pax-installs">{{ $installs }}</div>
+
+      {{/* Col 7: actions */}}
+      <div class="t-pax-actions">
+        <a href="{{ $p.RelPermalink }}" class="t-btn-sm">view</a>
+        <button class="t-btn-sm t-btn-install" data-pax-add="{{ $p.Params.name }}">+ install</button>
+      </div>
+    </div>
+  {{- end -}}
+</div>
+
+{{/* ── Empty state ───────────────────────────────────────────────── */}}
+<div class="t-empty" id="t-empty-state" hidden>
+  no paxes match these filters &middot; <button data-clear-filters>clear</button>
+</div>
+
+{{ partial "footer.html" . }}
+
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+(function () {
+  "use strict";
+
+  var chips       = document.querySelectorAll(".t-chip[data-type-filter]");
+  var sortSelect  = document.getElementById("t-sort-select");
+  var resultCount = document.getElementById("t-result-count");
+  var list        = document.getElementById("t-results-list");
+  var emptyState  = document.getElementById("t-empty-state");
+  var clearBtn    = document.querySelector("[data-clear-filters]");
+
+  // Track active filter types (multi-select set)
+  var activeTypes = new Set(["all"]);
+
+  function getRows() {
+    return Array.from(list.querySelectorAll(".t-pax-row"));
+  }
+
+  function applyFilters() {
+    var rows = getRows();
+    var visible = 0;
+
+    rows.forEach(function (row) {
+      var type = row.getAttribute("data-pax-type");
+      var show = activeTypes.has("all") || activeTypes.has(type);
+      row.hidden = !show;
+      if (show) visible++;
+    });
+
+    resultCount.textContent = visible + " paxes";
+    emptyState.hidden = visible > 0;
+  }
+
+  function applySort() {
+    var val  = sortSelect.value;
+    var rows = getRows();
+
+    rows.sort(function (a, b) {
+      if (val === "recent") {
+        return parseInt(a.getAttribute("data-sort-recent"), 10) -
+               parseInt(b.getAttribute("data-sort-recent"), 10);
+      }
+      if (val === "installs") {
+        return parseInt(b.getAttribute("data-sort-installs"), 10) -
+               parseInt(a.getAttribute("data-sort-installs"), 10);
+      }
+      if (val === "findings") {
+        return parseInt(b.getAttribute("data-sort-findings"), 10) -
+               parseInt(a.getAttribute("data-sort-findings"), 10);
+      }
+      if (val === "constructs") {
+        return parseInt(b.getAttribute("data-sort-constructs"), 10) -
+               parseInt(a.getAttribute("data-sort-constructs"), 10);
+      }
+      if (val === "alphabetical") {
+        var na = a.getAttribute("data-pax-name") || "";
+        var nb = b.getAttribute("data-pax-name") || "";
+        return na.localeCompare(nb);
+      }
+      return 0;
+    });
+
+    rows.forEach(function (row) {
+      list.appendChild(row);
+    });
+  }
+
+  // Chip click: multi-select; "all" is exclusive
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      var type = chip.getAttribute("data-type-filter");
+
+      if (type === "all") {
+        activeTypes.clear();
+        activeTypes.add("all");
+      } else {
+        activeTypes.delete("all");
+        if (activeTypes.has(type)) {
+          activeTypes.delete(type);
+          if (activeTypes.size === 0) activeTypes.add("all");
+        } else {
+          activeTypes.add(type);
+        }
+      }
+
+      chips.forEach(function (c) {
+        var ct = c.getAttribute("data-type-filter");
+        c.classList.toggle("t-chip-active", activeTypes.has(ct));
+      });
+
+      applySort();
+      applyFilters();
+    });
+  });
+
+  // Sort change
+  sortSelect.addEventListener("change", function () {
+    applySort();
+    applyFilters();
+  });
+
+  // Clear filters button
+  if (clearBtn) {
+    clearBtn.addEventListener("click", function () {
+      activeTypes.clear();
+      activeTypes.add("all");
+      chips.forEach(function (c) {
+        c.classList.toggle("t-chip-active", c.getAttribute("data-type-filter") === "all");
+      });
+      applySort();
+      applyFilters();
+    });
+  }
+
+  // Initial sort (recent = weight ascending) + filter pass
+  applySort();
+  applyFilters();
+}());
+</script>
+{{ end }}

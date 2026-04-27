@@ -1,0 +1,4 @@
+{{- /* Expects: dict "type" "construct|finding|source|proposition|playbook" */ -}}
+{{- $glyphs := dict "construct" "C" "finding" "F" "source" "S" "proposition" "P" "playbook" "B" -}}
+{{- $type := .type | default "construct" -}}
+<span class="t-glyph t-glyph-{{ $type }}">{{ index $glyphs $type }}</span>

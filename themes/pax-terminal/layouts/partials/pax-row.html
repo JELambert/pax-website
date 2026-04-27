@@ -1,0 +1,28 @@
+{{- /* Expects a Hugo Page object for a pax. Displays name, type, author, counts. */ -}}
+{{- $p := . -}}
+{{- $idx := .idx | default 0 -}}
+{{- $type := $p.Params.pax_type | default "field" -}}
+<div class="t-pax-row">
+  <div class="t-pax-accent" style="background-color: var(--pt-{{ $type }}-type)"></div>
+  <span class="t-pax-id">{{ $p.File.ContentBaseName }}</span>
+
+  <div class="t-pax-info">
+    <div class="t-pax-name">{{ $p.Title }}</div>
+    <div class="t-pax-tagline">{{ $p.Params.description | truncate 120 }}</div>
+  </div>
+
+  <div class="t-pax-author">
+    <div>{{ $p.Params.author | default "—" }}</div>
+    <div>v{{ $p.Params.version | default "1.0.0" }}</div>
+  </div>
+
+  <div class="t-pax-counts">
+    <span class="t-count t-count-construct">{{ partial "content-glyph.html" (dict "type" "construct") }}<span>{{ $p.Params.construct_count | default 0 }}</span></span>
+    <span class="t-count t-count-finding">{{ partial "content-glyph.html" (dict "type" "finding") }}<span>{{ $p.Params.finding_count | default 0 }}</span></span>
+    <span class="t-count t-count-source">{{ partial "content-glyph.html" (dict "type" "source") }}<span>{{ $p.Params.source_count | default 0 }}</span></span>
+  </div>
+
+  <div class="t-pax-actions">
+    <a href="{{ $p.RelPermalink }}" class="t-btn-sm">view</a>
+  </div>
+</div>

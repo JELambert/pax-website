@@ -1,0 +1,506 @@
+{{ define "main" }}
+{{- /* ===========================================================
+       Wave 3B — Knowledge graph (server-side SVG layout)
+       Data source: /static/graph.json  (also tried under data/)
+       Shape (actual): { nodes:[{id,name,domain,color}],
+                         edges:[{source,target,weight}],
+                         domains:[{name,color,count}],
+                         stats:{nodes,edges,domains} }
+       =========================================================== */ -}}
+
+{{- /* Load graph data: prefer site.Data.graph, fall back to static/graph.json via readFile. */ -}}
+{{- $g := "" -}}
+{{- with site.Data.graph -}}{{- $g = . -}}{{- end -}}
+{{- if not $g -}}
+  {{- if fileExists "static/graph.json" -}}
+    {{- $g = readFile "static/graph.json" | transform.Unmarshal -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $nodes := slice -}}
+{{- $edges := slice -}}
+{{- $domains := slice -}}
+{{- $stats := dict "nodes" 0 "edges" 0 "domains" 0 -}}
+{{- with $g -}}
+  {{- $nodes = (index . "nodes") | default slice -}}
+  {{- $edges = (index . "edges") | default slice -}}
+  {{- $domains = (index . "domains") | default slice -}}
+  {{- with index . "stats" -}}{{- $stats = . -}}{{- end -}}
+{{- end -}}
+
+{{- /* ---------- Layout (deterministic, polar by domain) ---------- */ -}}
+{{- $W := 760 -}}
+{{- $H := 720 -}}
+{{- $cx := 380 -}}
+{{- $cy := 360 -}}
+{{- $rOuter := 300 -}}
+{{- $rInner := 90 -}}
+
+{{- /* Sort domains by count desc so the biggest occupy the most arc */ -}}
+{{- $domSorted := sort $domains "count" "desc" -}}
+{{- $domCount := len $domSorted -}}
+
+{{- /* Map domain name -> { angle, color, idx } */ -}}
+{{- $domMap := dict -}}
+{{- range $i, $d := $domSorted -}}
+  {{- $a := 0.0 -}}
+  {{- if gt $domCount 0 -}}
+    {{- $a = mul (div (float $i) (float $domCount)) 6.28318530718 -}}
+  {{- end -}}
+  {{- $domMap = merge $domMap (dict $d.name (dict "angle" $a "color" $d.color "count" $d.count "idx" $i)) -}}
+{{- end -}}
+
+{{- /* Compute neighbors map and per-node cross-domain bridge flag */ -}}
+{{- $neighbors := dict -}}
+{{- range $edges -}}
+  {{- $s := .source -}}{{- $t := .target -}}
+  {{- $sn := (index $neighbors $s) | default slice -}}
+  {{- $tn := (index $neighbors $t) | default slice -}}
+  {{- $neighbors = merge $neighbors (dict $s (append $t $sn)) -}}
+  {{- $neighbors = merge $neighbors (dict $t (append $s $tn)) -}}
+{{- end -}}
+
+{{- /* node-by-id quick lookup (for domain on neighbors) */ -}}
+{{- $byId := dict -}}
+{{- range $nodes -}}
+  {{- $byId = merge $byId (dict .id .) -}}
+{{- end -}}
+
+{{- /* Compute positions per node + bridge flag */ -}}
+{{- $placed := slice -}}
+{{- range $i, $n := $nodes -}}
+  {{- $dom := $n.domain -}}
+  {{- $dInfo := index $domMap $dom -}}
+  {{- $base := 0.0 -}}{{- with $dInfo -}}{{- $base = .angle -}}{{- end -}}
+
+  {{- /* deterministic noise from md5(id) */ -}}
+  {{- $h := md5 $n.id -}}
+  {{- $h1 := substr $h 0 4 -}}
+  {{- $h2 := substr $h 4 4 -}}
+  {{- $h3 := substr $h 8 4 -}}
+  {{- $n1 := 0 -}}{{- $n2 := 0 -}}{{- $n3 := 0 -}}
+  {{- /* hex -> int via lookup */ -}}
+  {{- $hex := dict "0" 0 "1" 1 "2" 2 "3" 3 "4" 4 "5" 5 "6" 6 "7" 7 "8" 8 "9" 9 "a" 10 "b" 11 "c" 12 "d" 13 "e" 14 "f" 15 -}}
+  {{- range $j, $c := (split $h1 "") -}}{{- $n1 = add (mul $n1 16) (index $hex $c) -}}{{- end -}}
+  {{- range $j, $c := (split $h2 "") -}}{{- $n2 = add (mul $n2 16) (index $hex $c) -}}{{- end -}}
+  {{- range $j, $c := (split $h3 "") -}}{{- $n3 = add (mul $n3 16) (index $hex $c) -}}{{- end -}}
+  {{- $jitterA := sub (div (float (mod $n1 1000)) 1000.0) 0.5 -}}{{/* -0.5..0.5 */}}
+  {{- $jitterR := sub (div (float (mod $n2 1000)) 1000.0) 0.5 -}}
+  {{- $rPick   := div (float (mod $n3 1000)) 1000.0 -}}{{/* 0..1 */}}
+
+  {{- /* bridge = neighbors include a different domain */ -}}
+  {{- $isBridge := false -}}
+  {{- $nbrs := (index $neighbors $n.id) | default slice -}}
+  {{- range $nbrs -}}
+    {{- with index $byId . -}}
+      {{- if and (.domain) (ne .domain $dom) -}}{{- $isBridge = true -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* radius: bridges pulled inward */ -}}
+  {{- $r := add $rInner (mul $rPick (sub $rOuter $rInner)) -}}
+  {{- if $isBridge -}}
+    {{- $r = add (mul $rInner 0.3) (mul $rPick (mul (sub $rInner 20) 1.0)) -}}
+    {{- /* place between center and inner ring */ -}}
+    {{- $r = add 30 (mul $rPick 80) -}}
+  {{- end -}}
+
+  {{- /* angle: domain base + small jitter (~±0.18 rad ≈ ±10°) */ -}}
+  {{- $angle := add $base (mul $jitterA 0.32) -}}
+  {{- if $isBridge -}}
+    {{- /* bridges spread over full circle to avoid clumping */ -}}
+    {{- $angle = mul (div (float (mod $n1 6283)) 1000.0) 1.0 -}}
+  {{- end -}}
+
+  {{- /* polar -> cart (math.Cos / Sin available in Hugo via math.Pi etc.) */ -}}
+  {{- $px := add $cx (mul $r (math.Cos $angle)) -}}
+  {{- $py := add $cy (mul $r (math.Sin $angle)) -}}
+
+  {{- $deg := len $nbrs -}}
+  {{- $placed = append (dict
+      "id" $n.id
+      "name" $n.name
+      "domain" $dom
+      "color" $n.color
+      "x" $px
+      "y" $py
+      "deg" $deg
+      "bridge" $isBridge
+    ) $placed -}}
+{{- end -}}
+
+{{- /* placedById for edge endpoints */ -}}
+{{- $pById := dict -}}
+{{- range $placed -}}{{- $pById = merge $pById (dict .id .) -}}{{- end -}}
+
+{{- /* Bridge count + isolated count */ -}}
+{{- $bridgeCount := 0 -}}
+{{- range $placed -}}{{- if .bridge -}}{{- $bridgeCount = add $bridgeCount 1 -}}{{- end -}}{{- end -}}
+{{- $isolated := 0 -}}
+{{- range $placed -}}{{- if eq .deg 0 -}}{{- $isolated = add $isolated 1 -}}{{- end -}}{{- end -}}
+
+{{- /* Cap edges if huge — show all if <800 */ -}}
+{{- $maxEdges := 800 -}}
+{{- $renderEdges := $edges -}}
+{{- if gt (len $edges) $maxEdges -}}
+  {{- $renderEdges = first $maxEdges $edges -}}
+{{- end -}}
+
+<section class="t-page-wrap t-graph-page">
+
+  <div class="t-page-head t-graph-head">
+    <div class="t-caption">// graph/</div>
+    <h1 class="t-graph-title">Knowledge graph</h1>
+    <p class="t-graph-lede">
+      <span class="t-graph-lede-num">{{ $stats.nodes }}</span> constructs ·
+      <span class="t-graph-lede-num">{{ $stats.edges }}</span> finding-implied edges across
+      <span class="t-graph-lede-num">{{ $stats.domains }}</span> domains.
+      <span class="t-graph-lede-em">Bridge constructs (cobalt) connect two or more domains.</span>
+    </p>
+  </div>
+
+  {{- if eq (len $placed) 0 -}}
+  <div class="t-graph-empty">
+    <div class="t-caption">// graph data unavailable</div>
+    <p>
+      <code>static/graph.json</code> wasn't found or is empty. Re-run
+      <code>scripts/generate-content.py</code> after fetching the registry
+      artifacts to populate the knowledge graph.
+    </p>
+  </div>
+  {{- else -}}
+
+  <div class="t-graph-layout">
+
+    <div class="t-graph-canvas">
+      <svg id="t-graph-svg"
+           viewBox="0 0 {{ $W }} {{ $H }}"
+           preserveAspectRatio="xMidYMid meet"
+           role="img"
+           aria-label="Knowledge graph: {{ $stats.nodes }} constructs across {{ $stats.domains }} domains.">
+        <defs>
+          <pattern id="t-graph-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M40 0 L0 0 L0 40" fill="none" stroke="rgba(243,240,227,0.04)" stroke-width="1"></path>
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="{{ $W }}" height="{{ $H }}" fill="url(#t-graph-grid)"></rect>
+
+        {{- /* Edges first, so nodes render on top */ -}}
+        <g class="t-graph-edges">
+        {{- range $e := $renderEdges -}}
+          {{- $s := index $pById $e.source -}}
+          {{- $t := index $pById $e.target -}}
+          {{- if and $s $t -}}
+            {{- $isB := or $s.bridge $t.bridge -}}
+            <line class="t-graph-edge{{ if $isB }} is-bridge{{ end }}"
+                  data-edge-source="{{ $s.id }}"
+                  data-edge-target="{{ $t.id }}"
+                  x1="{{ printf "%.2f" $s.x }}" y1="{{ printf "%.2f" $s.y }}"
+                  x2="{{ printf "%.2f" $t.x }}" y2="{{ printf "%.2f" $t.y }}"></line>
+          {{- end -}}
+        {{- end -}}
+        </g>
+
+        {{- /* Domain anchor squares for the top 8 most populous domains */ -}}
+        <g class="t-graph-anchors">
+        {{- range $i, $d := first 8 $domSorted -}}
+          {{- $a := mul (div (float $i) 8.0) 6.28318530718 -}}
+          {{- $ax := add $cx (mul ($rOuter | float) (math.Cos $a)) -}}
+          {{- $ay := add $cy (mul ($rOuter | float) (math.Sin $a)) -}}
+          <g class="t-graph-anchor" data-anchor-name="{{ $d.name }}" transform="translate({{ printf "%.2f" $ax }} {{ printf "%.2f" $ay }})">
+            <rect x="-5" y="-5" width="10" height="10" fill="{{ $d.color }}" stroke="var(--pt-bg)" stroke-width="1.5"></rect>
+            <text x="0" y="22" text-anchor="middle" class="t-graph-anchor-label">{{ $d.name | truncate 22 "" }}</text>
+          </g>
+        {{- end -}}
+        </g>
+
+        {{- /* Construct nodes */ -}}
+        <g class="t-graph-nodes">
+        {{- range $n := $placed -}}
+          <circle class="t-graph-node{{ if $n.bridge }} is-bridge{{ end }}"
+                  data-node-id="{{ $n.id }}"
+                  data-node-name="{{ $n.name }}"
+                  data-node-domain="{{ $n.domain }}"
+                  data-node-color="{{ $n.color }}"
+                  data-node-degree="{{ $n.deg }}"
+                  data-node-bridge="{{ if $n.bridge }}1{{ else }}0{{ end }}"
+                  cx="{{ printf "%.2f" $n.x }}"
+                  cy="{{ printf "%.2f" $n.y }}"
+                  r="{{ if $n.bridge }}4.5{{ else }}3{{ end }}"
+                  fill="{{ if $n.bridge }}var(--term-accent){{ else }}var(--pt-dim){{ end }}"></circle>
+        {{- end -}}
+        </g>
+      </svg>
+    </div>
+
+    <aside class="t-graph-detail" id="t-graph-detail" aria-live="polite">
+      <div class="t-graph-detail-default" data-detail-state="default">
+        {{ partial "section-head.html" (dict "caption" "click a node to pin" "title" "Inspect") }}
+        <p class="t-graph-detail-hint">INFO: click any node to pin its detail</p>
+        <p class="t-graph-detail-blurb">
+          Hover any dot to inspect a construct. Click to pin the detail panel
+          so you can follow the link. Cobalt-filled dots are
+          <em>bridges</em> — constructs that appear in propositions linking
+          two or more domains. Squares mark the eight most populous domains.
+        </p>
+        <dl class="t-graph-detail-stats">
+          <div><dt>nodes</dt><dd>{{ $stats.nodes }}</dd></div>
+          <div><dt>edges</dt><dd>{{ $stats.edges }}</dd></div>
+          <div><dt>domains</dt><dd>{{ $stats.domains }}</dd></div>
+          <div><dt>bridges</dt><dd>{{ $bridgeCount }}</dd></div>
+        </dl>
+      </div>
+
+      <div class="t-graph-detail-active" data-detail-state="active" hidden>
+        <div class="t-graph-detail-head">
+          <span class="t-glyph t-glyph-construct">C</span>
+          <span class="t-graph-detail-id" data-detail="id">—</span>
+          <button type="button" class="t-graph-unpin-btn" id="t-graph-unpin-btn" hidden>[ unpin ]</button>
+        </div>
+        <div class="t-graph-detail-name" data-detail="name">—</div>
+        <dl class="t-graph-detail-meta">
+          <div><dt>domain</dt><dd data-detail="domain">—</dd></div>
+          <div><dt>degree</dt><dd data-detail="degree">—</dd></div>
+          <div><dt>kind</dt><dd data-detail="kind">construct</dd></div>
+          <div><dt>bridge</dt><dd data-detail="bridge">—</dd></div>
+        </dl>
+        <div class="t-graph-detail-foot">
+          <a class="t-graph-detail-link" data-detail="link" href="#">view construct →</a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="t-graph-strip">
+      <div class="t-graph-filters" role="group" aria-label="Graph filters">
+        <button type="button" class="t-graph-filter is-on" data-filter="bridges-only" aria-pressed="false">[ bridges only ]</button>
+        <button type="button" class="t-graph-filter is-on" data-filter="show-edges" aria-pressed="true">[ edges ]</button>
+        <button type="button" class="t-graph-filter is-on" data-filter="show-anchors" aria-pressed="true">[ domain anchors ]</button>
+      </div>
+      <div class="t-graph-legend" aria-label="Legend">
+        <span class="t-graph-legend-item"><span class="t-graph-legend-dot is-bridge"></span> bridge construct</span>
+        <span class="t-graph-legend-item"><span class="t-graph-legend-dot"></span> single-domain</span>
+        <span class="t-graph-legend-item"><span class="t-graph-legend-sq"></span> domain anchor</span>
+      </div>
+      <div class="t-graph-stats">
+        nodes: <span>{{ $stats.nodes }}</span> ·
+        edges: <span>{{ $stats.edges }}</span> ·
+        bridges: <span>{{ $bridgeCount }}</span> ·
+        isolated: <span>{{ $isolated }}</span>
+      </div>
+    </div>
+  </div>
+
+  {{- /* Inline JS: hover handlers + filter toggles + click-to-pin. Wave 8C. */ -}}
+  <script>
+  (function () {
+    var svg = document.getElementById('t-graph-svg');
+    if (!svg) return;
+    var detail = document.getElementById('t-graph-detail');
+    if (!detail) return;
+
+    var defaultPane = detail.querySelector('[data-detail-state="default"]');
+    var activePane  = detail.querySelector('[data-detail-state="active"]');
+    var unpinBtn    = document.getElementById('t-graph-unpin-btn');
+    var fields = {};
+    activePane.querySelectorAll('[data-detail]').forEach(function (el) {
+      fields[el.getAttribute('data-detail')] = el;
+    });
+
+    var nodes = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-node'));
+    var edges = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-edge'));
+    var anchors = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-anchor'));
+
+    // Wave 8C: pin state.
+    var pinnedNodeId = null;
+
+    // Build adjacency for fast hover dimming.
+    var adj = {};
+    edges.forEach(function (l) {
+      var s = l.getAttribute('data-edge-source');
+      var t = l.getAttribute('data-edge-target');
+      (adj[s] = adj[s] || []).push({ id: t, line: l });
+      (adj[t] = adj[t] || []).push({ id: s, line: l });
+    });
+
+    // nodeById for looking up the circle element by id.
+    var nodeById = {};
+    nodes.forEach(function (c) { nodeById[c.getAttribute('data-node-id')] = c; });
+
+    function showActive(n, pinned) {
+      var id = n.getAttribute('data-node-id');
+      fields.id && (fields.id.textContent = id);
+      fields.name && (fields.name.textContent = n.getAttribute('data-node-name') || '—');
+      fields.domain && (fields.domain.textContent = n.getAttribute('data-node-domain') || '—');
+      fields.degree && (fields.degree.textContent = n.getAttribute('data-node-degree') || '0');
+      fields.bridge && (fields.bridge.textContent = n.getAttribute('data-node-bridge') === '1' ? 'yes' : 'no');
+      if (fields.link) {
+        fields.link.setAttribute('href', '/constructs/?q=' + encodeURIComponent(id));
+      }
+      if (unpinBtn) unpinBtn.hidden = !pinned;
+      defaultPane.hidden = true;
+      activePane.hidden = false;
+    }
+    function showDefault() {
+      if (unpinBtn) unpinBtn.hidden = true;
+      defaultPane.hidden = false;
+      activePane.hidden = true;
+    }
+
+    function highlight(id) {
+      var neighbors = (adj[id] || []).reduce(function (m, x) { m[x.id] = true; return m; }, {});
+      neighbors[id] = true;
+      nodes.forEach(function (c) {
+        var nid = c.getAttribute('data-node-id');
+        if (neighbors[nid]) {
+          c.classList.add('is-active');
+          c.classList.remove('is-dim');
+        } else {
+          c.classList.add('is-dim');
+          c.classList.remove('is-active');
+        }
+      });
+      edges.forEach(function (l) {
+        var s = l.getAttribute('data-edge-source');
+        var t = l.getAttribute('data-edge-target');
+        if (s === id || t === id) {
+          l.classList.add('is-active');
+          l.classList.remove('is-dim');
+        } else {
+          l.classList.add('is-dim');
+          l.classList.remove('is-active');
+        }
+      });
+    }
+    function clearHighlight() {
+      nodes.forEach(function (c) { c.classList.remove('is-active', 'is-dim', 'is-pinned'); });
+      edges.forEach(function (l) { l.classList.remove('is-active', 'is-dim'); });
+    }
+
+    // Apply pinned visual treatment to the pinned node circle.
+    function applyPinnedStyle(id) {
+      nodes.forEach(function (c) { c.classList.remove('is-pinned'); });
+      if (id && nodeById[id]) {
+        nodeById[id].classList.add('is-pinned');
+      }
+    }
+
+    function pin(nodeEl) {
+      var id = nodeEl.getAttribute('data-node-id');
+      // Clicking the already-pinned node toggles off.
+      if (pinnedNodeId === id) {
+        unpin();
+        return;
+      }
+      pinnedNodeId = id;
+      highlight(id);
+      applyPinnedStyle(id);
+      showActive(nodeEl, true);
+    }
+
+    function unpin() {
+      pinnedNodeId = null;
+      clearHighlight();
+      showDefault();
+    }
+
+    nodes.forEach(function (c) {
+      c.addEventListener('mouseenter', function () {
+        if (pinnedNodeId) return; // pinned: ignore hover
+        highlight(c.getAttribute('data-node-id'));
+        showActive(c, false);
+      });
+      c.addEventListener('mouseleave', function () {
+        if (pinnedNodeId) return; // pinned: ignore hover
+        clearHighlight();
+        showDefault();
+      });
+      c.addEventListener('focus', function () {
+        if (pinnedNodeId) return;
+        highlight(c.getAttribute('data-node-id'));
+        showActive(c, false);
+      });
+      c.addEventListener('blur', function () {
+        if (pinnedNodeId) return;
+        clearHighlight();
+        showDefault();
+      });
+      // Click to pin / unpin.
+      c.addEventListener('click', function (e) {
+        e.stopPropagation();
+        pin(c);
+      });
+    });
+
+    // Click empty SVG area → unpin.
+    svg.addEventListener('click', function () {
+      if (pinnedNodeId) unpin();
+    });
+
+    // Unpin button.
+    if (unpinBtn) {
+      unpinBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        unpin();
+      });
+    }
+
+    // Esc key → unpin.
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && pinnedNodeId) {
+        unpin();
+      }
+    });
+
+    // Filter toggles
+    var filterButtons = document.querySelectorAll('.t-graph-filter');
+    var state = { 'bridges-only': false, 'show-edges': true, 'show-anchors': true };
+    // Initialize visual on/off classes from state.
+    filterButtons.forEach(function (b) {
+      var k = b.getAttribute('data-filter');
+      var on = !!state[k];
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    function applyFilters() {
+      var bridgesOnly = state['bridges-only'];
+      var showEdges = state['show-edges'];
+      var showAnchors = state['show-anchors'];
+
+      nodes.forEach(function (c) {
+        var bridge = c.getAttribute('data-node-bridge') === '1';
+        var hide = bridgesOnly && !bridge;
+        c.style.display = hide ? 'none' : '';
+      });
+      edges.forEach(function (l) {
+        if (!showEdges) { l.style.display = 'none'; return; }
+        if (bridgesOnly) {
+          var s = l.getAttribute('data-edge-source');
+          var t = l.getAttribute('data-edge-target');
+          var sNode = svg.querySelector('[data-node-id="' + s + '"]');
+          var tNode = svg.querySelector('[data-node-id="' + t + '"]');
+          var sB = sNode && sNode.getAttribute('data-node-bridge') === '1';
+          var tB = tNode && tNode.getAttribute('data-node-bridge') === '1';
+          l.style.display = (sB && tB) ? '' : 'none';
+        } else {
+          l.style.display = '';
+        }
+      });
+      anchors.forEach(function (a) { a.style.display = showAnchors ? '' : 'none'; });
+    }
+    filterButtons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.getAttribute('data-filter');
+        state[k] = !state[k];
+        b.classList.toggle('is-on', state[k]);
+        b.setAttribute('aria-pressed', state[k] ? 'true' : 'false');
+        applyFilters();
+      });
+    });
+    applyFilters();
+  })();
+  </script>
+
+  {{- end -}}
+</section>
+{{ partial "footer.html" . }}
+{{ end }}

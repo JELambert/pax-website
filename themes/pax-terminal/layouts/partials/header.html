@@ -1,0 +1,52 @@
+{{- $currentPath := .RelPermalink -}}
+<header class="t-header">
+  <!-- Nav row -->
+  <div class="t-header-row">
+    <!-- Logo -->
+    <a href="/" class="t-logo">
+      <svg class="t-logo-mark" width="26" height="26" viewBox="0 0 24 24" aria-label="PAX mark">
+        <rect x="0" y="0" width="24" height="24" fill="var(--term-accent)"/>
+        <g fill="var(--pt-bg)">
+          <rect x="4" y="4" width="3" height="16"/>
+          <rect x="4" y="4" width="11" height="3"/>
+          <rect x="4" y="10" width="9" height="3"/>
+          <rect x="13" y="4" width="3" height="9"/>
+          <rect x="17" y="14" width="3" height="6"/>
+        </g>
+      </svg>
+      <span class="t-logo-word">pax<span class="t-dim">&middot;market</span></span>
+    </a>
+
+    <!-- Search -->
+    <div class="t-search-wrap">
+      <span class="t-search-prefix">$</span>
+      <input
+        type="search"
+        id="t-search"
+        class="t-search-input"
+        placeholder="grep ./pax/  &middot;  try 'risk', 'climate', 'gdp_per_capita'"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter'&&this.value){window.location='/pax/?q='+encodeURIComponent(this.value)}"
+      >
+      <span class="t-search-hint">&#x2318;K</span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="t-nav" aria-label="Site navigation">
+      {{- $navItems := slice
+        (dict "label" "home"       "url" "/")
+        (dict "label" "browse"     "url" "/pax/")
+        (dict "label" "constructs" "url" "/constructs/")
+        (dict "label" "graph"      "url" "/graph/")
+        (dict "label" "showcase"   "url" "/showcase/")
+        (dict "label" "start"      "url" "/getting-started/")
+        (dict "label" "guide"      "url" "/guide/")
+        (dict "label" "about"      "url" "/about/")
+      -}}
+      {{- range $navItems -}}
+        {{- $active := eq $currentPath .url -}}
+        <a href="{{ .url }}" class="t-nav-item{{ if $active }} t-active{{ end }}">{{ .label }}</a>
+      {{- end -}}
+    </nav>
+  </div>
+</header>

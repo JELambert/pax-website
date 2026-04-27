@@ -1,0 +1,204 @@
+{{ define "main" }}
+
+{{- /* Page header */ -}}
+<section class="t-showcase-header">
+  <div class="t-caption">// showcase/</div>
+  <h1 class="t-showcase-title">Three pax, one analysis</h1>
+  <p class="t-showcase-lede">Real cross-pax synthesis. When independently authored pax share constructs, agents can run analyses no single pax could support.</p>
+</section>
+
+{{- /* Story 01 — Materials science bridge */ -}}
+<section class="t-showcase-story t-showcase-story-01">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.01</div>
+    <h2 class="t-showcase-story-title">Drop a pax into ChatGPT and analyze a live disruption.</h2>
+    <p class="t-showcase-story-prose">
+      You don't need a CLI, an MCP server, or any local tooling. Download <code>global-supply-chain-risk.pax.tar.gz</code>, extract it, open the included <code>llm-context.md</code>, and paste it into Claude or ChatGPT as the first message. The model now has 38 constructs, 113 findings, and 47 sources on supply-chain vulnerability sitting in its context.
+    </p>
+    <p class="t-showcase-story-prose">
+      Then ask it real questions. The agent cites by finding id (<code>F041</code>) and source id (<code>baldwin_2020</code>) — every claim traces back to a real paper. No hallucinated stats, no made-up effect sizes.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">workflow</div>
+      <div class="t-showcase-bridge-construct">paste-to-Claude · zero install</div>
+      <div class="t-showcase-bridge-paxes">pax: global-supply-chain-risk</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript01 := `# step 1 — get the pax
+$ curl -O https://pax-market.com/pax/global-supply-chain-risk.pax.tar.gz
+$ tar -xzf global-supply-chain-risk.pax.tar.gz
+$ cat global-supply-chain-risk/llm-context.md
+  → 38 constructs · 113 findings · 47 sources
+
+# step 2 — paste it into Claude (or ChatGPT)
+USER > [contents of llm-context.md pasted as
+        the first message]
+
+USER > a Tier-1 semiconductor supplier just
+        announced a 6-month outage. given the
+        constructs and findings in this pax,
+        what's the realistic downstream
+        impact window and what evidence
+        supports it?
+
+CLAUDE > Single-source dependency triggers
+  the strongest cascade in the literature.
+
+  - F041 (baldwin_2020, n=312 firms):
+    average lead-time stretch is 4.2x
+    nominal for single-source nodes
+    (β=4.21, SE=0.78, p<0.001).
+
+  - F067 (miroudot_2021): inventory
+    buffers below 6 weeks correlate with
+    revenue loss > 15% within one quarter
+    of disruption.
+
+  - P004 (proposition): supplier
+    diversification compounds with
+    nearshoring to halve cascade duration.
+
+  Realistic window: 3-6 months for tier-2
+  exposure if buffers exhaust. Cite F041,
+  F067, P004 in your memo.` }}
+    {{ partial "code-block.html" (dict "lang" "text · paste-to-claude session" "code" $transcript01 "id" "showcase-01") }}
+  </div>
+</section>
+
+{{- /* Story 02 — Conflict & state capacity */ -}}
+<section class="t-showcase-story t-showcase-story-02">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.02</div>
+    <h2 class="t-showcase-story-title">From civil war onset to coup forecasting: state capacity as the common thread</h2>
+    <p class="t-showcase-story-prose">
+      Three pax cover the same underlying phenomenon from different angles: Fearon &amp; Laitin's civil war onset model focuses on structural opportunity, the coup-prediction pax maps disposition and coordination among military elites, and the state-fragility pax tracks institutional erosion over time. Each uses <code>institutional_capacity</code> and related measures of state power.
+    </p>
+    <p class="t-showcase-story-prose">
+      Aligning findings across these pax lets an agent answer questions no single pax was designed for: which fragility indicators precede both coup attempts and civil war onset — and by how many years? That lead-time signal matters for early warning systems.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">bridge construct</div>
+      <div class="t-showcase-bridge-construct">institutional_capacity</div>
+      <div class="t-showcase-bridge-paxes">spans: fearon-laitin-2003 · military-coup-prediction · state-fragility</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript02 := `# step 1 — pull all three pax
+$ for p in fearon-laitin-2003 military-coup-prediction \
+          state-fragility ; do
+    curl -O https://pax-market.com/pax/$p.pax.tar.gz
+    tar -xzf $p.pax.tar.gz
+  done
+
+# step 2 — concatenate the three llm-context.md
+$ cat */llm-context.md > combined-context.md
+$ wc -l combined-context.md
+  4,217 combined-context.md
+
+# step 3 — paste combined-context.md into
+#         Claude as the first message,
+#         then ask:
+
+USER > using ONLY the constructs and findings
+        in the three pax I just gave you, list
+        fragility indicators that show lead
+        time > 2 years before BOTH civil war
+        onset and coup attempts. cite by id.
+
+CLAUDE > Three indicators meet the lead-time
+  bar across all three pax:
+
+  1. legitimacy_deficit
+     state-fragility F012 (n=78 countries):
+     OR 2.4 for civil-war onset, OR 1.9 for
+     coup, lead time 2-4 yrs.
+     Replicates fearon-laitin-2003 F003
+     at p < 0.001.
+
+  2. factionalized_elites
+     coup-prediction F031 (n=45 episodes):
+     precedes coup by median 3.1 yrs.
+
+  3. per_capita_income (low)
+     fearon-laitin F044, state-fragility F088:
+     same direction, both pathways, robust
+     across specifications.
+
+  cite: F012, F031, F044, F088, P007` }}
+    {{ partial "code-block.html" (dict "lang" "text · paste-to-claude session" "code" $transcript02 "id" "showcase-02") }}
+  </div>
+</section>
+
+{{- /* Story 03 — Fiscal policy & inequality */ -}}
+<section class="t-showcase-story t-showcase-story-03">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.03</div>
+    <h2 class="t-showcase-story-title">Tax structure, redistribution, and market inequality: the fiscal feedback loop</h2>
+    <p class="t-showcase-story-prose">
+      The taxation-fiscal-policy pax and the income-inequality-gini pax were authored independently, but they share the same underlying questions about how fiscal structure shapes distributional outcomes. The taxation pax covers incidence and compliance; the inequality pax covers concentration and mobility. Together they let an agent trace the full circuit: tax design → effective incidence → post-transfer Gini → intergenerational mobility.
+    </p>
+    <p class="t-showcase-story-prose">
+      The equity-trading-markets pax adds a third lens: how inequality-driven savings gluts and risk appetite shift asset pricing. An agent spanning all three can quantify how a 1-point Gini increase transmits to equity volatility — a question that requires evidence from all three fields simultaneously.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">bridge construct</div>
+      <div class="t-showcase-bridge-construct">redistributive_effect_taxes</div>
+      <div class="t-showcase-bridge-paxes">spans: taxation-fiscal-policy · income-inequality-gini · equity-trading-markets</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript03 := `USER > how does top marginal tax rate affect
+        both post-transfer inequality and equity
+        market volatility? trace the mechanism.
+
+CLAUDE > [tool] praxis_install_pax
+       ↳ { pax: 'taxation-fiscal-policy' }
+         26 constructs, 94 findings
+
+       [tool] praxis_install_pax
+       ↳ { pax: 'income-inequality-gini' }
+         12 constructs, 47 findings
+
+       [tool] praxis_install_pax
+       ↳ { pax: 'equity-trading-markets' }
+         25 constructs, 83 findings
+
+       [tool] praxis_align_constructs
+       ↳ { pax_a: 'taxation-fiscal-policy',
+           pax_b: 'income-inequality-gini' }
+         conceptual bridges:
+           redistributive_effect_taxes
+           top_marginal_income_tax_rate
+             ↔ income_share_top_10_pct
+
+       [tool] praxis_query_findings
+       ↳ { construct: 'redistributive_effect_taxes' }
+         18 findings across 2 pax
+
+──────── synthesis ────────
+Mechanism (3 stages):
+
+1. Tax incidence (taxation F034):
+   10pp rise in top marginal rate →
+   -0.8 Gini points post-transfer (β=-0.08,
+   p=0.002, N=42 countries, 1990-2018).
+
+2. Inequality → savings concentration
+   (gini F021): top-1% wealth share +1pp
+   → household savings rate +0.6pp.
+
+3. Savings glut → volatility compression
+   (equity F057): excess savings ↔
+   lower implied volatility (VIX -1.3pts).
+
+Caveat: effect reverses when top share
+  exceeds 20% — risk repricing dominates.
+
+cite: F034, F021, F057, F112, P009` }}
+    {{ partial "code-block.html" (dict "lang" "text · agent transcript" "code" $transcript03 "id" "showcase-03") }}
+  </div>
+</section>
+
+{{ partial "footer.html" . }}
+{{ end }}

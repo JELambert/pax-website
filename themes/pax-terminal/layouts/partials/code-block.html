@@ -1,0 +1,12 @@
+{{- /* Expects: dict "code" "..." "lang" "bash" "copyable" true "maxHeight" "" */ -}}
+{{- $copyable := .copyable | default true -}}
+{{- $maxHeight := .maxHeight | default "" -}}
+<div class="t-code-block"{{ if $maxHeight }} style="max-height: {{ $maxHeight }}"{{ end }}>
+  <div class="t-code-block-bar">
+    <span>{{ .lang | default "bash" }}</span>
+    {{- if $copyable -}}
+    <button data-copy-target="t-code-{{ .id | default "block" }}" class="t-copy-btn">copy</button>
+    {{- end -}}
+  </div>
+  <pre id="t-code-{{ .id | default "block" }}">{{ .code | default .content }}</pre>
+</div>
