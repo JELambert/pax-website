@@ -9,6 +9,8 @@ Reads artifacts/full-catalog.json (produced by the registry) and writes:
   - static/registry.json              (from artifacts/registry.json)
   - data/constructs.json              (from artifacts/constructs.json)
   - static/pax/*.pax.tar.gz           (from artifacts/pax/)
+  - data/graph.json                   (knowledge graph: nodes + edges)
+  - static/graph.json                 (same, served directly)
 """
 
 import json
@@ -357,6 +359,160 @@ def generate_playbook_pages(catalog: list):
 
 
 # ---------------------------------------------------------------------------
+# Knowledge graph generation  (Wave 20)
+# ---------------------------------------------------------------------------
+
+# Domain colour palette — matches the existing terminal theme accent colours.
+_DOMAIN_COLOURS = [
+    "#f0a93a", "#4a9eff", "#e05c5c", "#5cd65c", "#b06fff",
+    "#ff8c42", "#5ce4d6", "#e0a0e0", "#a0c8a0", "#d4b896", "#8888cc",
+]
+
+
+def generate_graph(packs: list, constructs: dict) -> dict:
+    """Build a knowledge-graph dict suitable for graph.json.
+
+    Nodes  — one per unique construct id (304 expected).
+    Edges  — derived from co-occurrence in finding construct_ids lists
+             (and propositions_detail if present).  Weight = number of
+             findings/propositions in which a pair co-occurs.
+    Cap    — keep at most 1200 edges by weight (descending) to stay within
+             visual budget.
+    """
+    from itertools import combinations
+    from collections import defaultdict
+
+    # ── 1. Build domain colour map ──────────────────────────────────────────
+    domain_names: list[str] = []
+    for p in packs:
+        dn = (p.get("domain") or {}).get("display_name", "")
+        if dn and dn not in domain_names:
+            domain_names.append(dn)
+    domain_colour: dict[str, str] = {
+        d: _DOMAIN_COLOURS[i % len(_DOMAIN_COLOURS)]
+        for i, d in enumerate(domain_names)
+    }
+
+    # ── 2. Map construct_id → {display_name, primary_domain} ────────────────
+    # constructs.json gives the global index; packs give per-pax context.
+    # Primary domain = domain of the first pack that lists this construct.
+    construct_domain: dict[str, str] = {}
+    construct_name: dict[str, str] = {}
+
+    for p in packs:
+        pax_domain = (p.get("domain") or {}).get("display_name", "Unknown")
+        for cid in p.get("constructs", []):
+            if cid not in construct_domain:
+                construct_domain[cid] = pax_domain
+
+    # Fill display names from constructs.json
+    for cid, cmeta in constructs.items():
+        construct_name[cid] = cmeta.get("display_name", cid)
+        if cid not in construct_domain:
+            construct_domain[cid] = "Unknown"
+
+    # ── 3. Accumulate edge weights from co-occurrence ───────────────────────
+    edge_weight: dict[tuple[str, str], int] = defaultdict(int)
+
+    for p in packs:
+        # findings_detail
+        for finding in p.get("findings_detail", []):
+            cids = finding.get("construct_ids", [])
+            if len(cids) < 2:
+                continue
+            for a, b in combinations(sorted(cids), 2):
+                if a != b:
+                    edge_weight[(a, b)] += 1
+
+        # propositions_detail (if present)
+        for prop in p.get("propositions_detail", []):
+            cids = prop.get("construct_ids", [])
+            if not cids:
+                # try antecedent / consequent form
+                cids = []
+                if prop.get("antecedent_id"):
+                    cids.append(prop["antecedent_id"])
+                if prop.get("consequent_id"):
+                    cids.append(prop["consequent_id"])
+            if len(cids) < 2:
+                continue
+            for a, b in combinations(sorted(cids), 2):
+                if a != b:
+                    edge_weight[(a, b)] += 1
+
+    # ── 4. Determine valid node set ─────────────────────────────────────────
+    # Only include constructs that appear in at least one pack's construct list.
+    all_construct_ids: set[str] = set()
+    for p in packs:
+        all_construct_ids.update(p.get("constructs", []))
+
+    # ── 5. Filter edges to valid nodes only; cap at 1200 ────────────────────
+    MAX_EDGES = 1200
+    valid_edges = [
+        (w, a, b)
+        for (a, b), w in edge_weight.items()
+        if a in all_construct_ids and b in all_construct_ids
+    ]
+    valid_edges.sort(reverse=True)
+    valid_edges = valid_edges[:MAX_EDGES]
+
+    # ── 6. Build node list ──────────────────────────────────────────────────
+    nodes = []
+    for cid in sorted(all_construct_ids):
+        dom = construct_domain.get(cid, "Unknown")
+        nodes.append({
+            "id": cid,
+            "name": construct_name.get(cid, cid),
+            "domain": dom,
+            "color": domain_colour.get(dom, "#888888"),
+        })
+
+    # ── 7. Build edge list ──────────────────────────────────────────────────
+    edges = [
+        {"source": a, "target": b, "weight": w}
+        for w, a, b in valid_edges
+    ]
+
+    # ── 8. Domain summary ───────────────────────────────────────────────────
+    domain_count: dict[str, int] = defaultdict(int)
+    for n in nodes:
+        domain_count[n["domain"]] += 1
+    domains = [
+        {"name": d, "color": domain_colour.get(d, "#888888"), "count": c}
+        for d, c in domain_count.items()
+    ]
+
+    # ── 9. Stats ─────────────────────────────────────────────────────────────
+    # Bridge constructs = appear in 2+ packs
+    bridge_ids: set[str] = set()
+    for cid, cmeta in constructs.items():
+        if cid in all_construct_ids and cmeta.get("pack_count", 0) >= 2:
+            bridge_ids.add(cid)
+
+    # Degree
+    degree: dict[str, int] = defaultdict(int)
+    for e in edges:
+        degree[e["source"]] += 1
+        degree[e["target"]] += 1
+    avg_deg = sum(degree.values()) / len(nodes) if nodes else 0.0
+
+    stats = {
+        "nodes": len(nodes),
+        "edges": len(edges),
+        "domains": len(domains),
+        "bridges": len(bridge_ids),
+        "avg_degree": round(avg_deg, 2),
+    }
+
+    print(
+        f"graph: {stats['nodes']} nodes, {stats['edges']} edges, "
+        f"{stats['bridges']} bridges, avg degree {stats['avg_degree']}"
+    )
+
+    return {"nodes": nodes, "edges": edges, "domains": domains, "stats": stats}
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -445,6 +601,22 @@ def main():
         print(f"Copied {count} archives -> static/pax/")
     else:
         print(f"WARNING: {artifacts_pax} not found, no archives copied", file=sys.stderr)
+
+    # Generate knowledge graph (Wave 20)
+    constructs_for_graph_path = DATA_DIR / "constructs.json"
+    if not constructs_for_graph_path.exists():
+        constructs_for_graph_path = ARTIFACTS_DIR / "constructs.json"
+    if constructs_for_graph_path.exists():
+        constructs_for_graph = json.loads(constructs_for_graph_path.read_text())
+        graph_data = generate_graph(packs, constructs_for_graph)
+        graph_json = json.dumps(graph_data, ensure_ascii=False, indent=2)
+        graph_data_path = DATA_DIR / "graph.json"
+        graph_static_path = STATIC_DIR / "graph.json"
+        graph_data_path.write_text(graph_json)
+        graph_static_path.write_text(graph_json)
+        print("Wrote graph.json -> data/ and static/")
+    else:
+        print("WARNING: constructs.json not found, skipping graph generation", file=sys.stderr)
 
     print("Done.")
 

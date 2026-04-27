@@ -4445,10 +4445,7 @@ button {
     /* hide lower-priority items to reduce wrap; keep: home browse start install */
   }
 
-  .t-nav-item[href="/about/"],
-  .t-nav-item[href="/api/"] {
-    display: none;
-  }
+  /* (api was removed from nav entirely; about stays visible on mobile) */
 
   /* hero */
   .t-hero h1 {
@@ -6913,5 +6910,86 @@ a.t-construct-row {
   .t-pb-step-strip-item {
     min-width: 68px;
     padding: 5px 8px;
+  }
+}
+
+/* === Wave 20: graph controls (zoom / pan / reset) === */
+
+/* Canvas wrapper anchors the floating controls panel. */
+.t-graph-canvas-wrap {
+  position: relative;
+}
+
+/* Floating controls panel — top-right corner of the SVG canvas. */
+.t-graph-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--pt-line-strong, var(--pt-line));
+  background: var(--pt-bg, #0d0d0d);
+  z-index: 10;
+  user-select: none;
+}
+
+/* Individual control buttons. */
+.t-graph-control-btn {
+  padding: 6px 10px;
+  font: 12px/1 var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  color: var(--pt-ink, var(--pt-fg));
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--pt-line);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.t-graph-control-btn:last-of-type {
+  border-bottom: none;
+}
+.t-graph-control-btn:hover,
+.t-graph-control-btn:focus-visible {
+  background: var(--pt-ink, var(--pt-fg));
+  color: var(--pt-bg, #0d0d0d);
+  outline: none;
+}
+
+/* Zoom percentage readout below buttons. */
+.t-graph-zoom-label {
+  padding: 4px 10px;
+  font: 10px/1 var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  color: var(--pt-dim);
+  text-align: center;
+  border-top: 1px solid var(--pt-line);
+}
+
+/* SVG cursor states. */
+#t-graph-svg {
+  cursor: grab;
+}
+#t-graph-svg.is-dragging {
+  cursor: grabbing;
+}
+
+/* Viewport group: smooth transition for programmatic zoom/reset; none during drag. */
+.t-graph-viewport {
+  transition: transform 0.2s ease;
+}
+.t-graph-viewport.is-dragging {
+  transition: none;
+}
+
+/* Mobile: smaller padding on controls. */
+@media (max-width: 700px) {
+  .t-graph-control-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  .t-graph-zoom-label {
+    padding: 3px 8px;
+    font-size: 9px;
   }
 }
