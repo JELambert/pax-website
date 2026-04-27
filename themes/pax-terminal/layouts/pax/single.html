@@ -128,17 +128,8 @@
           <a href="#tab-findings" class="t-tab-link" data-goto="findings" style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--term-accent); text-decoration:none; letter-spacing:0.04em;">view all →</a>
         </div>
         <div class="t-ov-finding-grid">
-          {{ range first 3 . }}
-          <div class="t-ov-finding-card">
-            <div class="t-ov-finding-id">{{ .id | default "F—" }}</div>
-            <div class="t-ov-finding-claim">{{ .finding_text }}</div>
-            <div class="t-ov-finding-meta">
-              {{- with .beta }}<span class="t-finding-stat"><span class="t-stat-label">β</span> <span class="t-stat-value">{{ . }}</span></span>{{ end -}}
-              {{- with .p_value }}<span class="t-finding-stat"><span class="t-stat-label">p</span> {{ . }}</span>{{ end -}}
-              {{- with .n }}<span class="t-finding-stat"><span class="t-stat-label">N</span> {{ . }}</span>{{ end -}}
-              <span class="t-finding-confidence t-conf-{{ .confidence | default "unknown" }}">{{ .confidence | default "unknown" }}</span>
-            </div>
-          </div>
+          {{ range $idx, $f := first 3 . }}
+          {{ partial "finding-entry.html" (dict "finding" $f "idx" $idx "pax_name" $name "density" "compact") }}
           {{ end }}
         </div>
       </div>
@@ -322,11 +313,11 @@
   {{- $findingsLen := len $allFindings -}}
   {{- $showMax := 50 -}}
   {{ range $idx, $f := first $showMax $allFindings }}
-  {{ partial "finding-entry.html" (dict "finding" $f "idx" $idx) }}
+  {{ partial "finding-entry.html" (dict "finding" $f "idx" $idx "pax_name" $name "density" "full") }}
   {{ end }}
   {{ if gt $findingsLen $showMax }}
   {{ range $idx, $f := after $showMax $allFindings }}
-  <div data-pax-finding-row hidden>{{ partial "finding-entry.html" (dict "finding" $f "idx" (add $idx $showMax)) }}</div>
+  <div data-pax-finding-row hidden>{{ partial "finding-entry.html" (dict "finding" $f "idx" (add $idx $showMax) "pax_name" $name "density" "full") }}</div>
   {{ end }}
   <button data-show-all-findings style="margin:16px 0; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:0.06em; color:var(--term-accent); background:transparent; border:1px solid var(--pt-line); padding:8px 16px; cursor:pointer; border-radius:0;">
     show all {{ $findingsLen }} findings
@@ -596,6 +587,28 @@ pax_type: {{ $paxType }}
       btn.textContent = expanded ? '[ show all ]' : '[ collapse ]';
     });
   });
+
+  /* ── Wave 17: F-ID deep-link auto-expand ── */
+  (function () {
+    var hash = location.hash; // e.g. "#F042"
+    if (!hash || !/^#[FP]\d+$/i.test(hash)) return;
+    var target = document.getElementById(hash.slice(1));
+    if (!target) return;
+    // If the finding is inside a hidden wrapper, reveal it first
+    var wrapper = target.closest('[data-pax-finding-row][hidden]');
+    if (wrapper) {
+      // Show all hidden findings so the anchor works
+      document.querySelectorAll('[data-pax-finding-row]').forEach(function (el) { el.hidden = false; });
+      var showBtn = document.querySelector('[data-show-all-findings]');
+      if (showBtn) showBtn.hidden = true;
+    }
+    // Switch to findings tab if needed
+    if (document.getElementById('tab-findings')) {
+      showTab('findings');
+    }
+    // Scroll to the target
+    setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
+  }());
 
   // Expand all / collapse all
   var expandAllBtn   = document.getElementById('construct-expand-all');

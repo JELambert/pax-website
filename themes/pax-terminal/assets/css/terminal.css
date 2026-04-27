@@ -6312,3 +6312,606 @@ a.t-construct-row {
     font-size: 14px;
   }
 }
+
+/* === Wave 17: findings redesign === */
+
+/* ── Full card ── */
+.t-finding-full {
+  display: block;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--pt-line-strong);
+  border-bottom: none;
+}
+.t-finding-full:last-child {
+  border-bottom: 1px solid var(--pt-line-strong);
+}
+
+/* ── Compact card ── */
+.t-finding-compact {
+  display: block;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--pt-line);
+  border-radius: 3px;
+}
+
+/* ── Finding header row ── */
+.t-finding-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.t-finding-head-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── F-ID badge ── */
+.t-finding-id {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ct-finding);
+  text-decoration: none;
+  padding: 2px 5px;
+  border: 1px solid var(--ct-finding);
+  border-radius: 2px;
+  line-height: 1.4;
+  transition: background 0.12s, color 0.12s;
+}
+.t-finding-id:hover {
+  background: var(--term-accent);
+  border-color: var(--term-accent);
+  color: var(--pt-bg);
+}
+
+/* ── Direction arrow ── */
+.t-finding-direction {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+.t-dir-positive { color: var(--term-accent); }
+.t-dir-negative { color: var(--pt-red); }
+.t-dir-neutral  { color: var(--pt-dim); }
+
+/* ── Confidence chip ── */
+.t-finding-confidence {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.t-conf-strong {
+  background: var(--term-accent);
+  color: var(--pt-bg);
+  border: 1px solid transparent;
+}
+.t-conf-moderate {
+  background: transparent;
+  color: var(--ct-finding);
+  border: 1px solid var(--ct-finding);
+}
+.t-conf-weak {
+  background: transparent;
+  color: var(--pt-dim);
+  border: 1px solid var(--pt-line-strong);
+}
+.t-conf-unknown {
+  background: transparent;
+  color: var(--pt-faint);
+  border: 1px solid var(--pt-line);
+}
+
+/* ── Construct link cluster (full card, top-right) ── */
+.t-finding-constructs {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.t-finding-construct-sep {
+  color: var(--pt-dim);
+  font-size: 11px;
+  margin: 0 1px;
+}
+.t-finding-construct-link {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 10px;
+  color: var(--ct-construct);
+  text-decoration: none;
+  padding: 1px 4px;
+  border: 1px solid rgba(189, 229, 91, 0.25);
+  border-radius: 2px;
+  line-height: 1.4;
+  transition: background 0.12s, color 0.12s;
+}
+.t-finding-construct-link:hover {
+  background: var(--ct-construct);
+  color: var(--pt-bg);
+}
+
+/* ── Claim text ── */
+.t-finding-claim {
+  font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--pt-ink);
+  max-width: 65ch;
+  margin: 0 0 10px;
+}
+.t-finding-claim-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* ── Evidence strip (numeric stats) ── */
+.t-finding-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 8px;
+  border: 1px solid var(--pt-line-strong);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.t-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 4px 10px;
+  border-right: 1px solid var(--pt-line-strong);
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.t-stat:last-child { border-right: none; }
+.t-stat-label {
+  color: var(--pt-dim);
+  font-weight: 500;
+}
+.t-stat-value {
+  color: var(--pt-ink);
+  font-weight: 600;
+}
+
+/* ── Inline evidence summary (compact) ── */
+.t-finding-evidence-inline {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--pt-dim);
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+.t-finding-evidence-inline span { margin-right: 4px; }
+
+/* ── Method / model / effect-text lines ── */
+.t-finding-method,
+.t-finding-model,
+.t-finding-effect-text {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--pt-dim);
+  line-height: 1.5;
+  margin-top: 6px;
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* ── Source line ── */
+.t-finding-source {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--ct-source);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* ── :target highlight when hash-navigating to a finding ── */
+.t-finding-full:target,
+.t-finding-compact:target {
+  border-color: var(--ct-finding);
+  background: rgba(240, 169, 58, 0.07);
+  outline: none;
+}
+
+/* ── Inline cite pill ── */
+.t-finding-cite {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ct-finding);
+  border: 1px solid var(--ct-finding);
+  border-radius: 9999px;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  margin: 0 4px 0 0;
+  transition: background 0.12s, color 0.12s;
+}
+.t-finding-cite:hover {
+  background: var(--ct-finding);
+  color: var(--pt-bg);
+}
+
+/* ── Showcase cite row ── */
+.t-showcase-cites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px 10px;
+  border-top: 1px solid var(--pt-line);
+  margin-top: 0;
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  background: var(--pt-panel);
+}
+.t-showcase-cites-label {
+  color: var(--pt-dim);
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+/* ── Overview compact finding grid ── */
+.t-ov-finding-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 640px) {
+  .t-finding-head {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .t-finding-constructs {
+    margin-left: 0;
+  }
+  .t-finding-evidence {
+    flex-wrap: wrap;
+  }
+  .t-stat {
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+}
+
+/* === Wave 18: playbook steps === */
+
+/* ── Pipeline section header ── */
+.t-playbook-pipeline-section {
+  margin: 32px 0;
+}
+
+.t-pb-pipeline-meta {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--pt-dim);
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Step strip (horizontal scroll nav) ── */
+.t-pb-step-strip {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pt-line-strong) transparent;
+}
+
+.t-pb-step-strip::-webkit-scrollbar {
+  height: 3px;
+}
+.t-pb-step-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+.t-pb-step-strip::-webkit-scrollbar-thumb {
+  background: var(--pt-line-strong);
+  border-radius: 2px;
+}
+
+.t-pb-step-strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--pt-line);
+  border-radius: 3px;
+  text-decoration: none;
+  min-width: 80px;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.t-pb-step-strip-item:hover {
+  border-color: var(--pt-line-strong);
+  background: rgba(243,240,227,0.04);
+}
+
+.t-pb-step-strip-num {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ct-playbook);
+  line-height: 1;
+}
+
+.t-pb-step-strip-name {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 10px;
+  color: var(--pt-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  line-height: 1.3;
+}
+
+/* ── Steps list container ── */
+.t-pb-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Individual step card ── */
+.t-pb-step {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 16px 0 16px 0;
+  position: relative;
+  border-bottom: 1px solid var(--pt-line);
+}
+
+.t-pb-step--last {
+  border-bottom: none;
+}
+
+/* Vertical connector line from badge downward */
+.t-pb-step:not(.t-pb-step--last)::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 52px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--pt-line);
+  pointer-events: none;
+}
+
+/* ── Step number badge ── */
+.t-pb-step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ct-playbook);
+  background: rgba(126,229,184,0.08);
+  border: 1px solid rgba(126,229,184,0.25);
+  border-radius: 4px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* ── Step body ── */
+.t-pb-step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Step header ── */
+.t-pb-step-head {
+  margin-bottom: 10px;
+}
+
+.t-pb-step-name {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pt-fg);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+/* ── Chips row ── */
+.t-pb-step-chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+/* Base chip style */
+.t-pb-step-op,
+.t-pb-step-op-name,
+.t-pb-step-deps,
+.t-pb-step-fail,
+.t-pb-step-kb {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* op-type chip: engine = mint, action = amber */
+.t-pb-step-op {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.t-pb-step-op--engine {
+  color: var(--ct-playbook);
+  background: rgba(126,229,184,0.10);
+  border: 1px solid rgba(126,229,184,0.30);
+}
+
+.t-pb-step-op--action {
+  color: var(--ct-finding);
+  background: rgba(240,169,58,0.10);
+  border: 1px solid rgba(240,169,58,0.30);
+}
+
+/* op-name chip */
+.t-pb-step-op-name {
+  color: var(--pt-dim);
+  background: rgba(243,240,227,0.04);
+  border: 1px solid var(--pt-line);
+}
+
+/* depends-on chip */
+.t-pb-step-deps {
+  color: var(--pt-dim);
+  background: transparent;
+  border: 1px solid var(--pt-line);
+}
+
+.t-pb-dep-link {
+  color: var(--ct-playbook);
+  text-decoration: none;
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+}
+
+.t-pb-dep-link:hover {
+  text-decoration: underline;
+  color: var(--ct-playbook);
+}
+
+/* on-failure chip */
+.t-pb-step-fail {
+  color: #e57373;
+  background: rgba(229,115,115,0.08);
+  border: 1px solid rgba(229,115,115,0.25);
+}
+
+/* compare_to_kb chip */
+.t-pb-step-kb {
+  color: var(--pt-dim);
+  background: rgba(243,240,227,0.04);
+  border: 1px solid var(--pt-line);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Config / expected results details ── */
+.t-pb-step-config,
+.t-pb-step-expected {
+  margin-top: 10px;
+}
+
+.t-pb-step-config > summary,
+.t-pb-step-expected > summary {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--pt-dim);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  padding: 4px 0;
+  letter-spacing: 0.03em;
+}
+
+.t-pb-step-config > summary::-webkit-details-marker,
+.t-pb-step-expected > summary::-webkit-details-marker {
+  display: none;
+}
+
+.t-pb-step-config > summary::before,
+.t-pb-step-expected > summary::before {
+  content: "▶ ";
+  font-size: 9px;
+  color: var(--pt-dim);
+  transition: transform 0.15s ease;
+  display: inline-block;
+}
+
+.t-pb-step-config[open] > summary::before,
+.t-pb-step-expected[open] > summary::before {
+  content: "▼ ";
+}
+
+.t-pb-step-config > summary:hover,
+.t-pb-step-expected > summary:hover {
+  color: var(--pt-fg);
+}
+
+/* ── Params pre block ── */
+.t-pb-step-params {
+  font-family: var(--pt-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--pt-dim);
+  background: rgba(243,240,227,0.03);
+  border: 1px solid var(--pt-line);
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin: 6px 0 4px 0;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.55;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* ── Mobile ── */
+@media (max-width: 700px) {
+  .t-pb-step-num {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .t-pb-step:not(.t-pb-step--last)::before {
+    left: 13px;
+    top: 44px;
+  }
+
+  .t-pb-step-chips {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .t-pb-step-name {
+    font-size: 13px;
+  }
+
+  .t-pb-step-strip {
+    gap: 5px;
+  }
+
+  .t-pb-step-strip-item {
+    min-width: 68px;
+    padding: 5px 8px;
+  }
+}

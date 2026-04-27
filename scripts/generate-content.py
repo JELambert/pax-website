@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import sys
+import tarfile
 from pathlib import Path
 
 import yaml
@@ -207,6 +208,74 @@ def slugify_playbook_id(playbook_id: str) -> str:
     return slug
 
 
+def extract_playbook_steps(pax_slug: str, playbook_id: str) -> list:
+    """Extract and normalize step data from the pax archive for a given playbook.
+
+    Returns a list of normalized step dicts, or an empty list if the archive
+    or playbook YAML is unavailable.
+    """
+    archive_path = STATIC_DIR / "pax" / f"{pax_slug}.pax.tar.gz"
+    if not archive_path.exists():
+        print(f"  WARNING: archive not found: {archive_path}", file=sys.stderr)
+        return []
+
+    member_path = f"playbooks/{playbook_id}.yaml"
+    try:
+        with tarfile.open(archive_path, "r:gz") as tf:
+            try:
+                f = tf.extractfile(member_path)
+            except KeyError:
+                print(f"  WARNING: {member_path} not found in {archive_path.name}", file=sys.stderr)
+                return []
+            if f is None:
+                return []
+            raw = yaml.safe_load(f.read().decode("utf-8"))
+    except Exception as exc:
+        print(f"  WARNING: could not read {archive_path.name}: {exc}", file=sys.stderr)
+        return []
+
+    if not isinstance(raw, dict):
+        return []
+
+    raw_steps = raw.get("steps", [])
+    if not isinstance(raw_steps, list):
+        return []
+
+    normalized = []
+    for s in raw_steps:
+        if not isinstance(s, dict):
+            continue
+        # Determine op_type and op_name
+        if "action" in s:
+            op_type = "action"
+            op_name = s["action"]
+        elif "engine" in s:
+            op_type = "engine"
+            op_name = s["engine"]
+        else:
+            op_type = "action"
+            op_name = s.get("id", "")
+
+        depends_on = s.get("depends_on", [])
+        if depends_on is None:
+            depends_on = []
+
+        normalized.append({
+            "step": s.get("step", len(normalized) + 1),
+            "id": s.get("id", ""),
+            "display_name": s.get("display_name", s.get("id", "")),
+            "op_type": op_type,
+            "op_name": op_name,
+            "depends_on": depends_on,
+            "params": s.get("params", {}),
+            "expected_results": s.get("expected_results", {}),
+            "on_failure": s.get("on_failure", ""),
+            "compare_to_kb": bool(s.get("compare_to_kb", False)),
+        })
+
+    return normalized
+
+
 def generate_playbook_pages(catalog: list):
     """Write content/playbooks/{pax-slug}--{playbook-slug}/index.md for every playbook."""
     PLAYBOOKS_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
@@ -232,6 +301,7 @@ def generate_playbook_pages(catalog: list):
 
     written = 0
     skipped = 0
+    steps_extracted = 0
     weight = 100
 
     for pack in catalog:
@@ -251,6 +321,11 @@ def generate_playbook_pages(catalog: list):
             out_dir = PLAYBOOKS_CONTENT_DIR / combined
             out_dir.mkdir(parents=True, exist_ok=True)
 
+            # Extract step data from archive
+            steps = extract_playbook_steps(pax_slug, pb_id)
+            if steps:
+                steps_extracted += 1
+
             fm = {
                 "title": pb.get("display_name", pb_id),
                 "playbook_id": pb_id,
@@ -264,6 +339,8 @@ def generate_playbook_pages(catalog: list):
                 "parent_pax_type": pax_type,
                 "weight": weight,
             }
+            if steps:
+                fm["steps"] = steps
 
             lines = ["---"]
             lines.append(yaml.dump(fm, default_flow_style=False, allow_unicode=True, sort_keys=False).strip())
@@ -274,6 +351,7 @@ def generate_playbook_pages(catalog: list):
             weight += 1
 
     print(f"Wrote {written} playbook pages to {PLAYBOOKS_CONTENT_DIR}")
+    print(f"Extracted step data for {steps_extracted}/{written} playbooks")
     if skipped:
         print(f"Skipped {skipped} playbooks with unslugifiable ids")
 

@@ -1,30 +1,143 @@
-{{- /* Expects: dict "finding" (frontmatter finding obj) "idx" N */ -}}
-{{- $f := .finding -}}
-{{- $idx := .idx | default 0 -}}
-<div class="t-finding">
-  <div class="t-finding-header">
-    <span class="t-finding-badge">F{{ printf "%03d" (add $idx 1) }}</span>
-    <div class="t-finding-main">
-      <div class="t-finding-text">{{ $f.finding_text }}</div>
-      <div class="t-finding-meta">
-        {{- with $f.beta }}<span class="t-finding-stat"><span class="t-stat-label">β</span> <span class="t-stat-value{{ if eq $f.direction "negative" }} t-negative{{ end }}">{{ . }}</span></span>{{ end -}}
-        {{- with $f.se }}<span class="t-finding-stat"><span class="t-stat-label">SE</span> {{ . }}</span>{{ end -}}
-        {{- with $f.p_value }}<span class="t-finding-stat"><span class="t-stat-label">p</span> {{ . }}</span>{{ end -}}
-        {{- with $f.n }}<span class="t-finding-stat"><span class="t-stat-label">N</span> {{ . }}</span>{{ end -}}
-        {{- with $f.model_specification }}<span class="t-finding-stat"><span class="t-stat-label">design</span> {{ . }}</span>{{ end -}}
-        {{- with $f.source_id }}<span class="t-finding-source">· {{ . }}</span>{{ end -}}
-        {{- with $f.construct_ids }}{{ if gt (len .) 0 }}<span class="t-finding-constructs">·
-          {{- range $ci, $cid := . }}{{ if gt $ci 0 }}, {{ end -}}
-          {{- $cslug := replace (lower $cid) "_" "-" -}}
-          <a href="/constructs/{{ $cslug }}/" class="t-construct-link">{{ $cid }}</a>
-          {{- end }}</span>{{ end }}{{ end -}}
-        <span class="t-finding-confidence t-conf-{{ $f.confidence | default "unknown" }}">{{ $f.confidence | default "unknown" }}</span>
-        {{- if $f.direction }}
-        <span class="t-finding-direction{{ if eq $f.direction "positive" }} t-positive{{ else if eq $f.direction "negative" }} t-negative{{ end }}">
-          {{- if eq $f.direction "positive" }}↑{{ else if eq $f.direction "negative" }}↓{{ end -}}
-        </span>
-        {{- end -}}
-      </div>
-    </div>
+{{- /* Wave 17 — finding-entry.html
+     Expects: dict "finding" $f "idx" N "pax_name" $paxName "density" "full|compact|inline"
+     Real field names used: effect_size_value, effect_size_se, effect_size_type,
+     sample_size, p_value, r_squared, ci_lower, ci_upper, method_used,
+     effect_size (free text), model_specification, source_id
+*/ -}}
+{{- $f        := .finding -}}
+{{- $idx      := .idx | default 0 -}}
+{{- $density  := .density | default "full" -}}
+{{- $paxName  := .pax_name | default "" -}}
+
+{{- /* Derive F-ID: use .id if present, else F + zero-padded (idx+1) */ -}}
+{{- $fid := "" -}}
+{{- with $f.id }}{{- $fid = . -}}{{- else }}{{- $fid = printf "F%03d" (add $idx 1) -}}{{- end }}
+
+{{- /* Direction class + glyph */ -}}
+{{- $dirClass := "t-dir-neutral" -}}
+{{- $dirGlyph := "→" -}}
+{{- if eq ($f.direction | default "") "positive" }}{{- $dirClass = "t-dir-positive" -}}{{- $dirGlyph = "↑" -}}{{- end }}
+{{- if eq ($f.direction | default "") "negative" }}{{- $dirClass = "t-dir-negative" -}}{{- $dirGlyph = "↓" -}}{{- end }}
+
+{{- /* Confidence class */ -}}
+{{- $conf      := $f.confidence | default "unknown" -}}
+{{- $confClass := printf "t-conf-%s" $conf -}}
+
+{{- /* Effect label: use effect_size_type if present, else "effect" */ -}}
+{{- $effectLabel := $f.effect_size_type | default "effect" -}}
+
+{{- /* Has any numeric stat? */ -}}
+{{- $hasStats := false -}}
+{{- if $f.effect_size_value }}{{- if ne (printf "%v" $f.effect_size_value) "null" }}{{- $hasStats = true -}}{{- end }}{{- end }}
+{{- if $f.effect_size_se    }}{{- if ne (printf "%v" $f.effect_size_se) "null"    }}{{- $hasStats = true -}}{{- end }}{{- end }}
+{{- if $f.p_value           }}{{- if ne (printf "%v" $f.p_value) "null"           }}{{- $hasStats = true -}}{{- end }}{{- end }}
+{{- if $f.sample_size       }}{{- if ne (printf "%v" $f.sample_size) "null"       }}{{- $hasStats = true -}}{{- end }}{{- end }}
+{{- if $f.r_squared         }}{{- if ne (printf "%v" $f.r_squared) "null"         }}{{- $hasStats = true -}}{{- end }}{{- end }}
+
+{{- /* Has free-text effect (but no numeric value)? */ -}}
+{{- $hasEffectText := false -}}
+{{- if $f.effect_size }}{{- if ne (printf "%v" $f.effect_size) "null" }}{{- if not $f.effect_size_value }}{{- $hasEffectText = true -}}{{- end }}{{- end }}{{- end }}
+
+{{- /* ── INLINE density ── */ -}}
+{{- if eq $density "inline" }}
+<a href="/pax/{{ $paxName }}/#{{ $fid }}" class="t-finding-cite" title="{{ $f.finding_text | truncate 120 "…" }}">{{ $fid }}</a>
+
+{{- /* ── COMPACT density ── */ -}}
+{{- else if eq $density "compact" }}
+<article class="t-finding t-finding-compact" id="{{ $fid }}">
+  <header class="t-finding-head">
+    <a href="#{{ $fid }}" class="t-finding-id" title="link to this finding">{{ $fid }}</a>
+    <span class="t-finding-direction {{ $dirClass }}">{{ $dirGlyph }}</span>
+    <span class="t-finding-confidence {{ $confClass }}">{{ $conf }}</span>
+  </header>
+  <p class="t-finding-claim t-finding-claim-clamped">{{ $f.finding_text }}</p>
+  {{- if $hasStats }}
+  <div class="t-finding-evidence-inline">
+    {{- if $f.effect_size_value }}{{- if ne (printf "%v" $f.effect_size_value) "null" }}<span>{{ $effectLabel }}={{ $f.effect_size_value }}</span>{{- end }}{{- end }}
+    {{- if $f.p_value }}{{- if ne (printf "%v" $f.p_value) "null" }}<span>&middot; p={{ $f.p_value }}</span>{{- end }}{{- end }}
+    {{- if $f.sample_size }}{{- if ne (printf "%v" $f.sample_size) "null" }}<span>&middot; N={{ $f.sample_size }}</span>{{- end }}{{- end }}
   </div>
-</div>
+  {{- else if $hasEffectText }}
+  <div class="t-finding-effect-text">// {{ $f.effect_size }}</div>
+  {{- end }}
+</article>
+
+{{- /* ── FULL density (default) ── */ -}}
+{{- else }}
+<article class="t-finding t-finding-full" id="{{ $fid }}">
+  <header class="t-finding-head">
+    <div class="t-finding-head-left">
+      <a href="#{{ $fid }}" class="t-finding-id" title="copy link to this finding">{{ $fid }}</a>
+      <span class="t-finding-direction {{ $dirClass }}">{{ $dirGlyph }}</span>
+      <span class="t-finding-confidence {{ $confClass }}">{{ $conf }}</span>
+    </div>
+    {{- with $f.construct_ids }}{{ if gt (len .) 0 }}
+    <div class="t-finding-constructs">
+      {{- range $ci, $cid := . }}{{- if gt $ci 0 }}<span class="t-finding-construct-sep">,</span>{{ end -}}
+      {{- $cslug := replace (lower $cid) "_" "-" -}}
+      <a href="/constructs/{{ $cslug }}/" class="t-construct-link t-finding-construct-link">{{ $cid }}</a>
+      {{- end }}
+    </div>
+    {{- end }}{{- end }}
+  </header>
+
+  <p class="t-finding-claim">{{ $f.finding_text }}</p>
+
+  {{- if $hasStats }}
+  <div class="t-finding-evidence">
+    {{- if $f.effect_size_value }}{{- if ne (printf "%v" $f.effect_size_value) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">{{ $effectLabel }}</span>
+      <span class="t-stat-value">{{ $f.effect_size_value }}</span>
+    </span>
+    {{- end }}{{- end }}
+    {{- if $f.effect_size_se }}{{- if ne (printf "%v" $f.effect_size_se) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">SE</span>
+      <span class="t-stat-value">{{ $f.effect_size_se }}</span>
+    </span>
+    {{- end }}{{- end }}
+    {{- if $f.p_value }}{{- if ne (printf "%v" $f.p_value) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">p</span>
+      <span class="t-stat-value">{{ $f.p_value }}</span>
+    </span>
+    {{- end }}{{- end }}
+    {{- if $f.sample_size }}{{- if ne (printf "%v" $f.sample_size) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">N</span>
+      <span class="t-stat-value">{{ $f.sample_size }}</span>
+    </span>
+    {{- end }}{{- end }}
+    {{- if $f.r_squared }}{{- if ne (printf "%v" $f.r_squared) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">R²</span>
+      <span class="t-stat-value">{{ $f.r_squared }}</span>
+    </span>
+    {{- end }}{{- end }}
+    {{- if $f.ci_lower }}{{- if ne (printf "%v" $f.ci_lower) "null" }}{{- if $f.ci_upper }}{{- if ne (printf "%v" $f.ci_upper) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">CI</span>
+      <span class="t-stat-value">[{{ $f.ci_lower }}, {{ $f.ci_upper }}]</span>
+    </span>
+    {{- end }}{{- end }}{{- end }}{{- end }}
+  </div>
+  {{- end }}
+
+  {{- if $hasEffectText }}
+  <div class="t-finding-effect-text">// effect: {{ $f.effect_size }}</div>
+  {{- end }}
+
+  {{- with $f.method_used }}{{- if ne (printf "%v" .) "null" }}
+  <div class="t-finding-method">// method: {{ . }}</div>
+  {{- end }}{{- end }}
+
+  {{- with $f.model_specification }}{{- if ne (printf "%v" .) "null" }}
+  <div class="t-finding-model">// model: {{ . }}</div>
+  {{- end }}{{- end }}
+
+  {{- with $f.source_id }}{{- if ne (printf "%v" .) "null" }}
+  <div class="t-finding-source">→ {{ . }}</div>
+  {{- end }}{{- end }}
+</article>
+{{- end }}

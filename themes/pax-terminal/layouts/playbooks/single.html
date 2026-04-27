@@ -4,6 +4,7 @@
 {{- $paxSlug := $params.parent_pax | default "" -}}
 {{- $parent := site.GetPage (printf "/pax/%s" $paxSlug) -}}
 {{- $paxType := $params.parent_pax_type | default "field" -}}
+{{- $steps := $params.steps | default slice -}}
 
 <div class="t-playbook-detail">
 
@@ -37,6 +38,98 @@
     <p class="t-playbook-description">{{ . }}</p>
     {{- end -}}
   </div>
+
+  {{/* ── Pipeline section ── */}}
+  {{- if gt (len $steps) 0 -}}
+  <div class="t-playbook-pipeline-section">
+    <div class="t-caption" style="margin-bottom:10px;">// pipeline</div>
+    <div class="t-pb-pipeline-meta">
+      {{ len $steps }} steps
+      {{- $hasDAG := false -}}
+      {{- range $steps -}}
+        {{- if gt (len .depends_on) 0 -}}{{- $hasDAG = true -}}{{- end -}}
+      {{- end -}}
+      {{- if $hasDAG -}} · DAG{{- end -}}
+    </div>
+
+    {{/* Build id→step-num lookup via scratch */}}
+    {{- $scratch := newScratch -}}
+    {{- range $steps -}}
+      {{- $scratch.Set .id .step -}}
+    {{- end -}}
+
+    {{/* ── Compact step strip ── */}}
+    <nav class="t-pb-step-strip">
+      {{- range $steps -}}
+      <a href="#step-{{ .step }}" class="t-pb-step-strip-item">
+        <span class="t-pb-step-strip-num">{{ printf "%02d" .step }}</span>
+        <span class="t-pb-step-strip-name">{{ .display_name | truncate 30 }}</span>
+      </a>
+      {{- end -}}
+    </nav>
+
+    {{/* ── Vertical step cards ── */}}
+    <div class="t-pb-steps-list">
+      {{- range $i, $step := $steps -}}
+      {{- $isLast := eq (add $i 1) (len $steps) -}}
+      <article class="t-pb-step{{ if $isLast }} t-pb-step--last{{ end }}" id="step-{{ $step.step }}">
+        <div class="t-pb-step-num">{{ printf "%02d" $step.step }}</div>
+        <div class="t-pb-step-body">
+          <header class="t-pb-step-head">
+            <h3 class="t-pb-step-name">{{ $step.display_name }}</h3>
+            <div class="t-pb-step-chips">
+              <span class="t-pb-step-op t-pb-step-op--{{ $step.op_type }}">{{ $step.op_type }}</span>
+              <span class="t-pb-step-op-name">{{ $step.op_name }}</span>
+              {{- if gt (len $step.depends_on) 0 -}}
+              <span class="t-pb-step-deps">←
+                {{- range $di, $dep := $step.depends_on -}}
+                  {{- if gt $di 0 }}, {{ end -}}
+                  {{- $depStep := $scratch.Get $dep -}}
+                  {{- if $depStep -}}
+                  <a href="#step-{{ $depStep }}" class="t-pb-dep-link">{{ $dep }}</a>
+                  {{- else -}}
+                  <span>{{ $dep }}</span>
+                  {{- end -}}
+                {{- end -}}
+              </span>
+              {{- end -}}
+              {{- if $step.on_failure -}}
+              <span class="t-pb-step-fail">on fail: {{ $step.on_failure }}</span>
+              {{- end -}}
+              {{- if $step.compare_to_kb -}}
+              <span class="t-pb-step-kb">compare_to_kb</span>
+              {{- end -}}
+            </div>
+          </header>
+
+          {{- $paramKeys := 0 -}}
+          {{- if $step.params -}}
+            {{- range $step.params -}}{{- $paramKeys = add $paramKeys 1 -}}{{- end -}}
+          {{- end -}}
+          {{- if gt $paramKeys 0 -}}
+          <details class="t-pb-step-config">
+            <summary>config ({{ $paramKeys }} {{ if eq $paramKeys 1 }}key{{ else }}keys{{ end }})</summary>
+            <pre class="t-pb-step-params">{{ $step.params | jsonify (dict "indent" "  ") }}</pre>
+          </details>
+          {{- end -}}
+
+          {{- $erKeys := 0 -}}
+          {{- if $step.expected_results -}}
+            {{- range $step.expected_results -}}{{- $erKeys = add $erKeys 1 -}}{{- end -}}
+          {{- end -}}
+          {{- if gt $erKeys 0 -}}
+          <details class="t-pb-step-expected">
+            <summary>expected results ({{ $erKeys }} {{ if eq $erKeys 1 }}key{{ else }}keys{{ end }})</summary>
+            <pre class="t-pb-step-params">{{ $step.expected_results | jsonify (dict "indent" "  ") }}</pre>
+          </details>
+          {{- end -}}
+        </div>
+      </article>
+      {{- end -}}
+    </div>
+
+  </div>
+  {{- end -}}
 
   {{/* ── From pax callout ── */}}
   <div class="t-playbook-pax-callout">
@@ -82,7 +175,11 @@
   <div class="t-playbook-note-panel">
     <div class="t-caption" style="margin-bottom:8px;">// note</div>
     <div class="t-playbook-note-body">
+      {{- if gt (len $steps) 0 -}}
+      step bodies extracted from the .pax archive at build time. download the parent pax for the full yaml.
+      {{- else -}}
       playbook step bodies live in the .pax archive — download the parent pax to inspect.
+      {{- end -}}
     </div>
     {{- if $parent -}}
     {{- with $parent.Params.download_url -}}
