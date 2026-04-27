@@ -1,53 +1,470 @@
 {{ define "main" }}
+{{- $name := .Params.name | default .File.ContentBaseName -}}
+{{- $version := .Params.version | default "1.0.0" -}}
 {{- $paxType := .Params.pax_type | default "field" -}}
-<section style="padding:32px 28px 24px; border-bottom:1px solid var(--pt-line);">
-  <div style="font-size:10px; color:var(--pt-dim); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px;">// /pax/{{ .File.ContentBaseName }}/</div>
-  <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-    {{ partial "pack-type-chip.html" (dict "type" $paxType) }}
-    <span style="font-size:11px; color:var(--pt-dim);">v{{ .Params.version | default "1.0.0" }}</span>
+{{- $constructCount := .Params.construct_count | default 0 -}}
+{{- $findingCount := .Params.finding_count | default 0 -}}
+{{- $propositionCount := .Params.proposition_count | default 0 -}}
+{{- $sourcesLen := len (.Params.sources_detail | default slice) -}}
+{{- $playbooksLen := len (.Params.playbooks_detail | default slice) -}}
+{{- $relsLen := len (.Params.relationships_detail | default slice) -}}
+
+{{/* ──────────────────────────────────────────────────
+     TITLE ROW
+────────────────────────────────────────────────── */}}
+<div class="t-detail-title-row">
+  <div class="t-detail-title-left">
+    <div class="t-caption" style="margin-bottom:8px;">// pax/{{ $name }}</div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      {{ partial "pack-type-chip.html" (dict "type" $paxType "size" "md") }}
+      <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim); letter-spacing:0.06em; font-variant-numeric:tabular-nums;">{{ $name }} &nbsp;&middot;&nbsp; v{{ $version }}</span>
+    </div>
+    <h1 style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:40px; font-weight:700; letter-spacing:-0.025em; line-height:1.05; margin:0 0 14px;">{{ .Title }}</h1>
+    <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:15px; line-height:1.6; color:var(--pt-dim); max-width:700px; margin:0;">
+      {{ .Params.description | default .Summary }}
+    </p>
   </div>
-  <h1 style="font-size:44px; font-weight:700; letter-spacing:-0.025em; line-height:1.05; margin-bottom:14px;">{{ .Title }}</h1>
-  <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:17px; line-height:1.55; color:var(--pt-ink); max-width:760px; margin-bottom:14px;">
-    {{ .Params.description | default .Summary }}
-  </p>
-  <div style="display:flex; gap:18px; font-size:11px; color:var(--pt-dim);">
-    <span>by <span style="color:var(--pt-ink)">{{ .Params.author | default "pax collective" }}</span></span>
-    {{ with .Params.domain }}<span>&middot; {{ . }}</span>{{ end }}
-    {{ with .Params.version }}<span>&middot; v{{ . }}</span>{{ end }}
+  <div class="t-detail-action-stack">
+    {{ with .Params.download_url }}
+    <a href="{{ . }}" class="t-btn-primary" style="width:100%; text-align:center; box-sizing:border-box;" download>download archive</a>
+    {{ end }}
+    <div style="background:var(--pt-panel-deep); border:1px solid var(--pt-line); padding:10px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim); margin-top:4px;">
+      {{ with .Params.published_by }}<div><span style="color:var(--pt-ink);">published by</span> {{ . }}</div>{{ end }}
+      {{ with .Params.download_size }}<div><span style="color:var(--pt-ink);">size</span> {{ . }}</div>{{ end }}
+    </div>
+  </div>
+</div>
+
+{{/* ── Meta strip ── */}}
+<div class="t-detail-meta-strip">
+  {{ with .Params.domain }}{{ with .display_name }}<span>{{ . }}</span>{{ end }}{{ end }}
+  {{ with .Params.license }}<span>&middot; {{ . }}</span>{{ end }}
+  {{ with .Params.author }}{{ if and (ne . "") (ne . "mcp_agent") }}<span>&middot; by {{ . }}</span>{{ end }}{{ end }}
+  <span>&middot; published {{ now.Format "Jan 2006" }}</span>
+  <span>&middot; <span style="font-variant-numeric:tabular-nums;">{{ $constructCount }} constructs / {{ $findingCount }} findings / {{ $propositionCount }} propositions</span></span>
+</div>
+
+{{/* ──────────────────────────────────────────────────
+     STICKY TAB NAV
+     Note: empty-section tabs are kept visible but dimmed; clicking still navigates to the empty-state panel.
+────────────────────────────────────────────────── */}}
+<nav class="t-tab-nav" id="t-tab-nav">
+  <a href="#tab-overview" class="t-tab" data-tab="overview">overview</a>
+  {{ if gt $constructCount 0 }}<a href="#tab-constructs" class="t-tab" data-tab="constructs">constructs <span class="t-tab-count">{{ $constructCount }}</span></a>{{ end }}
+  {{ if gt $findingCount 0 }}<a href="#tab-findings" class="t-tab" data-tab="findings">findings <span class="t-tab-count">{{ $findingCount }}</span></a>{{ end }}
+  {{ if gt $propositionCount 0 }}<a href="#tab-propositions" class="t-tab" data-tab="propositions">propositions <span class="t-tab-count">{{ $propositionCount }}</span></a>{{ end }}
+  {{ if gt $sourcesLen 0 }}<a href="#tab-sources" class="t-tab" data-tab="sources">sources <span class="t-tab-count">{{ $sourcesLen }}</span></a>{{ end }}
+  {{ if gt $playbooksLen 0 }}<a href="#tab-playbooks" class="t-tab" data-tab="playbooks">playbooks <span class="t-tab-count">{{ $playbooksLen }}</span></a>{{ end }}
+  {{ if gt $relsLen 0 }}<a href="#tab-relationships" class="t-tab" data-tab="relationships">relationships <span class="t-tab-count">{{ $relsLen }}</span></a>{{ end }}
+</nav>
+
+{{/* ──────────────────────────────────────────────────
+     TAB PANELS
+────────────────────────────────────────────────── */}}
+<div class="t-tab-panels" style="padding:28px var(--page-px) 56px;">
+
+{{/* ── OVERVIEW ── */}}
+<section id="tab-overview" class="t-tab-panel" data-tab-panel="overview">
+  <div class="t-overview-grid">
+    {{/* Left column */}}
+    <div class="t-overview-left">
+      <div class="t-caption" style="margin-bottom:4px;">// abstract</div>
+      <h2 style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:22px; font-weight:700; margin:0 0 14px;">Abstract</h2>
+      <div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:15px; line-height:1.65; color:var(--pt-ink);">
+        {{ if .Content }}{{ .Content }}{{ else }}<p>{{ .Params.description | default .Summary }}</p>{{ end }}
+      </div>
+
+      {{ with .Params.engines }}{{ if gt (len .) 0 }}
+      <div style="margin-top:28px;">
+        <div class="t-caption" style="margin-bottom:6px;">// dependencies</div>
+        <h3 style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:16px; font-weight:600; margin:0 0 10px;">Dependencies</h3>
+        <ul style="list-style:none; padding:0; margin:0;">
+          {{ range . }}
+          <li class="t-dep">engine.{{ . }}</li>
+          {{ end }}
+        </ul>
+      </div>
+      {{ end }}{{ end }}
+
+      {{ with .Params.tags }}{{ if gt (len .) 0 }}
+      <div style="margin-top:24px;">
+        <div class="t-caption" style="margin-bottom:8px;">// tags</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          {{ range . }}
+          <span class="t-tag-chip">{{ . }}</span>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}{{ end }}
+
+      {{/* Overview: sample findings */}}
+      {{ with .Params.findings_detail }}
+      <div style="margin-top:32px;">
+        {{ partial "section-head.html" (dict "caption" (printf "%d empirical findings" $findingCount) "title" "Sample findings" "right" (printf "<a href='#tab-findings' class='t-tab-link' data-goto='findings'>view all →</a>")) }}
+        {{ range first 4 . }}
+        {{ partial "finding-entry.html" (dict "finding" . "idx" 0) }}
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{/* Overview: sample playbooks */}}
+      {{ with .Params.playbooks_detail }}
+      <div style="margin-top:32px;">
+        {{ partial "section-head.html" (dict "caption" "analytical" "title" "Playbooks" "right" (printf "<a href='#tab-playbooks' class='t-tab-link' data-goto='playbooks'>view all →</a>")) }}
+        <div class="t-playbook-preview-grid">
+          {{ range first 4 . }}
+          <div class="t-playbook-preview-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim);">{{ partial "content-glyph.html" (dict "type" "playbook") }} &nbsp;{{ .id | default .name }}</span>
+              {{ with .steps }}<span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:var(--pt-dim); font-variant-numeric:tabular-nums;">{{ len . }} steps</span>{{ end }}
+            </div>
+            <div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:13px; line-height:1.45; color:var(--pt-ink);">{{ .description | default .name }}</div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+
+    {{/* Right column: meta sidebar */}}
+    <div>
+      <div class="t-meta-card">
+        <div class="t-caption" style="margin-bottom:10px;">// registry meta</div>
+        <div class="t-meta-kv-list">
+          {{ with .Params.domain }}
+            {{ with .display_name }}<div class="t-meta-kv"><span class="t-kv-label">domain</span><span class="t-kv-value">{{ . }}</span></div>{{ end }}
+            {{ with .level_of_analysis }}<div class="t-meta-kv"><span class="t-kv-label">level</span><span class="t-kv-value">{{ . }}</span></div>{{ end }}
+            {{ with .population }}<div class="t-meta-kv"><span class="t-kv-label">population</span><span class="t-kv-value">{{ . }}</span></div>{{ end }}
+          {{ end }}
+          <div class="t-meta-kv"><span class="t-kv-label">pax type</span><span class="t-kv-value">{{ $paxType }}</span></div>
+          <div class="t-meta-kv"><span class="t-kv-label">version</span><span class="t-kv-value" style="font-variant-numeric:tabular-nums;">{{ $version }}</span></div>
+          {{ with .Params.published_by }}<div class="t-meta-kv"><span class="t-kv-label">published by</span><span class="t-kv-value">{{ . }}</span></div>{{ end }}
+          {{ with .Params.download_size }}<div class="t-meta-kv"><span class="t-kv-label">archive</span><span class="t-kv-value" style="font-variant-numeric:tabular-nums;">{{ . }}</span></div>{{ end }}
+        </div>
+        {{ with .Params.domain }}{{ with .research_questions }}{{ if gt (len .) 0 }}
+        <div style="margin-top:14px;">
+          <div class="t-caption" style="margin-bottom:6px;">// research questions</div>
+          <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px;">
+            {{ range . }}
+            <li style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:13px; font-style:italic; color:var(--pt-dim); line-height:1.5; padding-left:10px; border-left:2px solid var(--pt-line-strong);">{{ . }}</li>
+            {{ end }}
+          </ul>
+        </div>
+        {{ end }}{{ end }}{{ end }}
+      </div>
+
+      {{/* Key constructs preview */}}
+      {{ with .Params.constructs_detail }}
+      <div style="margin-top:22px;">
+        {{ partial "section-head.html" (dict "caption" "key constructs" "title" "Vocabulary" "right" (printf "<a href='#tab-constructs' class='t-tab-link' data-goto='constructs'>view all →</a>")) }}
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+          {{ range first 6 . }}
+          <div class="t-construct-preview">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; font-weight:600; color:var(--pt-ink);">{{ .display_name | default .id }}</span>
+              {{ with .construct_type }}<span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:9px; color:var(--pt-dim); text-transform:uppercase; letter-spacing:0.1em;">{{ . }}</span>{{ end }}
+            </div>
+            {{ with .definition }}<div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:12px; color:var(--pt-dim); margin-top:4px; line-height:1.4;">{{ . | truncate 90 "…" }}</div>{{ end }}
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
   </div>
 </section>
-<section class="t-page">
-  <div class="t-prose">{{ .Content }}</div>
-  {{ if .Params.constructs_detail }}
-  <div style="margin-top:32px;">
-    <div class="t-section-head">
-      <div class="t-section-head-left">
-        <div class="t-caption">// constructs</div>
-        <div class="t-section-title">{{ len .Params.constructs_detail }} constructs</div>
+
+{{/* ── CONSTRUCTS ── */}}
+<section id="tab-constructs" class="t-tab-panel" data-tab-panel="constructs">
+  {{ partial "section-head.html" (dict "caption" "constructs.yaml" "title" (printf "%d variables in the pack vocabulary" $constructCount) "kicker" "Each construct names a thing the field measures, with a kind and an authoritative definition.") }}
+  {{ with .Params.constructs_detail }}
+  <div style="margin-bottom:14px;">
+    <input class="t-construct-filter" type="text" placeholder="$ filter constructs…" aria-label="Filter constructs" id="construct-filter-input">
+  </div>
+  <div class="t-construct-grid" id="construct-grid">
+    {{ range . }}
+    <div class="t-construct-card" data-construct-name="{{ .id }} {{ .display_name | default "" }}" data-construct-def="{{ .definition | default "" }}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+        <div>
+          {{ partial "content-glyph.html" (dict "type" "construct") }}
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim); text-transform:uppercase; letter-spacing:0.08em; margin-left:4px;">{{ .id }}</span>
+        </div>
+        {{ with .construct_type }}<span class="t-construct-type-chip">{{ . }}</span>{{ end }}
       </div>
-    </div>
-    {{ range .Params.constructs_detail }}
-    <div style="padding:10px 0; border-bottom:1px solid var(--pt-line); font-size:12px;">
-      <span style="font-weight:600; color:var(--pt-ink);">{{ .name | default .id }}</span>
-      {{ with .kind }}<span style="margin-left:8px; color:var(--pt-dim);">{{ . }}</span>{{ end }}
-      {{ with .units }}<span style="margin-left:8px; color:var(--pt-dim);">{{ . }}</span>{{ end }}
+      <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:14px; font-weight:700; color:var(--pt-ink); margin-bottom:6px;">{{ .display_name | default .id }}</div>
+      {{ with .definition }}<div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:13px; line-height:1.5; color:var(--pt-dim);">{{ . }}</div>{{ end }}
+      {{ with .aliases }}{{ if gt (len .) 0 }}
+      <div style="margin-top:8px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-faint);">aliases: {{ delimit . ", " }}</div>
+      {{ end }}{{ end }}
     </div>
     {{ end }}
   </div>
+  {{ else }}
+  <div class="t-empty">no constructs declared in this pax</div>
   {{ end }}
-  {{ if .Params.findings_detail }}
-  <div style="margin-top:32px;">
-    <div class="t-section-head">
-      <div class="t-section-head-left">
-        <div class="t-caption">// findings</div>
-        <div class="t-section-title">{{ len .Params.findings_detail }} findings</div>
-      </div>
-    </div>
-    {{ range $i, $f := .Params.findings_detail }}
-    {{ partial "finding-entry.html" (dict "finding" $f "idx" $i) }}
-    {{ end }}
+</section>
+
+{{/* ── FINDINGS ── */}}
+<section id="tab-findings" class="t-tab-panel" data-tab-panel="findings">
+  {{ partial "section-head.html" (dict "caption" "findings.yaml" "title" (printf "%d empirical claims" $findingCount) "kicker" "Each finding cites a source and reports effect size, standard error, p-value, and sample size where available.") }}
+  {{ with .Params.findings_detail }}
+  {{- $allFindings := . -}}
+  {{- $findingsLen := len $allFindings -}}
+  {{- $showMax := 50 -}}
+  {{ range $idx, $f := first $showMax $allFindings }}
+  {{ partial "finding-entry.html" (dict "finding" $f "idx" $idx) }}
+  {{ end }}
+  {{ if gt $findingsLen $showMax }}
+  {{ range $idx, $f := after $showMax $allFindings }}
+  <div data-pax-finding-row hidden>{{ partial "finding-entry.html" (dict "finding" $f "idx" (add $idx $showMax)) }}</div>
+  {{ end }}
+  <button data-show-all-findings style="margin:16px 0; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:0.06em; color:var(--term-accent); background:transparent; border:1px solid var(--pt-line); padding:8px 16px; cursor:pointer; border-radius:0;">
+    show all {{ $findingsLen }} findings
+  </button>
+  <script>
+  (function(){
+    var btn = document.querySelector('[data-show-all-findings]');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-pax-finding-row]').forEach(function(el){ el.hidden = false; });
+      btn.hidden = true;
+    });
+  }());
+  </script>
+  {{ end }}
+  {{ else }}
+  <div class="t-empty">
+    <div style="margin-bottom:8px;">findings_detail is empty for this pax.</div>
+    <div>The pack declares <span style="font-variant-numeric:tabular-nums; color:var(--pt-ink);">{{ $findingCount }}</span> findings but the catalog has not yet expanded them. Download the archive and inspect <code style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--term-accent);">findings.yaml</code> directly.</div>
   </div>
   {{ end }}
 </section>
+
+{{/* ── PROPOSITIONS ── */}}
+<section id="tab-propositions" class="t-tab-panel" data-tab-panel="propositions">
+  {{ partial "section-head.html" (dict "caption" "propositions.yaml" "title" (printf "%d theoretical claims" $propositionCount) "kicker" "Propositions are the field's reusable rules of thumb — they span findings without being tied to a single study.") }}
+  {{ with .Params.propositions_detail }}
+  <div style="display:flex; flex-direction:column; gap:0;">
+    {{ range $idx, $p := . }}
+    <div class="t-proposition-row">
+      <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim); letter-spacing:0.1em; font-variant-numeric:tabular-nums; min-width:52px;">P{{ printf "%03d" (add $idx 1) }}</div>
+      <div style="min-width:90px;">
+        {{ with $p.kind }}<span class="t-proposition-chip">{{ . }}</span>{{ end }}
+        {{ with $p.direction }}
+        <span class="t-direction-arrow{{ if eq . "positive" }} t-positive{{ else if eq . "negative" }} t-negative{{ end }}">
+          {{- if eq . "positive" }}↑{{ else if eq . "negative" }}↓{{ else }}→{{ end -}}
+        </span>
+        {{ end }}
+      </div>
+      <div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:15px; line-height:1.5; color:var(--pt-ink); font-style:italic;">"{{ $p.proposition_text }}"</div>
+    </div>
+    {{ end }}
+  </div>
+  {{ else }}
+  <div class="t-empty">no propositions declared in this pax</div>
+  {{ end }}
+</section>
+
+{{/* ── SOURCES ── */}}
+<section id="tab-sources" class="t-tab-panel" data-tab-panel="sources">
+  {{ partial "section-head.html" (dict "caption" "sources.yaml" "title" (printf "%d citations" $sourcesLen) "kicker" "The evidentiary backing — papers, datasets, reports — every finding can be traced to one of these.") }}
+  {{ with .Params.sources_detail }}
+  <div class="t-sources-list">
+    {{ range $idx, $s := . }}
+    <div class="t-source-row">
+      <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:var(--pt-dim); letter-spacing:0.1em; font-variant-numeric:tabular-nums; min-width:44px;">S{{ printf "%03d" (add $idx 1) }}</div>
+      <div style="flex:1;">
+        <div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:14px; line-height:1.4; color:var(--pt-ink);">
+          {{ with $s.authors }}{{ . }}{{ end }}{{ with $s.year }} ({{ . }}){{ end }}. <em>{{ $s.title }}</em>{{ with $s.venue }}. {{ . }}{{ else }}{{ with $s.journal }}. {{ . }}{{ end }}{{ end }}.
+        </div>
+        {{ with $s.doi }}<div style="margin-top:5px;"><a href="https://doi.org/{{ . }}" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:var(--term-accent); letter-spacing:0.06em;">doi:{{ . }} ↗</a></div>{{ end }}
+      </div>
+      <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:var(--pt-dim); text-transform:uppercase; letter-spacing:0.1em; min-width:80px;">{{ $s.design | default $s.study_design }}</div>
+      <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:var(--pt-dim); min-width:80px; font-variant-numeric:tabular-nums;">{{ with $s.n }}N = {{ . }}{{ else }}{{ with $s.sample_size }}N = {{ . }}{{ else }}—{{ end }}{{ end }}</div>
+    </div>
+    {{ end }}
+  </div>
+  {{ else }}
+  <div class="t-empty">no sources declared in this pax</div>
+  {{ end }}
+</section>
+
+{{/* ── PLAYBOOKS ── */}}
+<section id="tab-playbooks" class="t-tab-panel" data-tab-panel="playbooks">
+  {{ partial "section-head.html" (dict "caption" "playbooks/" "title" (printf "%d analytical recipes" $playbooksLen) "kicker" "Step-by-step recipes that wire constructs to engines. An MCP-aware agent runs them end-to-end.") }}
+  {{ with .Params.playbooks_detail }}
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    {{ range . }}
+    <details class="t-playbook-item">
+      <summary class="t-playbook-summary">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:14px; font-weight:600; color:var(--pt-ink);">{{ partial "content-glyph.html" (dict "type" "playbook") }} {{ .name | default .id }}</span>
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; color:var(--pt-dim); font-variant-numeric:tabular-nums;">{{ with .steps }}{{ len . }} steps{{ else }}[ open ]{{ end }}</span>
+        </div>
+        {{ with .description }}<div style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:13px; color:var(--pt-dim); margin-top:6px; font-style:italic;">{{ . }}</div>{{ end }}
+      </summary>
+      <div class="t-playbook-body">
+        {{ with .steps }}
+        <ol class="t-playbook-steps">
+          {{ range . }}
+          <li style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; color:var(--pt-ink); padding:4px 0; line-height:1.5;">
+            {{- if reflect.IsMap . -}}
+              {{ with .id }}<span style="color:var(--term-accent);">{{ . }}</span> — {{ end }}
+              {{ with .action }}{{ . }}{{ end }}
+              {{ with .engine }}<span style="color:var(--pt-dim);"> [{{ . }}]</span>{{ end }}
+            {{- else -}}
+              {{ . }}
+            {{- end -}}
+          </li>
+          {{ end }}
+        </ol>
+        {{ else }}
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; color:var(--pt-dim); padding:10px 0;">no step detail available</div>
+        {{ end }}
+      </div>
+    </details>
+    {{ end }}
+  </div>
+  {{ else }}
+  <div class="t-empty">no playbooks declared in this pax</div>
+  {{ end }}
+</section>
+
+{{/* ── RELATIONSHIPS ── */}}
+<section id="tab-relationships" class="t-tab-panel" data-tab-panel="relationships">
+  {{ partial "section-head.html" (dict "caption" "relationships.yaml" "title" (printf "%d construct edges" $relsLen) "kicker" "The pack's causal graph — which constructs are claimed to drive which others, and how strongly.") }}
+  {{ with .Params.relationships_detail }}
+  <div class="t-rels-table">
+    <div class="t-rels-header">
+      <span>from</span><span></span><span>to</span><span>kind</span><span>direction</span><span>strength</span>
+    </div>
+    {{ range $idx, $r := . }}
+    <div class="t-rels-row">
+      <span style="color:var(--pt-ink);">{{ $r.construct_from | default $r.from }}</span>
+      <span style="color:var(--term-accent); text-align:center; font-size:15px;">{{ if eq ($r.direction | default "") "positive" }}→+{{ else if eq ($r.direction | default "") "negative" }}→−{{ else }}→{{ end }}</span>
+      <span style="color:var(--pt-ink);">{{ $r.construct_to | default $r.to }}</span>
+      <span style="color:var(--pt-dim); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">{{ $r.relationship_type | default $r.kind }}</span>
+      <span class="t-direction-arrow{{ if eq ($r.direction | default "") "positive" }} t-positive{{ else if eq ($r.direction | default "") "negative" }} t-negative{{ end }}" style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">{{ $r.direction }}</span>
+      <span style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:{{ if eq ($r.strength | default "") "strong" }}var(--term-accent){{ else }}var(--pt-dim){{ end }};">{{ $r.strength }}</span>
+    </div>
+    {{ end }}
+  </div>
+  {{ else }}
+  <div class="t-empty">no relationships declared in this pax</div>
+  {{ end }}
+</section>
+
+</div>{{/* end .t-tab-panels */}}
+
+{{/* ──────────────────────────────────────────────────
+     MANIFEST ACCORDION (always shown)
+────────────────────────────────────────────────── */}}
+<div style="padding:0 var(--page-px) 40px;">
+<details class="t-manifest">
+  <summary>// pax.yaml manifest</summary>
+  <pre class="t-manifest-pre">name: {{ $name }}
+version: {{ $version }}
+pax_type: {{ $paxType }}
+{{ with .Params.author }}author: {{ . }}
+{{ end }}{{ with .Params.license }}license: {{ . }}
+{{ end }}{{ with .Params.published_by }}published_by: {{ . }}
+{{ end }}{{ with .Params.domain }}{{ with .id }}domain: {{ . }}
+{{ end }}{{ end }}constructs:
+{{ range .Params.constructs | first 20 }}  - {{ . }}
+{{ end }}{{ if gt (len (.Params.constructs | default slice)) 20 }}  # … {{ sub (len (.Params.constructs | default slice)) 20 }} more
+{{ end }}engines:
+{{ range .Params.engines }}  - {{ . }}
+{{ end }}counts:
+  constructs: {{ $constructCount }}
+  findings: {{ $findingCount }}
+  propositions: {{ $propositionCount }}
+  playbooks: {{ $playbooksLen }}
+  sources: {{ $sourcesLen }}</pre>
+</details>
+</div>
+
 {{ partial "footer.html" . }}
+
+{{/* ──────────────────────────────────────────────────
+     INLINE JS — Wave 2A tab switching + construct filter
+     Wave 4: extract these two IIFE blocks to terminal.js
+     and call initDetailPage() on DOMContentLoaded.
+     The functions rely on:
+       - [data-tab-panel] attributes on section elements
+       - [data-tab] on nav links
+       - #construct-filter-input + [data-construct-name/def]
+────────────────────────────────────────────────── */}}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Tab panel switching ── */
+  var nav     = document.getElementById('t-tab-nav');
+  var panels  = document.querySelectorAll('.t-tab-panel');
+  var tabs    = document.querySelectorAll('.t-tab');
+
+  function showTab(name) {
+    panels.forEach(function (p) {
+      p.style.display = (p.dataset.tabPanel === name) ? 'block' : 'none';
+    });
+    tabs.forEach(function (t) {
+      if (t.dataset.tab === name) {
+        t.classList.add('t-tab-active');
+      } else {
+        t.classList.remove('t-tab-active');
+      }
+    });
+    // Update hash without scroll-jump
+    if (history.replaceState) {
+      history.replaceState(null, '', '#tab-' + name);
+    }
+  }
+
+  function tabFromHash() {
+    var h = location.hash.replace('#tab-', '');
+    if (h && document.querySelector('[data-tab-panel="' + h + '"]')) return h;
+    return 'overview';
+  }
+
+  // Initial render
+  showTab(tabFromHash());
+
+  // Hash navigation (back/forward + anchor clicks)
+  window.addEventListener('hashchange', function () {
+    showTab(tabFromHash());
+  });
+
+  // Tab link clicks — prevent scroll-jump to anchor
+  if (nav) {
+    nav.addEventListener('click', function (e) {
+      var link = e.target.closest('a[data-tab]');
+      if (!link) return;
+      e.preventDefault();
+      showTab(link.dataset.tab);
+    });
+  }
+
+  // "view all →" links inside overview panels
+  document.querySelectorAll('.t-tab-link[data-goto]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      showTab(a.dataset.goto);
+    });
+  });
+
+  /* ── Construct filter ── */
+  var filterInput = document.getElementById('construct-filter-input');
+  if (filterInput) {
+    filterInput.addEventListener('input', function () {
+      var q = filterInput.value.toLowerCase();
+      document.querySelectorAll('#construct-grid .t-construct-card').forEach(function (card) {
+        var name = (card.dataset.constructName || '').toLowerCase();
+        var def  = (card.dataset.constructDef  || '').toLowerCase();
+        card.style.display = (!q || name.indexOf(q) >= 0 || def.indexOf(q) >= 0) ? '' : 'none';
+      });
+    });
+  }
+
+})();
+</script>
 {{ end }}

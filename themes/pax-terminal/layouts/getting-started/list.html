@@ -1,7 +1,245 @@
 {{ define "main" }}
-<section class="t-page">
-  <h1 style="font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-bottom:24px;">{{ .Title }}</h1>
-  <div class="t-prose">{{ .Content }}</div>
+
+{{- /* ── Page header ─────────────────────────────────────────────────── */ -}}
+<header class="t-gs-header">
+  <div class="t-caption">// start/</div>
+  <h1 class="t-gs-title">Two ways to use Pax</h1>
+  <p class="t-gs-lede">Pick the tier that matches how you want to consume verified knowledge. Tier 1 needs no tooling. Tier 2 hands paxes to an agent via the Praxis MCP server.</p>
+
+  {{- /* ── Tier tab nav ───────────────────────────────────────────────── */ -}}
+  <nav class="t-gs-tabs" id="tier-tabs">
+    <button class="t-gs-tab" data-tier="tier-1">tier 01 &middot; paste-to-claude</button>
+    <button class="t-gs-tab" data-tier="tier-3">tier 02 &middot; mcp server</button>
+  </nav>
+</header>
+
+{{- /* ── Tier 1: Paste-to-Claude ─────────────────────────────────────── */ -}}
+<section class="t-gs-panel" id="tier-1">
+  <div class="t-gs-panel-inner">
+    <div class="t-gs-panel-left">
+      {{ partial "section-head.html" (dict "caption" "tier.01 · zero install" "title" "Paste-to-Claude") }}
+      <p class="t-gs-body-lede">Copy a pax bundle into any chat-based LLM. Works with Claude, ChatGPT, Gemini, Llama. No tooling, no account, no install.</p>
+
+      <ol class="t-gs-steps">
+        <li>
+          <span class="t-gs-step-num">1</span>
+          <div class="t-gs-step-body">
+            <strong>Pick a pax</strong> from <a href="/pax/" class="t-link">/pax/</a> and click <code>Download</code>. You&rsquo;ll get a <code>.pax.tar.gz</code> archive (1&ndash;100 KB).
+          </div>
+        </li>
+        <li>
+          <span class="t-gs-step-num">2</span>
+          <div class="t-gs-step-body">
+            <strong>Extract and open <code>llm-context.md</code></strong>. This file contains the structured constructs, findings, and citations.
+          </div>
+        </li>
+        <li>
+          <span class="t-gs-step-num">3</span>
+          <div class="t-gs-step-body">
+            <strong>Paste the contents into your AI chat</strong> as the first message. Then ask questions &mdash; the AI will cite findings by ID.
+          </div>
+        </li>
+      </ol>
+
+      <div class="t-gs-callout">
+        <div class="t-caption">// what you can ask</div>
+        <ul class="t-gs-prompts">
+          <li>What are the top 3 findings on construct <code>risk_exposure_index</code>?</li>
+          <li>Cite all findings with p &lt; 0.05 and effect size above 0.3.</li>
+          <li>How do constructs <code>cascading_failure_size</code> and <code>TTR</code> relate?</li>
+          <li>Summarize the evidence for proposition P001 &mdash; quote it verbatim.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="t-gs-panel-right">
+      <div class="t-code-block">
+        <div class="t-code-block-bar">
+          <span>markdown &middot; llm-context.md</span>
+          <button data-copy-target="t-code-gs-paste-example" class="t-copy-btn">copy</button>
+        </div>
+        <pre id="t-code-gs-paste-example">SYSTEM: You are reasoning over the attached pax.
+Constraints:
+  - Cite findings by ID (F001, F042, ...)
+  - Quote propositions verbatim when used
+  - If the pack does not cover a question, say so
+
+&lt;pax name="global-supply-chain-risk" version="1.0.9"&gt;
+constructs:
+  - id: risk_exposure_index
+    kind: quantifiable
+    units: ratio
+    def: TTR/TTS ratio for each node in the supply graph
+  - id: cascading_failure_size
+    kind: quantifiable
+    units: fraction_of_network
+    def: share of downstream nodes disrupted after removal
+
+findings:
+  - id: F001
+    text: |
+      Supply chain disruptions cause average abnormal
+      stock returns of approximately -40% over a
+      three-year window post-event.
+    beta: -0.40
+    p:    "&lt;0.001"
+    n:    827
+    source: hendricks_singhal_2005
+  - id: F003
+    text: |
+      High betweenness-centrality nodes (top 5%) account
+      for 64% of cascading failure propagation paths.
+    ...
+&lt;/pax&gt;
+
+USER: Identify the top-3 vulnerabilities in our
+network given:
+  - 14 tier-1 suppliers, 6 chokepoint-exposed
+  - mean inventory: 18 days
+  - revenue at risk: $2.1B/yr</pre>
+      </div>
+    </div>
+  </div>
 </section>
+
+{{- /* ── Tier 2 (was Tier 3): MCP server via Praxis ──────────────────── */ -}}
+<section class="t-gs-panel" id="tier-3">
+  <div class="t-gs-panel-inner">
+    <div class="t-gs-panel-left">
+      {{ partial "section-head.html" (dict "caption" "tier.02 · agentic" "title" "MCP server (Praxis)") }}
+      <p class="t-gs-body-lede">Run Pax inside any MCP-compatible agent (Claude Code, Continue, Zed, Cursor) via <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-link">Praxis</a>, the reference MCP server for the pax format. Tools like <code>praxis_search_pax</code>, <code>praxis_install_pax</code>, <code>praxis_query_findings</code> become first-class.</p>
+
+      <div class="t-gs-sub">
+        {{ partial "section-head.html" (dict "caption" "install" "title" "Run Praxis locally") }}
+        <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:14px; line-height:1.55; color:var(--pt-dim); margin:0 0 12px;">
+          Praxis is an open-source Python MCP server. Clone, install, and point your agent at it. Setup instructions live in the
+          <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-link">Praxis README</a>.
+        </p>
+      </div>
+
+      <div class="t-gs-sub">
+        {{ partial "section-head.html" (dict "caption" "exposed tools" "title" "Tool reference") }}
+        <div class="t-gs-tool-grid">
+          <div class="t-gs-tool-header">
+            <span>tool</span>
+            <span>signature</span>
+            <span>description</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_search_pax</span>
+            <span class="t-gs-tool-sig">(query: str)</span>
+            <span class="t-gs-tool-desc">search the registry by keyword</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_install_pax</span>
+            <span class="t-gs-tool-sig">(pax: str)</span>
+            <span class="t-gs-tool-desc">download and install a pax locally</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_query_findings</span>
+            <span class="t-gs-tool-sig">(construct: str, pax?: str)</span>
+            <span class="t-gs-tool-desc">retrieve findings for a construct</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_query_constructs</span>
+            <span class="t-gs-tool-sig">(pax?: str)</span>
+            <span class="t-gs-tool-desc">list and search constructs across paxes</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_align_constructs</span>
+            <span class="t-gs-tool-sig">(pax_a: str, pax_b: str)</span>
+            <span class="t-gs-tool-desc">find bridge constructs between two paxes</span>
+          </div>
+          <div class="t-gs-tool-row">
+            <span class="t-gs-tool-name">praxis_run_playbook</span>
+            <span class="t-gs-tool-sig">(pax: str, playbook: str)</span>
+            <span class="t-gs-tool-desc">execute an analytical playbook</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-gs-panel-right">
+      {{ partial "section-head.html" (dict "caption" "end-to-end" "title" "A worked example" "kicker" "From English request to a cited result.") }}
+      <div class="t-code-block" style="max-height:620px; overflow-y:auto;">
+        <div class="t-code-block-bar"><span>text &middot; agent transcript</span></div>
+        <pre id="t-code-gs-mcp-transcript">USER  &gt; using the supply-chain pax, identify our top
+        cascading-failure risks. cite findings.
+
+CLAUDE &gt; [tool] praxis_install_pax
+       ↳ { pax: 'global-supply-chain-risk' }
+         38 constructs, 113 findings, 8 playbooks
+
+       [tool] praxis_query_findings
+              { construct: 'cascading_failure_size' }
+       ↳ 8 findings · sorted by strength
+
+       [tool] praxis_query_findings
+              { ids: ['F001', 'F003', 'F005'] }
+       ↳ F001: -40% equity returns on disruption
+         F003: top-5% nodes → 64% of cascades
+         F005: Malacca blockage $9.6B/day
+
+──────── results ────────
+Three nodes carry disproportionate risk:
+  1) Supplier_A (betweenness 0.41) — F003: TSMC-style
+     concentration; one outage propagates to 64% of
+     downstream tier-2 nodes.
+  2) Supplier_C (TTR/TTS = 3.1) — F001: REI > 1
+     historically associates with -40% equity returns.
+  3) Chokepoint_K (Strait of Malacca) — F005: 6-day
+     blockage modeled at $9.6B/day in delayed trade.
+
+cited: F001, F003, F005, P001.</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
 {{ partial "footer.html" . }}
+
+<script>
+(function () {
+  var panels = document.querySelectorAll('.t-gs-panel');
+  var tabs   = document.querySelectorAll('.t-gs-tab');
+
+  function activate(tierId) {
+    panels.forEach(function (p) { p.style.display = 'none'; });
+    tabs.forEach(function (t) { t.classList.remove('is-active'); });
+
+    var panel = document.getElementById(tierId);
+    if (panel) { panel.style.display = 'block'; }
+
+    tabs.forEach(function (t) {
+      if (t.getAttribute('data-tier') === tierId) {
+        t.classList.add('is-active');
+      }
+    });
+  }
+
+  // Read hash or default to tier-1
+  function tierFromHash() {
+    var hash = window.location.hash.replace('#', '');
+    return (hash === 'tier-1' || hash === 'tier-3') ? hash : 'tier-1';
+  }
+
+  // Tab clicks
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      var tid = t.getAttribute('data-tier');
+      window.location.hash = tid;
+      activate(tid);
+    });
+  });
+
+  // Hash changes (back/forward, direct URL)
+  window.addEventListener('hashchange', function () {
+    activate(tierFromHash());
+  });
+
+  // Initial render
+  activate(tierFromHash());
+}());
+</script>
+
 {{ end }}

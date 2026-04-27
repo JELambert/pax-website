@@ -21,6 +21,13 @@ theme = 'pax-terminal'
 [markup.goldmark.renderer]
   unsafe = true
 
+[markup.highlight]
+  noClasses = false
+  lineNos = false
+  codeFences = true
+  guessSyntax = false
+  tabWidth = 2
+
 [menu]
   [[menu.main]]
     name = 'home'

@@ -1,13 +1,28 @@
-{{- /* Wave 1 fills this. Stub for now. */ -}}
-{{- /* Expects: dict "page" (Hugo page) "idx" N */ -}}
-{{- $p := .page -}}
-<div style="display:grid; grid-template-columns: 36px 100px 1fr 80px 80px; gap:14px; padding:12px 18px; border-bottom:1px solid var(--pt-line); font-size:12px; align-items:center;">
-  <span style="color:var(--pt-dim)">{{ printf "%03d" (add .idx 1) }}</span>
-  {{ partial "pack-type-chip.html" (dict "type" ($p.Params.pax_type | default "field")) }}
-  <div>
-    <div style="font-weight:600">{{ $p.Title }}</div>
-    <div style="color:var(--pt-dim); font-size:11px">./ {{ $p.File.ContentBaseName }}/</div>
+{{- /* Expects a Hugo Page object for a pack. Displays name, type, author, counts. */ -}}
+{{- $p := . -}}
+{{- $idx := .idx | default 0 -}}
+{{- $type := $p.Params.pax_type | default "field" -}}
+<div class="t-pax-row">
+  <div class="t-pax-accent" style="background-color: var(--pt-{{ $type }}-type)"></div>
+  <span class="t-pax-id">{{ $p.File.ContentBaseName }}</span>
+
+  <div class="t-pax-info">
+    <div class="t-pax-name">{{ $p.Title }}</div>
+    <div class="t-pax-tagline">{{ $p.Params.description | truncate 120 }}</div>
   </div>
-  <span style="color:var(--pt-dim); text-align:right">{{ $p.Params.construct_count | default 0 }} C</span>
-  <span style="color:var(--pt-dim); text-align:right">{{ $p.Params.finding_count | default 0 }} F</span>
+
+  <div class="t-pax-author">
+    <div>{{ $p.Params.author | default "—" }}</div>
+    <div>v{{ $p.Params.version | default "1.0.0" }}</div>
+  </div>
+
+  <div class="t-pax-counts">
+    <span class="t-count t-count-construct">{{ partial "content-glyph.html" (dict "type" "construct") }}<span>{{ $p.Params.construct_count | default 0 }}</span></span>
+    <span class="t-count t-count-finding">{{ partial "content-glyph.html" (dict "type" "finding") }}<span>{{ $p.Params.finding_count | default 0 }}</span></span>
+    <span class="t-count t-count-source">{{ partial "content-glyph.html" (dict "type" "source") }}<span>{{ $p.Params.source_count | default 0 }}</span></span>
+  </div>
+
+  <div class="t-pax-actions">
+    <a href="{{ $p.RelPermalink }}" class="t-btn-sm">view</a>
+  </div>
 </div>

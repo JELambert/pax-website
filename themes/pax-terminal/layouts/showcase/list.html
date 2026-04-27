@@ -1,7 +1,165 @@
 {{ define "main" }}
-<section class="t-page">
-  <h1 style="font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-bottom:24px;">{{ .Title }}</h1>
-  <div class="t-prose">{{ .Content }}</div>
+
+{{- /* Page header */ -}}
+<section class="t-showcase-header">
+  <div class="t-caption">// showcase/</div>
+  <h1 class="t-showcase-title">Three paxes, one analysis</h1>
+  <p class="t-showcase-lede">Real cross-pack synthesis. When independently authored paxes share constructs, agents can run analyses no single pack could support.</p>
 </section>
+
+{{- /* Story 01 */ -}}
+<section class="t-showcase-story t-showcase-story-01">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.01</div>
+    <h2 class="t-showcase-story-title">Income, well-being, and conflict</h2>
+    <p class="t-showcase-story-prose">
+      Across macroeconomic, health, and security literature, per-capita income appears as a robust predictor — sometimes as a control, sometimes as the focal predictor, but almost always in the expected direction. By pooling findings across three independently maintained paxes, an agent can answer a question that no single researcher needed to tackle.
+    </p>
+    <p class="t-showcase-story-prose">
+      The findings converge: higher income correlates with stability. The mechanism is debated (institutional capacity? literacy? consumption smoothing?), but the empirical pattern holds across methods and countries.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">bridge construct</div>
+      <div class="t-showcase-bridge-construct">gdp_per_capita</div>
+      <div class="t-showcase-bridge-paxes">spans: financial-development · democratic-peace · child-mortality-determinants</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript01 := `$ pax install financial-development \\
+  democratic-peace child-mortality-det
+
+[ok] resolved 3 paxes
+[ok] shared constructs: 1 (gdp_per_capita)
+[ok] bridge findings: 14
+
+$ claude "What does the field say about
+income as a predictor? Back claims
+with finding IDs. Rank by strength."
+
+▸ working...
+▸ loading constructs from 3 paxes
+▸ joining on gdp_per_capita
+▸ ranking 14 findings by strength
+
+─────── synthesis ────────
+Strong evidence: across all paxes,
+income emerges as a robust predictor.
+
+· strongest from F042 (fin-dev):
+  +2.1 sd effect on stability index
+· replicated in F081 (dem-peace):
+  hazard ratio 1.34 for conflict onset
+· dose-response in child-mortality:
+  F156: inverted U for mortality rate
+
+cite: F042, F081, F156, P004` }}
+    {{ partial "code-block.html" (dict "lang" "bash · agent transcript" "code" $transcript01 "id" "showcase-01") }}
+  </div>
+</section>
+
+{{- /* Story 02 */ -}}
+<section class="t-showcase-story t-showcase-story-02">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.02</div>
+    <h2 class="t-showcase-story-title">Climate stress on agricultural systems</h2>
+    <p class="t-showcase-story-prose">
+      Temperature anomalies appear in three distinct paxes — one focused on climate-conflict nexus, one on land-use change, one on air quality. Each pack studied temperature through a different lens. Pooling them surfaces a consistent finding: warming destabilizes agricultural yields, triggering downstream economic and political pressure.
+    </p>
+    <p class="t-showcase-story-prose">
+      The cross-pack view reveals nonlinearities that a single pack might miss: impact differs by latitude, soil type, and cropping system.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">bridge construct</div>
+      <div class="t-showcase-bridge-construct">temperature_anomaly</div>
+      <div class="t-showcase-bridge-paxes">spans: climate-conflict-food-nexus · deforestation-land-use · air-quality-pollution</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript02 := `$ pax install climate-conflict-food-nexus \\
+  deforestation-land-use air-quality
+
+[ok] resolved 3 paxes
+[ok] shared constructs: 1 (temperature_anomaly)
+[ok] bridge findings: 11
+
+$ claude "How does temperature stress
+propagate through agriculture and
+food security? Multiple mechanisms?"
+
+▸ working...
+▸ joining on temperature_anomaly
+▸ ranking 11 findings by strength
+
+─────── synthesis ────────
+Warming has multiplier effects:
+
+· direct yield loss: F043 -8% per 1°C
+· secondary: crop failure → migration
+  (F067 in land-use, conflict-nexus)
+· tertiary: atmospheric feedback
+  (F089: ozone + particulates worsen)
+
+Nonlinearity critical: effect size
+differs sharply by region (latitude,
+growing season, irrigation access).
+
+cite: F043, F067, F089, F134` }}
+    {{ partial "code-block.html" (dict "lang" "bash · agent transcript" "code" $transcript02 "id" "showcase-02") }}
+  </div>
+</section>
+
+{{- /* Story 03 */ -}}
+<section class="t-showcase-story t-showcase-story-03">
+  <div class="t-showcase-story-left">
+    <div class="t-caption">// story.03</div>
+    <h2 class="t-showcase-story-title">Compensation, mobility, and democratic erosion</h2>
+    <p class="t-showcase-story-prose">
+      Wage growth appears in labor-mobility studies, compensation research, and democratic-erosion literature. Each field has a hypothesis about its role. Pooling the findings reveals a paradox: regions with rising wages sometimes see *faster* democratic backsliding, contradicting the simple "prosperity → stability" narrative.
+    </p>
+    <p class="t-showcase-story-prose">
+      The resolution lies in heterogeneity: wage gains concentrate, leaving others behind. Relative deprivation — not absolute income — predicts backlash.
+    </p>
+    <div class="t-showcase-bridge">
+      <div class="t-showcase-bridge-label">bridge construct</div>
+      <div class="t-showcase-bridge-construct">wage_growth</div>
+      <div class="t-showcase-bridge-paxes">spans: labor-compensation-materials · democratic-erosion · corruption-governance</div>
+    </div>
+  </div>
+  <div class="t-showcase-story-right">
+    {{ $transcript03 := `$ pax install labor-comp-materials \\
+  democratic-erosion corruption-gov
+
+[ok] resolved 3 paxes
+[ok] shared constructs: 1 (wage_growth)
+[ok] bridge findings: 9
+
+$ claude "Rising wages but democratic
+decline? Reconcile the labor and
+political findings. Is it causality?"
+
+▸ working...
+▸ joining on wage_growth
+▸ examining heterogeneity claims
+
+─────── synthesis ────────
+Apparent paradox resolves via
+distributional heterogeneity:
+
+· aggregate wage growth: F122 +3.2%
+  (labor-comp, overall economy)
+· but: Gini coefficient rose (F201)
+· relative deprivation model (F256):
+  backlash ∝ (wage_elite - wage_worker)
+· mechanism: resentment → authoritarianism
+  (F089 dem-erosion; F145 corruption)
+
+Key finding: absolute gains ≠ stability
+without equitable distribution.
+
+cite: F122, F201, F256, F089` }}
+    {{ partial "code-block.html" (dict "lang" "bash · agent transcript" "code" $transcript03 "id" "showcase-03") }}
+  </div>
+</section>
+
 {{ partial "footer.html" . }}
 {{ end }}

@@ -1,7 +1,100 @@
 {{ define "main" }}
-<section class="t-page">
-  <h1 style="font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-bottom:24px;">{{ .Title }}</h1>
+
+{{- /* Hero on paper-cream background */ -}}
+<section class="t-about-hero">
+  <div class="t-about-hero-top">
+    <div class="t-about-hero-left">
+      <div class="t-caption">// /about/</div>
+      <h1 class="t-about-hero-title">
+        Pax is open infrastructure for <em>verified</em> knowledge.
+      </h1>
+      <p class="t-about-hero-lede">
+        Portable analytical expertise packages give your AI structured, evidence-backed domain knowledge. Constructs, findings, propositions — traceable to sources. Composable across domains. Built for agents.
+      </p>
+    </div>
+    <div class="t-about-hero-right">
+      <div class="t-about-stats-card">
+        <div class="t-stat-row">
+          <span class="t-stat-label">paxes</span>
+          <span class="t-stat-value">{{ len (where .Site.RegularPages "Section" "pax") }}</span>
+        </div>
+        <div class="t-stat-row">
+          <span class="t-stat-label">license</span>
+          <span class="t-stat-value">CC-BY 4.0</span>
+        </div>
+        <div class="t-stat-row">
+          <span class="t-stat-label">last sync</span>
+          <span class="t-stat-value">{{ now.Format "2006-01-02" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{- /* Six principles grid */ -}}
+<section class="t-about-principles">
+  <div class="t-about-principles-grid">
+    <div class="t-principle">
+      <div class="t-principle-number">01</div>
+      <div class="t-principle-title">Provenance over plausibility</div>
+      <p class="t-principle-body">Every finding links to a source. Every claim is falsifiable. We will never ship summary prose you cannot verify.</p>
+    </div>
+
+    <div class="t-principle">
+      <div class="t-principle-number">02</div>
+      <div class="t-principle-title">Constructs are first-class</div>
+      <p class="t-principle-body">Constructs are the atoms of reasoning. Shared across paxes, they become bridges. Agents use that to synthesize without glue code.</p>
+    </div>
+
+    <div class="t-principle">
+      <div class="t-principle-number">03</div>
+      <div class="t-principle-title">Findings carry uncertainty</div>
+      <p class="t-principle-body">Effect sizes, confidence intervals, p-values, sample sizes — not just direction. Strength labels are policed by editors, not by hope.</p>
+    </div>
+
+    <div class="t-principle">
+      <div class="t-principle-number">04</div>
+      <div class="t-principle-title">Open by default</div>
+      <p class="t-principle-body">CC-BY-4.0 for content. MIT for runtime. The registry is open. Forks are blessed. Mirrors are encouraged.</p>
+    </div>
+
+    <div class="t-principle">
+      <div class="t-principle-number">05</div>
+      <div class="t-principle-title">Composable, not monolithic</div>
+      <p class="t-principle-body">Paxes are YAML folders, not databases. No lock-in. Install what you need, compose at the construct level, run where you want.</p>
+    </div>
+
+    <div class="t-principle">
+      <div class="t-principle-number">06</div>
+      <div class="t-principle-title">Built for agents</div>
+      <p class="t-principle-body">Praxis MCP server. Tools for list, search, get findings, run playbooks. Agents can reason over your paxes like a research assistant.</p>
+    </div>
+  </div>
+</section>
+
+{{- /* Content section if non-empty */ -}}
+{{ if .Content }}
+<section class="t-about-content">
   <div class="t-prose">{{ .Content }}</div>
 </section>
+{{ end }}
+
+{{- /* Contact / colophon */ -}}
+<section class="t-about-footer">
+  <div class="t-about-footer-left">
+    <div class="t-footer-head">Maintained by</div>
+    <div class="t-footer-name">Joshua E. Lambert</div>
+    <div class="t-footer-email"><a href="mailto:joshuae.lambert@gmail.com">joshuae.lambert@gmail.com</a></div>
+  </div>
+  <div class="t-about-footer-right">
+    <div class="t-footer-head">Built with</div>
+    <ul class="t-footer-list">
+      <li>Hugo</li>
+      <li>JetBrains Mono</li>
+      <li>Source Serif 4</li>
+    </ul>
+  </div>
+</section>
+
 {{ partial "footer.html" . }}
 {{ end }}

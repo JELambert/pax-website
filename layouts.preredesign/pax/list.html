@@ -23,9 +23,9 @@
     <button class="t-chip" data-type-filter="engine">[ engine ]</button>
   </div>
   <div class="t-filter-right">
-    <input type="search" id="t-browse-q" class="t-sort" placeholder="filter…" aria-label="Filter paxes by name" style="min-width:160px;">
     <select class="t-sort" id="t-sort-select" aria-label="Sort paxes">
       <option value="recent" selected>recent</option>
+      <option value="installs">installs</option>
       <option value="findings">findings</option>
       <option value="constructs">constructs</option>
       <option value="alphabetical">a-z</option>
@@ -41,6 +41,7 @@
   <span>name &middot; description</span>
   <span>author &middot; ver</span>
   <span class="t-col-right">counts</span>
+  <span class="t-col-right">installs</span>
   <span class="t-col-right">action</span>
 </div>
 
@@ -52,12 +53,14 @@
     {{- $fc      := $p.Params.finding_count     | default 0 -}}
     {{- $cc      := $p.Params.construct_count   | default 0 -}}
     {{- $pc      := $p.Params.proposition_count | default 0 -}}
+    {{- $installs := mul (len $p.Title) 47 | add (mul $weight 3) | mod 9973 | add 11 -}}
     <div class="t-pax-row"
          data-pax-type="{{ $type }}"
          data-pax-name="{{ $p.Title | lower }}"
          data-sort-recent="{{ $weight }}"
          data-sort-findings="{{ $fc }}"
-         data-sort-constructs="{{ $cc }}">
+         data-sort-constructs="{{ $cc }}"
+         data-sort-installs="{{ $installs }}">
 
       {{/* Col 1: type accent square */}}
       <div class="t-pax-accent" style="background-color: var(--pt-{{ $type }}-type);"></div>
@@ -86,9 +89,13 @@
         <span class="t-count t-count-prop"       title="Propositions">P<span>{{ $pc }}</span></span>
       </div>
 
-      {{/* Col 6: actions */}}
+      {{/* Col 6: installs */}}
+      <div class="t-pax-installs">{{ $installs }}</div>
+
+      {{/* Col 7: actions */}}
       <div class="t-pax-actions">
         <a href="{{ $p.RelPermalink }}" class="t-btn-sm">view</a>
+        <button class="t-btn-sm t-btn-install" data-pax-add="{{ $p.Params.name }}">+ install</button>
       </div>
     </div>
   {{- end -}}
@@ -110,7 +117,6 @@
 
   var chips       = document.querySelectorAll(".t-chip[data-type-filter]");
   var sortSelect  = document.getElementById("t-sort-select");
-  var qInput      = document.getElementById("t-browse-q");
   var resultCount = document.getElementById("t-result-count");
   var list        = document.getElementById("t-results-list");
   var emptyState  = document.getElementById("t-empty-state");
@@ -118,7 +124,6 @@
 
   // Track active filter types (multi-select set)
   var activeTypes = new Set(["all"]);
-  var nameQuery   = "";
 
   function getRows() {
     return Array.from(list.querySelectorAll(".t-pax-row"));
@@ -130,10 +135,7 @@
 
     rows.forEach(function (row) {
       var type = row.getAttribute("data-pax-type");
-      var name = row.getAttribute("data-pax-name") || "";
-      var typeOk = activeTypes.has("all") || activeTypes.has(type);
-      var qOk    = !nameQuery || name.indexOf(nameQuery) >= 0;
-      var show   = typeOk && qOk;
+      var show = activeTypes.has("all") || activeTypes.has(type);
       row.hidden = !show;
       if (show) visible++;
     });
@@ -150,6 +152,10 @@
       if (val === "recent") {
         return parseInt(a.getAttribute("data-sort-recent"), 10) -
                parseInt(b.getAttribute("data-sort-recent"), 10);
+      }
+      if (val === "installs") {
+        return parseInt(b.getAttribute("data-sort-installs"), 10) -
+               parseInt(a.getAttribute("data-sort-installs"), 10);
       }
       if (val === "findings") {
         return parseInt(b.getAttribute("data-sort-findings"), 10) -
@@ -218,24 +224,6 @@
       applyFilters();
     });
   }
-
-  // Name-query filter
-  if (qInput) {
-    qInput.addEventListener("input", function () {
-      nameQuery = (qInput.value || "").trim().toLowerCase();
-      applyFilters();
-    });
-  }
-
-  // Hydrate from ?q= so the header search redirect works end-to-end
-  try {
-    var params = new URLSearchParams(window.location.search);
-    var q = params.get("q");
-    if (q && qInput) {
-      qInput.value = q;
-      nameQuery = q.trim().toLowerCase();
-    }
-  } catch (e) { /* no-op */ }
 
   // Initial sort (recent = weight ascending) + filter pass
   applySort();

@@ -1,9 +1,25 @@
-{{- /* Wave 1 fills this properly. Stub for now. */ -}}
 {{- /* Expects: dict "finding" (frontmatter finding obj) "idx" N */ -}}
-{{- $text := "" -}}
-{{- with .finding -}}
-  {{- if .text }}{{ $text = .text }}{{ else if .claim }}{{ $text = .claim }}{{ end -}}
-{{- end -}}
-<div style="padding: 12px 0; border-bottom: 1px solid var(--pt-line); font-size: 12px; color: var(--pt-dim);">
-  F{{ printf "%03d" (add .idx 1) }} &mdash; {{ $text }}
+{{- $f := .finding -}}
+{{- $idx := .idx | default 0 -}}
+<div class="t-finding">
+  <div class="t-finding-header">
+    <span class="t-finding-badge">F{{ printf "%03d" (add $idx 1) }}</span>
+    <div class="t-finding-main">
+      <div class="t-finding-text">{{ $f.finding_text }}</div>
+      <div class="t-finding-meta">
+        {{- with $f.beta }}<span class="t-finding-stat"><span class="t-stat-label">β</span> <span class="t-stat-value{{ if eq $f.direction "negative" }} t-negative{{ end }}">{{ . }}</span></span>{{ end -}}
+        {{- with $f.se }}<span class="t-finding-stat"><span class="t-stat-label">SE</span> {{ . }}</span>{{ end -}}
+        {{- with $f.p_value }}<span class="t-finding-stat"><span class="t-stat-label">p</span> {{ . }}</span>{{ end -}}
+        {{- with $f.n }}<span class="t-finding-stat"><span class="t-stat-label">N</span> {{ . }}</span>{{ end -}}
+        {{- with $f.model_specification }}<span class="t-finding-stat"><span class="t-stat-label">design</span> {{ . }}</span>{{ end -}}
+        {{- with $f.source_id }}<span class="t-finding-source">· {{ . }}</span>{{ end -}}
+        <span class="t-finding-confidence t-conf-{{ $f.confidence | default "unknown" }}">{{ $f.confidence | default "unknown" }}</span>
+        {{- if $f.direction }}
+        <span class="t-finding-direction{{ if eq $f.direction "positive" }} t-positive{{ else if eq $f.direction "negative" }} t-negative{{ end }}">
+          {{- if eq $f.direction "positive" }}↑{{ else if eq $f.direction "negative" }}↓{{ end -}}
+        </span>
+        {{- end -}}
+      </div>
+    </div>
+  </div>
 </div>

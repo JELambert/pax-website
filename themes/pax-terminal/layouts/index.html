@@ -2,21 +2,35 @@
 {{- $paxPages := where .Site.RegularPages "Section" "pax" -}}
 {{- $paxCount := len $paxPages -}}
 {{- $graphData := .Site.Data.graph -}}
-{{- $constructCount := 424 -}}
-{{- $findingCount := 469 -}}
-{{- $domainCount := 97 -}}
-{{- $sourceCount := 210 -}}
+{{- $constructCount := 0 -}}
+{{- $findingCount := 0 -}}
+{{- $sourceCount := 0 -}}
+{{- range $paxPages -}}
+  {{- $constructCount = add $constructCount (int (.Params.construct_count | default 0)) -}}
+  {{- $findingCount = add $findingCount (int (.Params.finding_count | default 0)) -}}
+  {{- with .Params.sources_detail -}}
+    {{- $sourceCount = add $sourceCount (len .) -}}
+  {{- end -}}
+{{- end -}}
+{{- $domainCount := 0 -}}
 {{- if $graphData -}}
   {{- with $graphData.stats -}}
-    {{- with .constructs }}{{ $constructCount = . }}{{ end -}}
-    {{- with .findings }}{{ $findingCount = . }}{{ end -}}
     {{- with .domains }}{{ $domainCount = . }}{{ end -}}
-    {{- with .sources }}{{ $sourceCount = . }}{{ end -}}
   {{- end -}}
+{{- end -}}
+{{- if eq $domainCount 0 -}}
+  {{- /* fallback: count distinct pack domains */ -}}
+  {{- $domSet := dict -}}
+  {{- range $paxPages -}}
+    {{- with .Params.domain -}}
+      {{- with .id -}}{{ $domSet = merge $domSet (dict . true) }}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $domainCount = len $domSet -}}
 {{- end -}}
 
 {{- /* Featured pack IDs — curated list */ -}}
-{{- $featuredIDs := slice "bartel-comp-materials" "pmsc-market-for-force" "military-coup-prediction" "financial-development" "credit-risk-ml" -}}
+{{- $featuredIDs := slice "bartel-comp-materials" "pmsc-market-for-force" "military-coup-prediction" "global-supply-chain-risk" "ml-materials-discovery" -}}
 {{- $featuredPages := slice -}}
 {{- range $featuredIDs -}}
   {{- $pg := site.GetPage (printf "/pax/%s" .) -}}
@@ -41,7 +55,7 @@
 
     <!-- Left: headline + CTA -->
     <div>
-      <div class="t-hero-eyebrow">// pax-market &mdash; rev abc123</div>
+      <div class="t-hero-eyebrow">// pax-market</div>
       <h1>
         The registry<br>
         of <span class="t-hero-highlight">verified&nbsp;knowledge</span><br>
@@ -50,12 +64,11 @@
       <p class="t-hero-desc">
         <strong>pax</strong>&nbsp;&mdash; <em>portable analytic exchange</em> &mdash; is a portable knowledge format
         that bundles constructs, findings, propositions, sources, and analytical playbooks into a single inspectable
-        file. Install one with <code>pax install</code>, and your agent reasons with the field's evidence,
-        not the model's vibes.
+        file. Hand one to an agent, and it reasons with the field's evidence, not the model's vibes.
       </p>
       <div class="t-hero-actions">
         <a href="/pax/" class="t-btn-primary">browse {{ $paxCount }} paxes &rarr;</a>
-        <a href="/getting-started/" class="t-btn-secondary">$ install pax-cli</a>
+        <a href="/getting-started/" class="t-btn-secondary">how to use a pax</a>
         <a href="/guide/" class="t-btn-ghost">author a pax</a>
       </div>
     </div>
@@ -241,7 +254,7 @@
           </div>
         {{- end -}}
       </div>
-      <div class="t-featured-hero-btn">$ pax install {{ $hero.File.ContentBaseName }}</div>
+      <div class="t-featured-hero-btn">view pax &rarr;</div>
     </a>
 
     <!-- Small featured cards -->
@@ -313,72 +326,6 @@
   </div>
 </section>
 
-<!-- ─── ACTIVITY LOG ──────────────────────────────────────────────── -->
-<section class="t-activity">
-  {{ partial "section-head.html" (dict
-    "caption" "registry log"
-    "title"   "Recent activity"
-    "right"   "tail -f /var/log/pax"
-  ) }}
-  <div class="t-activity-log">
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">2m</span>
-      <span class="t-activity-kind publish">&#x25CF; publish</span>
-      <span style="color:var(--pt-ink)">Lambert J.</span>
-      <span style="color:var(--pt-ink)">credit-risk-ml <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">v1.2.0 &middot; 42 constructs</span></span>
-      <span style="color:var(--pt-dim)">field</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">18m</span>
-      <span class="t-activity-kind update">&#x25CF; update</span>
-      <span style="color:var(--pt-ink)">Praxis Agent</span>
-      <span style="color:var(--pt-ink)">military-coup-prediction <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">added 3 findings</span></span>
-      <span style="color:var(--pt-dim)">topic</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">1h</span>
-      <span class="t-activity-kind verify">&#x25CF; verify</span>
-      <span style="color:var(--pt-ink)">Review Bot</span>
-      <span style="color:var(--pt-ink)">bartel-comp-materials <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">editorial review passed</span></span>
-      <span style="color:var(--pt-dim)">paper</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">3h</span>
-      <span class="t-activity-kind publish">&#x25CF; publish</span>
-      <span style="color:var(--pt-ink)">Lambert J.</span>
-      <span style="color:var(--pt-ink)">financial-development <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">v2.0.0 &middot; full reindex</span></span>
-      <span style="color:var(--pt-dim)">field</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">6h</span>
-      <span class="t-activity-kind update">&#x25CF; update</span>
-      <span style="color:var(--pt-ink)">Praxis Agent</span>
-      <span style="color:var(--pt-ink)">pmsc-market-for-force <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">construct alignment pass</span></span>
-      <span style="color:var(--pt-dim)">topic</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-    <div class="t-activity-row">
-      <span class="t-activity-when">12h</span>
-      <span class="t-activity-kind verify">&#x25CF; verify</span>
-      <span style="color:var(--pt-ink)">Review Bot</span>
-      <span style="color:var(--pt-ink)">global-supply-chain-risk <span style="color:var(--pt-dim)">&middot;</span> <span style="color:var(--pt-dim)">schema v2 migration complete</span></span>
-      <span style="color:var(--pt-dim)">field</span>
-      <span style="color:var(--pt-dim); text-align:right">&rarr;</span>
-    </div>
-
-  </div>
-</section>
-
 <!-- ─── CONTRIBUTE STRIP ──────────────────────────────────────────── -->
 <section class="t-contribute">
   <div>
@@ -396,24 +343,19 @@
 
   <div class="t-code-block">
     <div class="t-code-block-bar">
-      <span>bash</span>
-      <span>copy</span>
+      <span>yaml &middot; pax skeleton</span>
     </div>
-    <pre>$ pax init my-research-pack --type paper
-&#x2713; scaffold ./pax/my-research-pack/
-  &#x251C;&#x2500;&#x2500; pax.yaml
-  &#x251C;&#x2500;&#x2500; constructs.yaml
-  &#x251C;&#x2500;&#x2500; findings.yaml
-  &#x251C;&#x2500;&#x2500; propositions.yaml
-  &#x251C;&#x2500;&#x2500; sources.yaml
-  &#x2514;&#x2500;&#x2500; playbooks/
-       &#x2514;&#x2500;&#x2500; quick-start.yaml
+    <pre>my-research-pack/
+&#x251C;&#x2500;&#x2500; pax.yaml             # name, version, license, domain
+&#x251C;&#x2500;&#x2500; constructs.yaml      # variables, kinds, definitions
+&#x251C;&#x2500;&#x2500; findings.yaml        # claims with effect size, p, N
+&#x251C;&#x2500;&#x2500; propositions.yaml    # rules of thumb across findings
+&#x251C;&#x2500;&#x2500; sources.yaml         # papers, datasets, DOIs
+&#x2514;&#x2500;&#x2500; playbooks/
+     &#x2514;&#x2500;&#x2500; quick-start.yaml # analytical recipe
 
-$ pax validate
-&#x2713; schema &middot; constructs (5)
-&#x2713; schema &middot; findings (12) &#x2014; all sourced
-&#x2713; schema &middot; sources (3)
-ready to publish: pax publish my-research-pack</pre>
+# zip the folder, drop it at submit.pax-market.com,
+# editorial review opens a PR on the registry.</pre>
   </div>
 </section>
 
