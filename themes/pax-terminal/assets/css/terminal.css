@@ -1143,6 +1143,7 @@ button {
 
   .t-hero h1 {
     font-size: 38px;
+    line-height: 1.25;
   }
 
   .t-hero-stats {
@@ -1191,6 +1192,7 @@ button {
 @media (max-width: 600px) {
   .t-hero h1 {
     font-size: 32px;
+    line-height: 1.25;
   }
 
   .t-hero-stats {
@@ -4289,7 +4291,7 @@ button {
   /* hero */
   .t-hero h1 {
     font-size: 38px;
-    line-height: 1.05;
+    line-height: 1.25;
   }
 
   .t-hero {
@@ -4451,7 +4453,7 @@ button {
   /* hero */
   .t-hero h1 {
     font-size: 32px;
-    line-height: 1.05;
+    line-height: 1.25;
   }
 
   .t-hero-stats {
@@ -6016,4 +6018,297 @@ a.t-construct-row {
   }
   .t-playbook-detail { padding: 24px 16px 60px; }
   .t-playbook-detail-h1 { font-size: 26px; }
+}
+
+/* === Wave 16: mobile design === */
+
+/* ── Issue 1: Hero headline — suppress manual <br> on narrow widths ──────────
+   The index.html has two <br> tags inside h1 for desktop wrapping control.
+   At ≤480px the viewport is too narrow for those breaks to look good;
+   neutralize them so the browser wraps naturally. The pill (t-hero-highlight)
+   already has box-decoration-break:clone so it handles mid-word wraps fine.  */
+@media (max-width: 480px) {
+  .t-hero h1 br {
+    display: none;
+  }
+  .t-hero h1 {
+    /* Let text wrap freely; the pill's clone decoration handles splits. */
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+}
+
+/* ── Issue 2: Browse — stacked card layout at ≤720px ──────────────────────── */
+@media (max-width: 720px) {
+
+  /* hide desktop column header entirely */
+  .t-browse-col-header { display: none; }
+
+  /* each row becomes a stacked card */
+  .t-pax-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px var(--page-px-mobile, 16px);
+    min-height: 44px;
+    /* keep accent square out of flow */
+    position: relative;
+    padding-left: calc(var(--page-px-mobile, 16px) + 16px);
+  }
+
+  /* accent square repositioned as a left-edge stripe */
+  .t-pax-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    height: 100%;
+  }
+
+  /* top row: chip + name inline */
+  .t-pax-type-col {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  /* name: full-width, slightly larger tap area */
+  .t-pax-info {
+    margin-bottom: 6px;
+  }
+
+  .t-pax-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .t-pax-tagline {
+    white-space: normal;       /* allow wrapping on mobile */
+    overflow: visible;
+    text-overflow: clip;
+    font-size: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* counts row: restore on mobile as small inline badges */
+  .t-pax-counts {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  /* author: hide (version is secondary on mobile) */
+  .t-pax-author {
+    display: none;
+  }
+
+  /* action button: full-width tap target */
+  .t-pax-actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .t-pax-actions .t-btn-sm {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+  }
+
+  /* filter row: already stacks at 900px; ensure search input fills width */
+  .t-filter-row {
+    padding: 10px var(--page-px-mobile, 16px);
+  }
+
+  #t-browse-q {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .t-filter-right {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+/* ── Issue 2: Constructs — stacked card layout at ≤720px ─────────────────── */
+@media (max-width: 720px) {
+
+  /* hide desktop column heads */
+  .t-construct-col-heads { display: none; }
+
+  /* each construct row becomes a stacked card */
+  .t-construct-row-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px var(--page-px-mobile, 16px);
+    min-height: 44px;
+    position: relative;
+  }
+
+  /* glyph + bridge dot: inline at top */
+  .t-construct-glyph-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    flex-direction: row;
+  }
+
+  /* id + name */
+  .t-construct-identity {
+    margin-bottom: 5px;
+  }
+
+  .t-construct-id {
+    font-size: 11px;
+  }
+
+  .t-construct-name {
+    font-size: 13px;
+  }
+
+  /* definition: allow wrapping, clamp to 3 lines */
+  .t-construct-definition {
+    font-size: 12px;
+    color: var(--pt-dim);
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+  }
+
+  /* pack count + packs: inline at bottom */
+  .t-pack-count {
+    font-size: 11px;
+    color: var(--pt-dim);
+    margin-bottom: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .t-construct-packs {
+    font-size: 11px;
+    color: var(--pt-dim);
+    white-space: normal;
+    word-break: break-word;
+  }
+}
+
+/* ── Issue 2: Playbooks — stacked card layout at ≤720px ─────────────────── */
+@media (max-width: 720px) {
+
+  /* hide column heads */
+  .t-playbook-col-heads { display: none; }
+
+  /* stacked card */
+  .t-playbook-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px var(--page-px-mobile, 16px);
+    min-height: 44px;
+    position: relative;
+  }
+
+  .t-playbook-glyph-wrap {
+    margin-bottom: 4px;
+  }
+
+  .t-playbook-identity {
+    margin-bottom: 5px;
+  }
+
+  .t-playbook-name {
+    font-size: 14px;
+  }
+
+  .t-playbook-desc-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    font-size: 12px;
+  }
+
+  /* parent chip + meta + engines: all in flow, stacked */
+  .t-playbook-parent {
+    margin-bottom: 4px;
+    padding-top: 0;
+  }
+
+  .t-playbook-meta {
+    flex-direction: row;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-top: 0;
+    margin-bottom: 2px;
+  }
+
+  .t-playbook-engines-col {
+    font-size: 11px;
+    padding-top: 0;
+  }
+}
+
+/* ── Issue 3: Showcase — code block overflow fix ─────────────────────────── */
+@media (max-width: 900px) {
+
+  /* ensure the story section doesn't cause horizontal scroll */
+  .t-showcase-story {
+    overflow: hidden;
+  }
+
+  /* right column: constrain width so pre can't widen the page */
+  .t-showcase-story-right {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* code block container */
+  .t-showcase-story-right .t-code-block {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* pre: horizontal scroll within the block, not the page */
+  .t-showcase-story-right .t-code-block pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-break: normal;
+    white-space: pre;
+  }
+}
+
+@media (max-width: 600px) {
+  /* tighter font on very narrow screens — more chars per line */
+  .t-showcase-story-right .t-code-block pre {
+    font-size: 11px;
+  }
+
+  /* showcase header wraps cleanly */
+  .t-showcase-title {
+    font-size: 24px;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .t-showcase-lede {
+    font-size: 14px;
+  }
 }
