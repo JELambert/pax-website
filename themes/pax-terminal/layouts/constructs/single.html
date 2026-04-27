@@ -1,0 +1,106 @@
+{{ define "main" }}
+{{- $p := . -}}
+{{- $params := $p.Params -}}
+
+<div class="t-construct-detail">
+
+  {{/* ── Breadcrumb ── */}}
+  <div class="t-caption t-construct-breadcrumb">
+    <a href="/constructs/" class="t-breadcrumb-link">// constructs</a>
+    <span class="t-breadcrumb-sep">/</span>
+    <span class="t-breadcrumb-id">{{ $params.construct_id }}</span>
+  </div>
+
+  {{/* ── Title block ── */}}
+  <div class="t-construct-title-block">
+    <h1 class="t-construct-detail-h1">{{ $p.Title }}</h1>
+
+    <div class="t-construct-meta-line">
+      <span class="t-construct-meta-id">id: {{ $params.construct_id }}</span>
+      {{- if $params.aliases -}}
+        {{- $nonEmpty := slice -}}
+        {{- range $params.aliases -}}
+          {{- if . -}}{{- $nonEmpty = $nonEmpty | append . -}}{{- end -}}
+        {{- end -}}
+        {{- if $nonEmpty -}}
+          <span class="t-construct-meta-sep">·</span>
+          <span class="t-construct-meta-aliases">aliases: {{ delimit $nonEmpty ", " }}</span>
+        {{- end -}}
+      {{- end -}}
+      {{- if $params.is_bridge -}}
+        <span class="t-construct-meta-sep">·</span>
+        <span class="t-bridge-badge">bridge construct</span>
+      {{- end -}}
+    </div>
+
+    {{- if $params.definition -}}
+    <p class="t-construct-definition-text">{{ $params.definition }}</p>
+    {{- end -}}
+  </div>
+
+  {{/* ── Bridge callout ── */}}
+  {{- if $params.is_bridge -}}
+  <div class="t-construct-bridge-callout">
+    <span class="t-construct-bridge-callout-label">cross-pax synthesis</span>
+    This construct appears in {{ $params.pack_count }} pax. Agents can run analyses that span all of them — findings from each pax are directly comparable because they share this construct definition.
+  </div>
+  {{- end -}}
+
+  {{/* ── Usage section ── */}}
+  <div class="t-construct-usage-section">
+    <div class="t-caption">// usage</div>
+    <h2 class="t-construct-usage-h2">Used in {{ $params.pack_count }} {{ if eq $params.pack_count 1 }}pax{{ else }}pax{{ end }}</h2>
+
+    <div class="t-construct-pax-cards">
+      {{- range $params.packs -}}
+        {{- $paxPage := site.GetPage (printf "/pax/%s" .pack) -}}
+        <div class="t-construct-pax-card">
+
+          {{/* Pack type chip — look up from pax page if available */}}
+          <div class="t-construct-pax-card-header">
+            {{- if $paxPage -}}
+              {{- $paxType := $paxPage.Params.pax_type | default "field" -}}
+              {{ partial "pack-type-chip.html" (dict "type" $paxType) }}
+            {{- else -}}
+              {{ partial "pack-type-chip.html" (dict "type" "field") }}
+            {{- end -}}
+
+            <a class="t-construct-pax-title" href="/pax/{{ .pack }}/">
+              {{- if $paxPage -}}
+                {{ $paxPage.Title }}
+              {{- else -}}
+                {{ .pack_title | default .pack }}
+              {{- end -}}
+            </a>
+          </div>
+
+          <div class="t-construct-pax-card-meta">
+            {{/* Direction */}}
+            {{- if eq .direction "positive" -}}
+              <span class="t-construct-direction-up" title="positive direction">↑ positive relationship</span>
+            {{- else if eq .direction "negative" -}}
+              <span class="t-construct-direction-down" title="negative direction">↓ negative relationship</span>
+            {{- else -}}
+              <span class="t-construct-direction-null">direction not specified</span>
+            {{- end -}}
+
+            {{/* Finding count */}}
+            <span class="t-construct-finding-count">
+              {{ .finding_count }} {{ if eq .finding_count 1 }}finding{{ else }}findings{{ end }}
+            </span>
+          </div>
+
+        </div>
+      {{- end -}}
+    </div>
+  </div>
+
+  {{/* ── Back link ── */}}
+  <div class="t-construct-back">
+    <a href="/constructs/" class="t-construct-back-link">← back to construct index</a>
+  </div>
+
+</div>{{/* end .t-construct-detail */}}
+
+{{ partial "footer.html" . }}
+{{ end }}

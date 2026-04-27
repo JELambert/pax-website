@@ -17,7 +17,7 @@
     <h1 class="t-constructs-h1">Constructs</h1>
     <p class="t-constructs-lede">
       <span class="t-constructs-total-count" style="font-variant-numeric: tabular-nums;">{{ $totalCount }}</span> typed variables across the registry.
-      Bridge constructs (used in 2+ paxes) connect knowledge across paxes.
+      Bridge constructs (used in 2+ pax) connect knowledge across pax.
     </p>
 
     {{/* ── Filter row ── */}}
@@ -26,12 +26,7 @@
         <span class="t-construct-search-prefix">$ filter</span>
         <input class="t-construct-search" type="text" placeholder="construct id, name, or definition…" autocomplete="off" spellcheck="false">
       </div>
-      <div class="t-kind-chips" role="group" aria-label="Filter by kind">
-        <button class="t-kind-chip is-active" data-kind="all">all</button>
-        <button class="t-kind-chip" data-kind="outcome">outcome</button>
-        <button class="t-kind-chip" data-kind="quantifiable">quantifiable</button>
-        <button class="t-kind-chip" data-kind="categorical">categorical</button>
-      </div>
+      <span class="t-dim" style="font-size:10px; opacity:0.5;">// kind metadata not yet available</span>
       <button class="t-bridge-toggle" data-active="false">bridges only</button>
       <span class="t-construct-count" style="font-variant-numeric: tabular-nums;">{{ $totalCount }} constructs</span>
     </div>
@@ -47,8 +42,8 @@
       <div class="t-construct-col-heads">
         <span>construct</span>
         <span>definition</span>
-        <span>paxes</span>
-        <span>pack list</span>
+        <span>pax</span>
+        <span>pax list</span>
       </div>
 
       {{/* ── Rows ── */}}
@@ -61,7 +56,9 @@
             {{- end -}}
             {{- $isBridge := ge $c.pack_count 2 -}}
             {{- $kindVal := $c.construct_type | default "unknown" -}}
-            <div class="t-construct-row"
+            {{- $slug := $c.id | lower | replaceRE "_" "-" -}}
+            <a class="t-construct-row t-construct-row-link"
+              href="/constructs/{{ $slug }}/"
               data-construct-id="{{ $c.id }}"
               data-construct-name="{{ $c.display_name | lower }}"
               data-construct-def="{{ $c.definition | lower }}"
@@ -72,7 +69,7 @@
               <div class="t-construct-glyph-wrap">
                 {{ partial "content-glyph.html" (dict "type" "construct") }}
                 {{- if $isBridge -}}
-                <span class="t-bridge-dot" title="bridge across {{ $c.pack_count }} paxes"></span>
+                <span class="t-bridge-dot" title="bridge across {{ $c.pack_count }} pax"></span>
                 {{- end -}}
               </div>
 
@@ -85,25 +82,25 @@
               {{/* Col 3: definition */}}
               <div class="t-construct-definition">{{ $c.definition }}</div>
 
-              {{/* Col 4: pack count */}}
+              {{/* Col 4: pax count */}}
               <div class="t-pack-count{{ if $isBridge }} is-bridge{{ end }}" style="font-variant-numeric: tabular-nums;">
                 {{ $c.pack_count }}
-                {{- if eq $c.pack_count 1 }} pax{{- else }} paxes{{- end }}
+                {{- if eq $c.pack_count 1 }} pax{{- else }} pax{{- end }}
               </div>
 
-              {{/* Col 5: pack id links, truncated to 3 */}}
+              {{/* Col 5: pax slugs, truncated to 3 (no nested <a> inside <a>) */}}
               <div class="t-construct-packs">
                 {{- range $i, $pack := $c.packs -}}
                   {{- if lt $i 3 -}}
                     {{- if gt $i 0 -}}, {{ end -}}
-                    <a class="t-construct-pack-link" href="/pax/{{ $pack.pack }}/">{{ $pack.pack }}</a>
+                    <span class="t-construct-pack-link">{{ $pack.pack }}</span>
                   {{- end -}}
                 {{- end -}}
                 {{- if gt $c.pack_count 3 -}}
                   <span class="t-pack-more">… {{ sub $c.pack_count 3 }} more</span>
                 {{- end -}}
               </div>
-            </div>
+            </a>
           {{- end -}}
         {{- else -}}
           <div class="t-empty">no constructs.json available — run `bash scripts/fetch-artifacts.sh &amp;&amp; python3 scripts/generate-content.py`</div>
@@ -115,16 +112,16 @@
     <div class="t-constructs-right">
       <div class="t-explainer-panel">
 
-        {{ partial "section-head.html" (dict "caption" "why this matters" "title" "Bridges connect paxes") }}
+        {{ partial "section-head.html" (dict "caption" "why this matters" "title" "Bridges connect pax") }}
 
         <p class="t-explainer-body">
-          Paxes are independently authored, but constructs with the same id mean the same thing.
-          When two paxes both define <span class="t-construct-example">gdp_per_capita</span>, an agent
+          Pax are independently authored, but constructs with the same id mean the same thing.
+          When two pax both define <span class="t-construct-example">gdp_per_capita</span>, an agent
           can run an analysis that spans both.
         </p>
         <p class="t-explainer-body">
-          Bridge constructs (cobalt-flagged in the list) appear in 2 or more paxes.
-          They are the seams that let cross-pack synthesis work.
+          Bridge constructs (cobalt-flagged in the list) appear in 2 or more pax.
+          They are the seams that let cross-pax synthesis work.
         </p>
         <p class="t-explainer-body">
           The registry validates that bridge constructs have compatible definitions, units, and measurement
@@ -136,7 +133,7 @@
         {{ partial "code-block.html" (dict
           "lang" "bash"
           "id" "constructs-cli"
-          "code" "# find every pax that defines a construct\n$ pax constructs gdp_per_capita\ngdp_per_capita        outcome   USD\n  in 2 paxes:\n    C civil-conflict           (+22 findings)\n    C climate-adaptation       (+18 findings)\n  total: 40 findings\n\n# inspect bridges across registry\n$ pax bridges gdp_per_capita\n  bridge confirmed: 2 paxes share this construct\n  definition match: OK\n  unit match:       OK\n  level match:      OK"
+          "code" "# find every pax that defines a construct\n$ pax constructs gdp_per_capita\ngdp_per_capita        outcome   USD\n  in 2 pax:\n    C civil-conflict           (+22 findings)\n    C climate-adaptation       (+18 findings)\n  total: 40 findings\n\n# inspect bridges across registry\n$ pax bridges gdp_per_capita\n  bridge confirmed: 2 pax share this construct\n  definition match: OK\n  unit match:       OK\n  level match:      OK"
         ) }}
 
         {{ partial "section-head.html" (dict "caption" "stats") }}
@@ -144,7 +141,7 @@
         <div class="t-constructs-stats">
           {{ partial "stat-tile.html" (dict "value" $totalCount "label" "total constructs") }}
           {{ partial "stat-tile.html" (dict "value" $bridgeCount "label" "bridges") }}
-          {{ partial "stat-tile.html" (dict "value" "2.0" "label" "avg paxes / bridge") }}
+          {{ partial "stat-tile.html" (dict "value" "2.0" "label" "avg pax / bridge") }}
         </div>
 
       </div>
@@ -163,25 +160,21 @@
   if (rows.length === 0) return;
 
   var searchInput  = document.querySelector('.t-construct-search');
-  var kindChips    = Array.from(document.querySelectorAll('.t-kind-chip'));
   var bridgeToggle = document.querySelector('.t-bridge-toggle');
   var countDisplay = document.querySelector('.t-construct-count');
 
-  var activeKinds  = new Set(['all']);
-  var bridgeOnly   = false;
+  var bridgeOnly = false;
 
   function updateCount(visible) {
     if (countDisplay) countDisplay.textContent = visible + ' construct' + (visible !== 1 ? 's' : '');
   }
 
   function applyFilters() {
-    var query      = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    var kindAll    = activeKinds.has('all');
-    var visible    = 0;
+    var query   = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    var visible = 0;
 
     rows.forEach(function (row) {
       var matchText   = true;
-      var matchKind   = true;
       var matchBridge = true;
 
       if (query) {
@@ -191,15 +184,11 @@
         matchText = id.includes(query) || name.includes(query) || def.includes(query);
       }
 
-      if (!kindAll) {
-        matchKind = activeKinds.has(row.dataset.constructKind);
-      }
-
       if (bridgeOnly) {
         matchBridge = row.dataset.bridge === 'true';
       }
 
-      var show = matchText && matchKind && matchBridge;
+      var show = matchText && matchBridge;
       row.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -211,36 +200,6 @@
     searchInput.addEventListener('input', applyFilters);
   }
 
-  kindChips.forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      var kind = chip.dataset.kind;
-
-      if (kind === 'all') {
-        activeKinds = new Set(['all']);
-        kindChips.forEach(function (c) { c.classList.remove('is-active'); });
-        chip.classList.add('is-active');
-      } else {
-        activeKinds.delete('all');
-        var allChip = document.querySelector('.t-kind-chip[data-kind="all"]');
-        if (allChip) allChip.classList.remove('is-active');
-
-        if (chip.classList.contains('is-active')) {
-          chip.classList.remove('is-active');
-          activeKinds.delete(kind);
-          if (activeKinds.size === 0) {
-            activeKinds = new Set(['all']);
-            if (allChip) allChip.classList.add('is-active');
-          }
-        } else {
-          chip.classList.add('is-active');
-          activeKinds.add(kind);
-        }
-      }
-
-      applyFilters();
-    });
-  });
-
   if (bridgeToggle) {
     bridgeToggle.addEventListener('click', function () {
       bridgeOnly = !bridgeOnly;
@@ -249,6 +208,16 @@
       applyFilters();
     });
   }
+
+  // Hydrate from ?q= so header search redirect works end-to-end
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('q');
+    if (q && searchInput) {
+      searchInput.value = q;
+      applyFilters();
+    }
+  } catch (e) { /* no-op */ }
 
   updateCount(rows.length);
 })();

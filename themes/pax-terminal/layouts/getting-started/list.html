@@ -4,7 +4,7 @@
 <header class="t-gs-header">
   <div class="t-caption">// start/</div>
   <h1 class="t-gs-title">Two ways to use Pax</h1>
-  <p class="t-gs-lede">Pick the tier that matches how you want to consume verified knowledge. Tier 1 needs no tooling. Tier 2 hands paxes to an agent via the Praxis MCP server.</p>
+  <p class="t-gs-lede">Pick the tier that matches how you want to consume verified knowledge. Tier 1 needs no tooling. Tier 2 hands pax to an agent via the Praxis MCP server.</p>
 
   {{- /* ── Tier tab nav ───────────────────────────────────────────────── */ -}}
   <nav class="t-gs-tabs" id="tier-tabs">
@@ -19,6 +19,11 @@
     <div class="t-gs-panel-left">
       {{ partial "section-head.html" (dict "caption" "tier.01 · zero install" "title" "Paste-to-Claude") }}
       <p class="t-gs-body-lede">Copy a pax bundle into any chat-based LLM. Works with Claude, ChatGPT, Gemini, Llama. No tooling, no account, no install.</p>
+
+      <div class="t-gs-dl-callout">
+        <p class="t-gs-dl-callout-copy">Need a starting kit? Download the usage guide and paste it alongside any pax.</p>
+        <a href="/PAX_USAGE_GUIDE.md" download class="t-btn-primary">[ download ] usage guide.md</a>
+      </div>
 
       <ol class="t-gs-steps">
         <li>
@@ -62,7 +67,7 @@
 Constraints:
   - Cite findings by ID (F001, F042, ...)
   - Quote propositions verbatim when used
-  - If the pack does not cover a question, say so
+  - If the pax does not cover a question, say so
 
 &lt;pax name="global-supply-chain-risk" version="1.0.9"&gt;
 constructs:
@@ -143,12 +148,12 @@ network given:
           <div class="t-gs-tool-row">
             <span class="t-gs-tool-name">praxis_query_constructs</span>
             <span class="t-gs-tool-sig">(pax?: str)</span>
-            <span class="t-gs-tool-desc">list and search constructs across paxes</span>
+            <span class="t-gs-tool-desc">list and search constructs across pax</span>
           </div>
           <div class="t-gs-tool-row">
             <span class="t-gs-tool-name">praxis_align_constructs</span>
             <span class="t-gs-tool-sig">(pax_a: str, pax_b: str)</span>
-            <span class="t-gs-tool-desc">find bridge constructs between two paxes</span>
+            <span class="t-gs-tool-desc">find bridge constructs between two pax</span>
           </div>
           <div class="t-gs-tool-row">
             <span class="t-gs-tool-name">praxis_run_playbook</span>

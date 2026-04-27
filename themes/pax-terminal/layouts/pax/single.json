@@ -1,0 +1,28 @@
+{{- $p := dict
+  "name"               .Params.name
+  "title"              .Title
+  "version"            .Params.version
+  "pax_type"           .Params.pax_type
+  "description"        .Params.description
+  "author"             .Params.author
+  "license"            .Params.license
+  "tags"               .Params.tags
+  "construct_count"    .Params.construct_count
+  "finding_count"      .Params.finding_count
+  "proposition_count"  .Params.proposition_count
+  "has_playbooks"      .Params.has_playbooks
+  "has_data_sources"   .Params.has_data_sources
+  "engines"            .Params.engines
+  "domain"             .Params.domain
+  "constructs_detail"  .Params.constructs_detail
+  "findings_detail"    .Params.findings_detail
+  "propositions_detail" .Params.propositions_detail
+  "sources_detail"     .Params.sources_detail
+  "playbooks_detail"   .Params.playbooks_detail
+  "relationships_detail" .Params.relationships_detail
+  "download_url"       .Params.download_url
+  "download_size"      .Params.download_size
+  "schema_version"     "2.0"
+  "url"                .Permalink
+-}}
+{{- jsonify (dict "indent" "  ") $p -}}

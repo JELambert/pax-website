@@ -67,7 +67,7 @@ schema_version: "2.0"
 pax_type: topic                  # paper | topic | field | enterprise | engine
 author: "Your Name"
 created: "2026-04-09"
-license: CC-BY-4.0
+license: ""                      # set per-pack; leave empty if unspecified
 tags: [economics, development]
 provides:
   constructs: [construct_id_1, construct_id_2]

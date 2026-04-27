@@ -13,6 +13,11 @@
         {{- with $f.n }}<span class="t-finding-stat"><span class="t-stat-label">N</span> {{ . }}</span>{{ end -}}
         {{- with $f.model_specification }}<span class="t-finding-stat"><span class="t-stat-label">design</span> {{ . }}</span>{{ end -}}
         {{- with $f.source_id }}<span class="t-finding-source">· {{ . }}</span>{{ end -}}
+        {{- with $f.construct_ids }}{{ if gt (len .) 0 }}<span class="t-finding-constructs">·
+          {{- range $ci, $cid := . }}{{ if gt $ci 0 }}, {{ end -}}
+          {{- $cslug := replace (lower $cid) "_" "-" -}}
+          <a href="/constructs/{{ $cslug }}/" class="t-construct-link">{{ $cid }}</a>
+          {{- end }}</span>{{ end }}{{ end -}}
         <span class="t-finding-confidence t-conf-{{ $f.confidence | default "unknown" }}">{{ $f.confidence | default "unknown" }}</span>
         {{- if $f.direction }}
         <span class="t-finding-direction{{ if eq $f.direction "positive" }} t-positive{{ else if eq $f.direction "negative" }} t-negative{{ end }}">

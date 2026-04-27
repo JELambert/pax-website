@@ -6,11 +6,20 @@
     <div class="t-guide-header-left">
       <div class="t-caption">// guide/</div>
       <h1 class="t-guide-h1">Authoring guide</h1>
-      <p class="t-guide-lede">Everything you need to write, validate, and submit a pax. Cite well, structure rigorously, version honestly.</p>
+      <p class="t-guide-lede">Everything you need to write and submit a pax. Cite well, structure rigorously, version honestly.</p>
     </div>
     <div class="t-guide-header-right">
       <a href="/PAX_CREATION_GUIDE.md" download class="t-guide-dl-link">creation guide.md</a>
       <a href="/PAX_USAGE_GUIDE.md" download class="t-guide-dl-link">usage guide.md</a>
+    </div>
+  </div>
+
+  {{/* ── Guide download callout ───────────────────────────────────────── */}}
+  <div class="t-guide-dl-strip">
+    <p class="t-guide-dl-strip-copy">Hand these to Claude, ChatGPT, or Gemini and you can author or use a pax without any local tooling.</p>
+    <div class="t-guide-dl-strip-btns">
+      <a href="/PAX_CREATION_GUIDE.md" download class="t-btn-primary">[ download ] creation guide.md</a>
+      <a href="/PAX_USAGE_GUIDE.md" download class="t-btn-secondary">[ download ] usage guide.md</a>
     </div>
   </div>
 
@@ -21,6 +30,7 @@
     <nav class="t-guide-toc" aria-label="Guide contents">
       <div class="t-caption">// contents</div>
       <ul class="t-guide-toc-list">
+        <li><a href="#section-0" data-toc-target class="t-toc-recommended">00. agent-authored</a></li>
         <li><a href="#section-1" data-toc-target>01. what is a pax</a></li>
         <li><a href="#section-2" data-toc-target>02. anatomy</a></li>
         <li><a href="#section-3" data-toc-target>03. constructs</a></li>
@@ -38,19 +48,40 @@
     {{/* ── Body column ─────────────────────────────────────────── */}}
     <div class="t-guide-body">
 
+      {{/* 00. agent-authored */}}
+      <section id="section-0" class="t-guide-section t-guide-section-recommended">
+        {{ partial "section-head.html" (dict "caption" "00.agent-authored" "title" "Author with an agent" "kicker" "recommended path") }}
+        <p class="t-guide-prose">Most authors don't write a pax by hand. Any frontier language model — Claude, ChatGPT, Gemini, Llama — can draft a well-formed pax when given the creation guide as context. You don't need a runtime, a CLI, or a local install.</p>
+
+        <ol class="t-guide-ol">
+          <li><strong>Download the creation guide</strong> (button below) and the source paper, dataset, or report you want to package.</li>
+          <li><strong>Open your agent of choice and paste both</strong> — the creation guide first, then the source material.</li>
+          <li><strong>Ask the agent to draft a pax</strong> that conforms to the schema. The model writes the JSON files, the YAML manifest, and the playbooks.</li>
+          <li><strong>Inspect the folder</strong> — the structure is human-readable flat files. Fix anything that looks off before you submit.</li>
+          <li><strong>Submit at <a href="https://submit.pax-market.com" class="t-guide-link">submit.pax-market.com</a></strong> for automated lint and peer review.</li>
+        </ol>
+
+        <p class="t-guide-prose">The agent needs two things in its context window: the creation guide (schema rules, field definitions, type constraints) and your source material. The rest is generation. Review the anatomy section below if you want to understand what the agent produced.</p>
+
+        <div class="t-guide-agent-dl-row">
+          <a href="/PAX_CREATION_GUIDE.md" download class="t-btn-primary">[ download ] creation guide.md</a>
+          <a href="/PAX_USAGE_GUIDE.md" download class="t-btn-secondary">[ download ] usage guide.md</a>
+        </div>
+      </section>
+
       {{/* 01. what is a pax */}}
       <section id="section-1" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "01.what-is-a-pax" "title" "What is a pax") }}
-        <p class="t-guide-prose">A pax — Portable Analytical eXpertise — is a structured, machine-readable knowledge package that captures the accumulated empirical knowledge of a research domain. It is not a paper, a database, or a model weight file. It is a folder of flat YAML and JSON that any agent, any script, or any human can read without tooling.</p>
+        <p class="t-guide-prose">A pax — Portable Analytic eXpertise — is a structured, machine-readable knowledge package that captures the accumulated empirical knowledge of a research domain. It is not a paper, a database, or a model weight file. It is a folder of flat YAML and JSON that any agent, any script, or any human can read without tooling.</p>
         <p class="t-guide-prose">The central insight is portability. Frontier language models know surface-level facts about a lot of domains. They do not know which claims are well-identified, which findings have replicated, or what the field's canonical vocabulary even is. A pax answers all three questions: <strong>here is the vocabulary, here are the findings, here is who said what and how they measured it.</strong></p>
         <p class="t-guide-prose">Paxes are evidence-backed. Every finding must point to a source entry with a resolvable DOI (or a declared caveat when the literature does not provide one). The linter enforces referential integrity at publish time — a finding cannot cite a source that does not exist in sources.json.</p>
-        <p class="t-guide-prose">Paxes are composable. An agent running a playbook can import multiple paxes and resolve constructs across them using the shared construct registry. The registry detects near-duplicate ids and warns authors before collision enters the shared namespace.</p>
+        <p class="t-guide-prose">Pax is composable. An agent running a playbook can import multiple pax and resolve constructs across them using the shared construct registry. The registry detects near-duplicate ids and warns authors before collision enters the shared namespace.</p>
       </section>
 
       {{/* 02. anatomy */}}
       <section id="section-2" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "02.anatomy" "title" "Anatomy of a pax") }}
-        <p class="t-guide-prose">Every pax is a directory. The directory name is the pack's kebab-case id. Inside it you will always find a manifest, and usually find the five knowledge files plus a playbooks subdirectory. Files are flat JSON — no proprietary database, no encoding tricks, no binary blobs.</p>
+        <p class="t-guide-prose">Every pax is a directory. The directory name is the pax's kebab-case id. Inside it you will always find a manifest, and usually find the five knowledge files plus a playbooks subdirectory. Files are flat JSON — no proprietary database, no encoding tricks, no binary blobs.</p>
         {{ partial "code-block.html" (dict "lang" "text" "id" "anatomy-tree" "code" "my-pack-name/\n  pax.yaml                       # manifest (required)\n  knowledge/\n    domain.json                  # domain definition (required)\n    constructs.json              # construct vocabulary (required)\n    findings.json                # empirical claims (required if sourced)\n    sources.json                 # paper/report metadata (required if findings)\n    propositions.json            # theoretical claims (optional)\n    construct_relationships.json # causal/correlational links (optional)\n  playbooks/\n    quick_start.yaml             # analysis workflow (optional)") }}
         <p class="t-guide-prose">The simplest valid pax has a manifest, a domain file, and a constructs file. Add findings, sources, and a playbook when you have the evidence. The linter will tell you what is missing for each pax type at validation time.</p>
 
@@ -135,7 +166,7 @@
 
       {{/* 05. sources */}}
       <section id="section-5" class="t-guide-section">
-        {{ partial "section-head.html" (dict "caption" "05.sources" "title" "Sources &amp; citations") }}
+        {{ partial "section-head.html" (dict "caption" "05.sources" "title" "Sources & citations") }}
         <p class="t-guide-prose">Every finding must have a source. Sources live in sources.json and are referenced by id from findings. The id convention is author_year — for multi-author papers use first-author only (e.g., fearon_laitin_2003). For reports or grey literature, use org_year (e.g., worldbank_2022).</p>
         {{ partial "code-block.html" (dict "lang" "json · knowledge/sources.json" "id" "sources-ex" "code" "[\n  {\n    \"id\":                   \"author_year_2024\",\n    \"source_type\":          \"academic_paper\",\n    \"title\":               \"The Full Paper Title Goes Here\",\n    \"authors\":             \"Last, First; Last2, First2\",\n    \"year\":                2024,\n    \"doi\":                 \"10.1234/example.doi\",\n    \"methodology_summary\": \"Panel regression with country/year FE, N=1200\",\n    \"sample_size\":         1200,\n    \"study_design\":        \"observational_longitudinal\",\n    \"open_access\":         true\n  }\n]") }}
         <p class="t-guide-prose"><strong>Required:</strong> id, title, authors, year. Strongly encouraged: doi, study_design. The linter resolves DOIs against Crossref and flags unresolvable ones as warnings. Open-access papers must set open_access: true and must be linkable at publish time. Paywalled papers must declare open_access: false — do not leave it null.</p>
@@ -161,17 +192,16 @@
       {{/* 07. playbooks */}}
       <section id="section-7" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "07.playbooks" "title" "Playbooks · YAML DSL" "kicker" "Step-by-step recipes the agent runs end-to-end.") }}
-        <p class="t-guide-prose">A playbook is a reproducible analysis workflow defined in YAML. It specifies inputs, which engines to use, and the order of steps. Each step references an engine by id and passes typed arguments. Engines are separate paxes of type "engine" — the playbook does not bundle the code, it declares the dependency.</p>
+        <p class="t-guide-prose">A playbook is a reproducible analysis workflow defined in YAML. It specifies inputs, which engines to use, and the order of steps. Each step references an engine by id and passes typed arguments. Engines are separate pax of type "engine" — the playbook does not bundle the code, it declares the dependency.</p>
         {{ partial "code-block.html" (dict "lang" "yaml · playbooks/quick_start.yaml" "id" "playbook-ex" "code" "name: cascading-failure\nversion: 1.0\ndescription: |\n  Compute centrality, identify critical nodes,\n  test percolation under random and targeted failure.\ninputs:\n  - id: network\n    schema: edgelist\n  - id: id_col\n    type: string\n    default: \"node_id\"\nengines:\n  - network_centrality\n  - percolation\nsteps:\n  - id: 01_centrality\n    engine: network_centrality\n    args:\n      measures: [betweenness, eigenvector, harmonic]\n    out: centrality_table\n  - id: 02_percolation\n    engine: percolation\n    args:\n      mode: random\n      thresholds: [0.05, 0.10, 0.20]\n    out: failure_curve\n  - id: 03_targeted\n    engine: percolation\n    args:\n      mode: targeted\n      order_by: betweenness\n    out: critical_nodes\n  - id: 04_report\n    engine: yaml_report\n    in: [centrality_table, failure_curve, critical_nodes]\n    out: results.yaml\non_error: log_and_continue\noutput:\n  format: yaml\n  attach_findings: [F003, F011]") }}
-        <p class="t-guide-prose">Playbook ids follow snake_case. The quick_start.yaml name is a convention — the registry surfaces it as the primary playbook on the pack's detail page. A pack of type "engine" carries no constructs or findings, only playbooks and the engine definition itself.</p>
+        <p class="t-guide-prose">Playbook ids follow snake_case. The quick_start.yaml name is a convention — the registry surfaces it as the primary playbook on the pax's detail page. A pax of type "engine" carries no constructs or findings, only playbooks and the engine definition itself.</p>
       </section>
 
       {{/* 08. validation */}}
       <section id="section-8" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "08.validation" "title" "Validation") }}
-        <p class="t-guide-prose">Run <code class="t-inline-code">pax validate</code> before submitting. The linter checks every structural constraint. It will not block on warnings, but it will block on errors. Fix all errors; review all warnings before deciding to ignore them.</p>
-        {{ partial "code-block.html" (dict "lang" "bash" "id" "validate-ex" "code" "$ pax validate\n\nv pax.yaml              schema ok · type=field · version=1.0.9\nv constructs.json       38 entries · all ids snake_case · no registry collisions\nv findings.json         113 entries · all source_ids resolved · all construct_ids resolved\nv sources.json          47 entries · 46/47 doi resolved\nW findings.json         F042: confidence='strong' but design=observational_cross_sectional\n                        (suggest 'moderate'? — non-blocking)\nv propositions.json     12 entries · all evidence ids resolved\nv playbooks/            8 files · all engines registered\n\nready  1 warning") }}
-        <div class="t-guide-subsection-head">what the linter checks</div>
+        <p class="t-guide-prose">Validation runs server-side when you submit. There is no local CLI yet — the registry's CI pipeline checks every structural constraint on upload. Errors block publication; warnings are surfaced for author review but do not block.</p>
+        <div class="t-guide-subsection-head">what the registry checks</div>
         <table class="t-guide-table">
           <thead><tr><th>check</th><th>blocking</th></tr></thead>
           <tbody>
@@ -183,9 +213,10 @@
             <tr><td>Proposition evidence ids resolve to findings</td><td>yes</td></tr>
             <tr><td>DOI resolution against Crossref</td><td>warning</td></tr>
             <tr><td>Confidence vs study_design consistency</td><td>warning</td></tr>
-            <tr><td>SHA-256 stability of pack contents</td><td>warning on change</td></tr>
+            <tr><td>SHA-256 stability of pax contents</td><td>warning on change</td></tr>
           </tbody>
         </table>
+        <p class="t-guide-prose">If you author through an LLM with the creation guide loaded, the agent can self-check most of these constraints before you submit. The registry will re-verify on upload.</p>
       </section>
 
       {{/* 09. peer review */}}
@@ -198,13 +229,13 @@
           <li><strong>Editorial pass.</strong> One human reviewer skims for obvious miscitations, sign flips, or unsupported confidence labels. They do not re-do your peer review — they check you are representing the literature faithfully.</li>
           <li><strong>Trust score.</strong> Each pax receives a public trust score (0–5) based on author credentials, source quality, replication evidence, and schema completeness. Visible on the marketplace detail page.</li>
         </ol>
-        <p class="t-guide-prose">Estimated time from PR open to publish: 48–72h for well-formed paxes. Schema errors will extend this; fix them before opening the PR.</p>
+        <p class="t-guide-prose">Estimated time from PR open to publish: 48–72h for well-formed pax. Schema errors will extend this; fix them before opening the PR.</p>
       </section>
 
       {{/* 10. versioning */}}
       <section id="section-10" class="t-guide-section">
-        {{ partial "section-head.html" (dict "caption" "10.versioning" "title" "Versioning &amp; deprecations") }}
-        <p class="t-guide-prose">Paxes use semantic versioning. The version in pax.yaml is the pack version — it is distinct from schema_version, which tracks the pax format specification. Bump pack version according to the rules below whenever you publish a change.</p>
+        {{ partial "section-head.html" (dict "caption" "10.versioning" "title" "Versioning & deprecations") }}
+        <p class="t-guide-prose">Pax uses semantic versioning. The version in pax.yaml is the pax version — it is distinct from schema_version, which tracks the pax format specification. Bump the pax version according to the rules below whenever you publish a change.</p>
         <table class="t-guide-table">
           <thead><tr><th>bump</th><th>when</th></tr></thead>
           <tbody>
@@ -213,32 +244,28 @@
             <tr><td class="t-num">patch</td><td>typo fixes, source-id corrections, additional aliases, metadata updates</td></tr>
           </tbody>
         </table>
-        <p class="t-guide-prose">Deprecations must live in pax.yaml for at least two minor versions before an id is removed. The deprecated field accepts an array of objects with id, deprecated_in, and reason. Any downstream pax depending on a deprecated id will receive a warning at their next validate run.</p>
+        <p class="t-guide-prose">Deprecations must live in pax.yaml for at least two minor versions before an id is removed. The deprecated field accepts an array of objects with id, deprecated_in, and reason. Any downstream pax depending on a deprecated id will surface a warning at their next registry submission.</p>
         {{ partial "code-block.html" (dict "lang" "yaml · pax.yaml — deprecation block" "id" "deprecation-ex" "code" "deprecated:\n  - id: old_construct_name\n    deprecated_in: \"1.3.0\"\n    reason: \"Renamed to new_construct_name for registry alignment.\"\n    replaced_by: new_construct_name") }}
       </section>
 
       {{/* 11. publishing */}}
       <section id="section-11" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "11.publishing" "title" "Publishing") }}
-        <p class="t-guide-prose">There are two paths to publishing a pax: the web uploader at submit.pax-market.com, and a direct pull request on the pax-market registry repository. Both paths run the same CI pipeline — schema lint, DOI check, construct collision check — before merging.</p>
+        <p class="t-guide-prose">There are two paths to publishing a pax: the web uploader, or directly through Praxis. Both paths run the same registry validation before merging.</p>
 
         <div class="t-guide-subsection-head">path 1 — web upload</div>
         <ol class="t-guide-ol">
-          <li>Zip your pack directory: <code class="t-inline-code">zip -r my-pack.zip my-pack-name/</code></li>
-          <li>Upload at <a href="https://submit.pax-market.com" class="t-guide-link">submit.pax-market.com</a> — sign in with GitHub.</li>
+          <li>Zip your pax directory: <code class="t-inline-code">zip -r my-pax.zip my-pax-name/</code></li>
+          <li>Upload at <a href="https://submit.pax-market.com" class="t-guide-link">submit.pax-market.com</a>.</li>
           <li>Validation runs automatically. Errors appear inline; fix and re-upload.</li>
-          <li>A pull request is opened on the registry on your behalf.</li>
-          <li>After editorial review, your pack is merged and live within minutes.</li>
+          <li>After editorial review, your pax is merged and live within minutes.</li>
         </ol>
 
-        <div class="t-guide-subsection-head">path 2 — direct PR</div>
-        {{ partial "code-block.html" (dict "lang" "bash" "id" "publish-ex" "code" "# fork github.com/JELambert/pax-market, then:\ngit clone https://github.com/YOUR_HANDLE/pax-market\ncp -r my-pack-name pax-market/packs/\ncd pax-market\ngit checkout -b add-my-pack-name\ngit add packs/my-pack-name/\ngit commit -m \"add: my-pack-name v1.0.0\"\ngit push origin add-my-pack-name\n# open PR — CI runs automatically") }}
+        <div class="t-guide-subsection-head">path 2 — publish through praxis</div>
+        <p class="t-guide-prose">If you already use the <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-guide-link">Praxis MCP server</a>, you can author and publish from inside any MCP-aware agent (Claude Code, Continue, Zed, Cursor). The agent calls <code class="t-inline-code">praxis_publish_pax</code> with your pax folder; Praxis handles the validation and submission to the registry on your behalf.</p>
+        {{ partial "code-block.html" (dict "lang" "agent · MCP tool call" "id" "publish-praxis-ex" "code" "praxis_publish_pax(\n  path=\"./my-pax-name\",\n  message=\"Initial release\"\n)\n\n→ validating schema...      ok\n→ resolving DOIs...         47/47 ok\n→ checking construct ids... no collisions\n→ submitted to pax-market   pr #142") }}
 
-        <p class="t-guide-prose">CI validates the pack, generates a registry release, and deploys the updated /registry.json to the CDN. Your pack's detail page appears at pax-market.com/pax/my-pack-name immediately after deploy completes.</p>
-
-        <div class="t-guide-prose-section">
-          {{ .Content }}
-        </div>
+        <p class="t-guide-prose">Either path lands at the same place: once accepted, your pax appears at <code class="t-inline-code">pax-market.com/pax/my-pax-name</code> immediately after deploy.</p>
       </section>
 
     </div>{{/* end .t-guide-body */}}
@@ -250,7 +277,7 @@
         <ul class="t-guide-ref-list">
           <li><a href="https://github.com/JELambert/pax-market" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] pax-market/registry</a></li>
           <li><a href="https://github.com/JELambert/pax-market/blob/main/schema.json" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] schema.json</a></li>
-          <li><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] CC-BY 4.0</a></li>
+          <li><a href="/guide/#section-10" class="t-guide-ref-link">[ ] versioning guide</a></li>
           <li><a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] praxis (mcp server)</a></li>
           <li><a href="https://submit.pax-market.com" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] submit a pax</a></li>
         </ul>

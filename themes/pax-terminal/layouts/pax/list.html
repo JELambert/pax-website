@@ -7,7 +7,7 @@
   <div class="t-caption">// pax/index</div>
   <h1 class="t-browse-h1">Browse the registry</h1>
   <p class="t-browse-lede">
-    {{ $pageCount }} paxes available &middot; last sync {{ now.Format "2006-01-02 15:04 MST" }}
+    {{ $pageCount }} pax available &middot; last sync {{ now.Format "2006-01-02 15:04 MST" }}
   </p>
 </section>
 
@@ -23,14 +23,14 @@
     <button class="t-chip" data-type-filter="engine">[ engine ]</button>
   </div>
   <div class="t-filter-right">
-    <input type="search" id="t-browse-q" class="t-sort" placeholder="filter…" aria-label="Filter paxes by name" style="min-width:160px;">
-    <select class="t-sort" id="t-sort-select" aria-label="Sort paxes">
+    <input type="search" id="t-browse-q" class="t-sort" placeholder="filter…" aria-label="Filter pax by name" style="min-width:160px;">
+    <select class="t-sort" id="t-sort-select" aria-label="Sort pax">
       <option value="recent" selected>recent</option>
       <option value="findings">findings</option>
       <option value="constructs">constructs</option>
       <option value="alphabetical">a-z</option>
     </select>
-    <span class="t-result-count" id="t-result-count">{{ $pageCount }} paxes</span>
+    <span class="t-result-count" id="t-result-count">{{ $pageCount }} pax</span>
   </div>
 </div>
 
@@ -39,7 +39,7 @@
   <span></span>
   <span>type</span>
   <span>name &middot; description</span>
-  <span>author &middot; ver</span>
+  <span>version</span>
   <span class="t-col-right">counts</span>
   <span class="t-col-right">action</span>
 </div>
@@ -62,7 +62,7 @@
       {{/* Col 1: type accent square */}}
       <div class="t-pax-accent" style="background-color: var(--pt-{{ $type }}-type);"></div>
 
-      {{/* Col 2: pack-type chip */}}
+      {{/* Col 2: pax-type chip */}}
       <div class="t-pax-type-col">
         <span class="t-pack-chip" data-type="{{ $type }}">{{ $type }}</span>
       </div>
@@ -75,7 +75,7 @@
 
       {{/* Col 4: author / version */}}
       <div class="t-pax-author">
-        <div>{{ $p.Params.author | default "&mdash;" }}</div>
+        {{ with $p.Params.author }}<div>{{ . }}</div>{{ end }}
         <div>v{{ $p.Params.version | default "1.0.0" }}</div>
       </div>
 
@@ -96,7 +96,7 @@
 
 {{/* ── Empty state ───────────────────────────────────────────────── */}}
 <div class="t-empty" id="t-empty-state" hidden>
-  no paxes match these filters &middot; <button data-clear-filters>clear</button>
+  no pax match these filters &middot; <button data-clear-filters>clear</button>
 </div>
 
 {{ partial "footer.html" . }}
@@ -134,11 +134,12 @@
       var typeOk = activeTypes.has("all") || activeTypes.has(type);
       var qOk    = !nameQuery || name.indexOf(nameQuery) >= 0;
       var show   = typeOk && qOk;
-      row.hidden = !show;
+      // Use style.display instead of .hidden so CSS display:grid is not blocked
+      row.style.display = show ? "" : "none";
       if (show) visible++;
     });
 
-    resultCount.textContent = visible + " paxes";
+    resultCount.textContent = visible + " pax";
     emptyState.hidden = visible > 0;
   }
 

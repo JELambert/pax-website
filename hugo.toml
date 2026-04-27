@@ -17,6 +17,7 @@ theme = 'pax-terminal'
 [outputs]
   home = ['HTML', 'JSON']
   section = ['HTML', 'JSON']
+  page = ['HTML', 'JSON']
 
 [markup.goldmark.renderer]
   unsafe = true

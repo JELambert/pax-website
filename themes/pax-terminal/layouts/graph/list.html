@@ -235,9 +235,11 @@
 
     <aside class="t-graph-detail" id="t-graph-detail" aria-live="polite">
       <div class="t-graph-detail-default" data-detail-state="default">
-        {{ partial "section-head.html" (dict "caption" "hover a node" "title" "Inspect") }}
+        {{ partial "section-head.html" (dict "caption" "click a node to pin" "title" "Inspect") }}
+        <p class="t-graph-detail-hint">INFO: click any node to pin its detail</p>
         <p class="t-graph-detail-blurb">
-          Hover any dot to inspect a construct. Cobalt-filled dots are
+          Hover any dot to inspect a construct. Click to pin the detail panel
+          so you can follow the link. Cobalt-filled dots are
           <em>bridges</em> — constructs that appear in propositions linking
           two or more domains. Squares mark the eight most populous domains.
         </p>
@@ -253,6 +255,7 @@
         <div class="t-graph-detail-head">
           <span class="t-glyph t-glyph-construct">C</span>
           <span class="t-graph-detail-id" data-detail="id">—</span>
+          <button type="button" class="t-graph-unpin-btn" id="t-graph-unpin-btn" hidden>[ unpin ]</button>
         </div>
         <div class="t-graph-detail-name" data-detail="name">—</div>
         <dl class="t-graph-detail-meta">
@@ -287,7 +290,7 @@
     </div>
   </div>
 
-  {{- /* Inline JS: hover handlers + filter toggles. Defensive guards. */ -}}
+  {{- /* Inline JS: hover handlers + filter toggles + click-to-pin. Wave 8C. */ -}}
   <script>
   (function () {
     var svg = document.getElementById('t-graph-svg');
@@ -297,6 +300,7 @@
 
     var defaultPane = detail.querySelector('[data-detail-state="default"]');
     var activePane  = detail.querySelector('[data-detail-state="active"]');
+    var unpinBtn    = document.getElementById('t-graph-unpin-btn');
     var fields = {};
     activePane.querySelectorAll('[data-detail]').forEach(function (el) {
       fields[el.getAttribute('data-detail')] = el;
@@ -305,6 +309,9 @@
     var nodes = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-node'));
     var edges = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-edge'));
     var anchors = Array.prototype.slice.call(svg.querySelectorAll('.t-graph-anchor'));
+
+    // Wave 8C: pin state.
+    var pinnedNodeId = null;
 
     // Build adjacency for fast hover dimming.
     var adj = {};
@@ -315,18 +322,26 @@
       (adj[t] = adj[t] || []).push({ id: s, line: l });
     });
 
-    function showActive(n) {
+    // nodeById for looking up the circle element by id.
+    var nodeById = {};
+    nodes.forEach(function (c) { nodeById[c.getAttribute('data-node-id')] = c; });
+
+    function showActive(n, pinned) {
       var id = n.getAttribute('data-node-id');
       fields.id && (fields.id.textContent = id);
       fields.name && (fields.name.textContent = n.getAttribute('data-node-name') || '—');
       fields.domain && (fields.domain.textContent = n.getAttribute('data-node-domain') || '—');
       fields.degree && (fields.degree.textContent = n.getAttribute('data-node-degree') || '0');
       fields.bridge && (fields.bridge.textContent = n.getAttribute('data-node-bridge') === '1' ? 'yes' : 'no');
-      if (fields.link) fields.link.setAttribute('href', '/constructs/' + id + '/');
+      if (fields.link) {
+        fields.link.setAttribute('href', '/constructs/?q=' + encodeURIComponent(id));
+      }
+      if (unpinBtn) unpinBtn.hidden = !pinned;
       defaultPane.hidden = true;
       activePane.hidden = false;
     }
     function showDefault() {
+      if (unpinBtn) unpinBtn.hidden = true;
       defaultPane.hidden = false;
       activePane.hidden = true;
     }
@@ -341,6 +356,7 @@
           c.classList.remove('is-dim');
         } else {
           c.classList.add('is-dim');
+          c.classList.remove('is-active');
         }
       });
       edges.forEach(function (l) {
@@ -351,31 +367,88 @@
           l.classList.remove('is-dim');
         } else {
           l.classList.add('is-dim');
+          l.classList.remove('is-active');
         }
       });
     }
     function clearHighlight() {
-      nodes.forEach(function (c) { c.classList.remove('is-active', 'is-dim'); });
+      nodes.forEach(function (c) { c.classList.remove('is-active', 'is-dim', 'is-pinned'); });
       edges.forEach(function (l) { l.classList.remove('is-active', 'is-dim'); });
+    }
+
+    // Apply pinned visual treatment to the pinned node circle.
+    function applyPinnedStyle(id) {
+      nodes.forEach(function (c) { c.classList.remove('is-pinned'); });
+      if (id && nodeById[id]) {
+        nodeById[id].classList.add('is-pinned');
+      }
+    }
+
+    function pin(nodeEl) {
+      var id = nodeEl.getAttribute('data-node-id');
+      // Clicking the already-pinned node toggles off.
+      if (pinnedNodeId === id) {
+        unpin();
+        return;
+      }
+      pinnedNodeId = id;
+      highlight(id);
+      applyPinnedStyle(id);
+      showActive(nodeEl, true);
+    }
+
+    function unpin() {
+      pinnedNodeId = null;
+      clearHighlight();
+      showDefault();
     }
 
     nodes.forEach(function (c) {
       c.addEventListener('mouseenter', function () {
+        if (pinnedNodeId) return; // pinned: ignore hover
         highlight(c.getAttribute('data-node-id'));
-        showActive(c);
+        showActive(c, false);
       });
       c.addEventListener('mouseleave', function () {
+        if (pinnedNodeId) return; // pinned: ignore hover
         clearHighlight();
         showDefault();
       });
       c.addEventListener('focus', function () {
+        if (pinnedNodeId) return;
         highlight(c.getAttribute('data-node-id'));
-        showActive(c);
+        showActive(c, false);
       });
       c.addEventListener('blur', function () {
+        if (pinnedNodeId) return;
         clearHighlight();
         showDefault();
       });
+      // Click to pin / unpin.
+      c.addEventListener('click', function (e) {
+        e.stopPropagation();
+        pin(c);
+      });
+    });
+
+    // Click empty SVG area → unpin.
+    svg.addEventListener('click', function () {
+      if (pinnedNodeId) unpin();
+    });
+
+    // Unpin button.
+    if (unpinBtn) {
+      unpinBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        unpin();
+      });
+    }
+
+    // Esc key → unpin.
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && pinnedNodeId) {
+        unpin();
+      }
     });
 
     // Filter toggles

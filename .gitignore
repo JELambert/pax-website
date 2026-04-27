@@ -1,8 +1,11 @@
 # Generated content (from registry artifacts)
 content/pax/
+content/constructs/[a-z0-9-]*/
+content/playbooks/[a-z0-9-]*/
 static/pax/*.pax.tar.gz
 data/registry.json
 data/constructs.json
+data/graph.json
 
 # Artifacts directory
 artifacts/
@@ -22,3 +25,9 @@ upload-service/.env
 # macOS
 .DS_Store
 ._*
+
+# MCP/dev logs
+logs/
+
+# Pre-redesign layouts (kept locally as fallback)
+layouts.preredesign/
