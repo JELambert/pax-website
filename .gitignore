@@ -7,6 +7,7 @@ static/PAX_CREATION_GUIDE.md
 data/registry.json
 data/constructs.json
 data/graph.json
+static/graph.json
 
 # Artifacts directory
 artifacts/
