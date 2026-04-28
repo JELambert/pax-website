@@ -7092,3 +7092,70 @@ pre {
     gap: 10px;
   }
 }
+
+/* === Wave 22: featured pax mobile alignment === */
+/* Root cause: at narrow viewports the hero card's 5-up counts grid
+   ('constructs', 'findings', 'propositions', 'playbooks', 'sources')
+   cannot fit five labels in five columns. Cells either overflow their
+   borders or clip the labels, making the section visually misaligned
+   with the rest of the page. Fix: collapse the counts grid to fewer
+   columns at mobile widths so each cell has breathing room. Also
+   tighten card paddings on the smallest viewports so the inner content
+   sits comfortably within page gutters. */
+
+@media (max-width: 720px) {
+  /* hero counts: 5-up → 3-up (top row) + 2-up (bottom row) via grid */
+  .t-featured-hero-counts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 0;
+  }
+  /* Re-do dividers since flow now wraps to 2 rows */
+  .t-featured-hero-count-cell:not(:last-child) {
+    border-right: 1px solid var(--pt-line);
+  }
+  .t-featured-hero-count-cell:nth-child(3n) {
+    border-right: none;
+  }
+  /* Reduce excess padding so inner content reaches the card edges
+     consistently with how the small cards render */
+  .t-featured-hero,
+  .t-featured-card {
+    padding: 16px;
+  }
+  .t-featured-hero-name {
+    font-size: 20px;
+  }
+  .t-featured-hero-desc {
+    font-size: 13px;
+  }
+  .t-featured-hero-count-val {
+    font-size: 18px;
+  }
+  /* Small card counts: ensure they wrap rather than overflow */
+  .t-featured-card-counts {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Section padding parity with adjacent sections (anatomy, tiers, contribute) */
+  .t-featured {
+    padding: 32px var(--page-px-mobile, 14px);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even tighter — 2 cells per row */
+  .t-featured-hero-counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 0;
+  }
+  .t-featured-hero-count-cell:nth-child(3n) {
+    border-right: 1px solid var(--pt-line);
+  }
+  .t-featured-hero-count-cell:nth-child(2n) {
+    border-right: none;
+  }
+  .t-featured-hero,
+  .t-featured-card {
+    padding: 14px;
+  }
+}
