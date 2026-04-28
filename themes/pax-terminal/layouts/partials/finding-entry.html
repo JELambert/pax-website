@@ -33,6 +33,7 @@
 {{- if $f.p_value           }}{{- if ne (printf "%v" $f.p_value) "null"           }}{{- $hasStats = true -}}{{- end }}{{- end }}
 {{- if $f.sample_size       }}{{- if ne (printf "%v" $f.sample_size) "null"       }}{{- $hasStats = true -}}{{- end }}{{- end }}
 {{- if $f.r_squared         }}{{- if ne (printf "%v" $f.r_squared) "null"         }}{{- $hasStats = true -}}{{- end }}{{- end }}
+{{- if $f.unit_of_analysis  }}{{- if ne (printf "%v" $f.unit_of_analysis) "null"  }}{{- $hasStats = true -}}{{- end }}{{- end }}
 
 {{- /* Has free-text effect (but no numeric value)? */ -}}
 {{- $hasEffectText := false -}}
@@ -121,6 +122,12 @@
       <span class="t-stat-value">[{{ $f.ci_lower }}, {{ $f.ci_upper }}]</span>
     </span>
     {{- end }}{{- end }}{{- end }}{{- end }}
+    {{- with $f.unit_of_analysis }}{{- if ne (printf "%v" .) "null" }}
+    <span class="t-stat">
+      <span class="t-stat-label">unit</span>
+      <span class="t-stat-value">{{ . }}</span>
+    </span>
+    {{- end }}{{- end }}
   </div>
   {{- end }}
 
