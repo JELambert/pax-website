@@ -537,7 +537,7 @@ button {
 /* Stat strip */
 .t-hero-stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 28px;
   margin-top: 44px;
   padding-top: 28px;
@@ -593,7 +593,7 @@ button {
 
 .t-anatomy-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -637,7 +637,7 @@ button {
 
 .t-tiers-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
   border: 1px solid var(--pt-line);
 }
@@ -695,7 +695,7 @@ button {
 
 .t-featured-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -748,7 +748,7 @@ button {
 
 .t-featured-hero-counts {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
   margin-top: auto;
   padding-top: 14px;
@@ -898,7 +898,7 @@ button {
 
 .t-showcase-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -990,7 +990,7 @@ button {
 .t-contribute {
   padding: 40px var(--page-px);
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 32px;
   align-items: center;
   border-bottom: 1px solid var(--pt-line);
@@ -1613,7 +1613,7 @@ button {
 
 .t-about-principles-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   border: 1px solid var(--pt-line);
   max-width: 1200px;
@@ -1668,7 +1668,7 @@ button {
 /* Footer section */
 .t-about-footer {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0;
   border-top: 1px solid var(--pt-line);
   background: var(--pt-bg);
@@ -1752,7 +1752,7 @@ button {
 
 .t-api-main {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 28px;
   padding: 28px var(--page-px) 40px var(--page-px);
 }
@@ -1881,7 +1881,7 @@ button {
 /* Story rows */
 .t-showcase-story {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 40px;
   padding: 52px var(--page-px);
   border-bottom: 1px solid var(--pt-line);
@@ -1889,7 +1889,7 @@ button {
 }
 
 .t-showcase-story-02 {
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
 }
 
 .t-showcase-story-02 .t-showcase-story-left {
@@ -1901,7 +1901,7 @@ button {
 }
 
 .t-showcase-story-03 {
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
 }
 
 .t-showcase-story-title {
@@ -2670,7 +2670,7 @@ button {
 
 .t-gs-panel-inner {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 32px;
   padding: 32px var(--page-px) 48px;
 }
@@ -3258,7 +3258,7 @@ button {
 /* ── Overview grid ── */
 .t-overview-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: 40px;
   align-items: start;
 }
@@ -3749,7 +3749,7 @@ button {
 /* ── Two-pane grid ── */
 .t-constructs-grid {
   display: grid;
-  grid-template-columns: 1.7fr 1fr;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
   align-items: start;
 }
 
@@ -3761,7 +3761,7 @@ button {
 /* ── Column headers ── */
 .t-construct-col-heads {
   display: grid;
-  grid-template-columns: 26px 1fr 2fr 70px 1fr;
+  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 2fr) 70px minmax(0, 1fr);
   gap: 12px;
   padding: 8px 18px;
   background: var(--pt-panel-deep, var(--pt-panel));
@@ -3776,7 +3776,7 @@ button {
 /* ── Construct row ── */
 .t-construct-row {
   display: grid;
-  grid-template-columns: 26px 1fr 2fr 70px 1fr;
+  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 2fr) 70px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   padding: 12px 18px;
@@ -5134,7 +5134,7 @@ button {
 /* Counts strip */
 .t-detail-counts-strip {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-top: 1px solid var(--pt-line);
   border-bottom: none;
   margin: 0 calc(-1 * var(--page-px));
@@ -5237,7 +5237,7 @@ button {
 /* ── Construct index: clickable row link ── */
 .t-construct-row-link {
   display: grid;
-  grid-template-columns: 26px 1fr 2fr 70px 1fr;
+  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 2fr) 70px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   padding: 12px 18px;
@@ -5577,7 +5577,7 @@ a.t-construct-row {
 
 .t-about-why-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 36px;
 }
 .t-about-why-prose {
@@ -5590,7 +5590,7 @@ a.t-construct-row {
 
 .t-about-principles-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   border-top: 1px solid var(--pt-line);
   border-left: 1px solid var(--pt-line);
@@ -5803,7 +5803,7 @@ a.t-construct-row {
 /* Column headers */
 .t-playbook-col-heads {
   display: grid;
-  grid-template-columns: 28px 1fr 160px 140px 1fr;
+  grid-template-columns: 28px minmax(0, 1fr) 160px 140px minmax(0, 1fr);
   gap: 12px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--pt-line-strong);
@@ -5817,7 +5817,7 @@ a.t-construct-row {
 /* Row */
 .t-playbook-row {
   display: grid;
-  grid-template-columns: 28px 1fr 160px 140px 1fr;
+  grid-template-columns: 28px minmax(0, 1fr) 160px 140px minmax(0, 1fr);
   gap: 12px;
   padding: 12px 12px;
   border-bottom: 1px solid var(--pt-line);
@@ -6991,5 +6991,104 @@ a.t-construct-row {
   .t-graph-zoom-label {
     padding: 3px 8px;
     font-size: 9px;
+  }
+}
+
+/* === Wave 21: mobile bounding-box sweep === */
+
+/* ── Root containment: prevent any child from pushing the viewport wider ── */
+html {
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* ── Universal min-width: 0 on grid/flex children with text content ──
+   Default min-width is "auto" (= content size) inside grid/flex. Any
+   long unbreakable token (snake_case id, URL, monospace string) will
+   push the cell past its declared fr share. Applying min-width: 0
+   lets the cell compress to its fraction and clip/wrap properly.    */
+.t-featured-grid > *,
+.t-anatomy-card,
+.t-tier-cell,
+.t-stat-tile,
+.t-showcase-card,
+.t-finding,
+.t-finding-full,
+.t-finding-compact,
+.t-pb-step-body,
+.t-principle,
+.t-about-why-prose,
+.t-meta-kv > * {
+  min-width: 0;
+}
+
+/* ── Code blocks: must never widen their container ── */
+.t-code-block,
+.t-code-block pre,
+pre,
+code {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.t-code-block pre,
+pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Long snake_case identifiers: allow graceful mid-token breaks ──
+   Without this, ids like "discovery_acceleration_factor" never break
+   and push their flex/grid cell past the viewport edge.             */
+.t-construct-id,
+.t-finding-id,
+.t-finding-source,
+.t-pb-step-op-name,
+.t-pax-id {
+  overflow-wrap: anywhere;
+}
+
+/* ── Featured pax grid: clean mobile collapse ──
+   At 900px the grid already switches to 1fr (single column) via the
+   existing @media (max-width: 900px) rule. This pass adds:
+   • an intermediate 2-column layout at 901–1100px so 5 cards don't
+     form a single cramped tall column on mid-size tablets
+   • explicit width containment so cards never exceed their column     */
+.t-featured-hero,
+.t-featured-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+  .t-featured-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* ── About-why and about-principles: collapse on mobile ── */
+@media (max-width: 720px) {
+  .t-about-why-grid {
+    grid-template-columns: 1fr;
+  }
+  .t-about-principles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .t-about-principles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Hero stat tiles: ensure they compress on very narrow viewports ── */
+@media (max-width: 360px) {
+  .t-hero-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
