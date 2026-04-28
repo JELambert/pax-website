@@ -10,7 +10,7 @@ from .security import validate_pack_name
 
 REQUIRED_MANIFEST = ["name", "version", "description", "pax_type", "schema_version"]
 VALID_TYPES = ["paper", "topic", "field", "engine", "enterprise"]
-VALID_SCHEMA_VERSIONS = ["1.0", "2.0"]
+VALID_SCHEMA_VERSIONS = ["1.0", "2.0", "3.0"]
 
 
 def validate_manifest(manifest: dict) -> tuple[list[str], list[str]]:
