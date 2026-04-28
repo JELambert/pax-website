@@ -45,6 +45,14 @@
   --site-max: 1500px;
   --col-gap: 24px;
   --cols: 12;
+
+  /* Content-width tokens — use these instead of magic max-width numbers.
+     - prose: long-form reading column (one-paragraph-wide text)
+     - narrow: short copy + action stacks
+     - wide: capped multi-card grid inside the shell */
+  --content-prose: 720px;
+  --content-narrow: 560px;
+  --content-wide: 1200px;
 }
 
 /* Theme presets */
@@ -120,6 +128,23 @@ button {
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   column-gap: var(--col-gap);
+}
+
+/* Standard section padding. Apply to <section> elements that previously
+   set `padding: 40px var(--page-px)` directly — keeps section spacing
+   consistent so future tuning lives in one place. Sections that need
+   non-standard padding (e.g. .t-hero with 48/36 split) keep their own
+   rule and don't use this class. */
+.t-section {
+  padding-block: 40px;
+  padding-inline: var(--page-px);
+}
+
+@media (max-width: 900px) {
+  .t-section {
+    padding-block: 32px;
+    padding-inline: var(--page-px-mobile);
+  }
 }
 
 .t-page {
@@ -209,7 +234,7 @@ button {
 .t-search-wrap {
   flex: 1;
   position: relative;
-  max-width: 540px;
+  max-width: var(--content-narrow);
 }
 
 .t-search-prefix {
@@ -422,7 +447,7 @@ button {
   grid-template-columns: 1fr;
   gap: 0;
   align-items: flex-start;
-  max-width: 740px;
+  max-width: var(--content-prose);
 }
 
 .t-hero-eyebrow {
@@ -465,7 +490,7 @@ button {
   line-height: 1.55;
   color: var(--pt-ink);
   margin-top: 22px;
-  max-width: 560px;
+  max-width: var(--content-narrow);
 }
 
 .t-hero-desc strong {
@@ -623,7 +648,7 @@ button {
 
 /* ─── anatomy section ────────────────────────────────────────────── */
 .t-anatomy {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -667,7 +692,7 @@ button {
 
 /* ─── pack tiers section ─────────────────────────────────────────── */
 .t-tiers {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -725,7 +750,7 @@ button {
 
 /* ─── featured paxes ─────────────────────────────────────────────── */
 .t-featured {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -895,7 +920,7 @@ button {
 
 /* ─── showcase strip (inverted cream bg) ─────────────────────────── */
 .t-showcase {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
   background: var(--pt-paper);
   color: var(--pt-paper-ink);
@@ -985,7 +1010,7 @@ button {
 
 /* ─── activity log ───────────────────────────────────────────────── */
 .t-activity {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -1024,7 +1049,7 @@ button {
 
 /* ─── contribute strip ───────────────────────────────────────────── */
 .t-contribute {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 32px;
@@ -1048,7 +1073,7 @@ button {
   line-height: 1.55;
   color: var(--pt-dim);
   margin-top: 14px;
-  max-width: 540px;
+  max-width: var(--content-narrow);
 }
 
 .t-contribute-desc code {
@@ -1119,7 +1144,7 @@ button {
   font-size: 14px;
   line-height: 1.7;
   color: var(--pt-ink);
-  max-width: 760px;
+  max-width: var(--content-prose);
 }
 
 .t-prose h2 {
@@ -1265,7 +1290,7 @@ button {
 .t-guide-h1 {
   margin: 8px 0 0;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--pt-ink);
@@ -1380,7 +1405,7 @@ button {
   line-height: 1.7;
   color: var(--pt-ink);
   margin: 12px 0 0;
-  max-width: 680px;
+  max-width: var(--content-prose);
 }
 
 .t-guide-prose strong {
@@ -1413,7 +1438,7 @@ button {
   color: var(--pt-ink);
   padding-left: 22px;
   margin: 12px 0 0;
-  max-width: 680px;
+  max-width: var(--content-prose);
 }
 
 .t-guide-ol li {
@@ -1437,7 +1462,7 @@ button {
 /* ── Tables ──────────────────────────────────────────────────────── */
 .t-guide-table {
   width: 100%;
-  max-width: 680px;
+  max-width: var(--content-prose);
   border-collapse: collapse;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 12px;
@@ -1582,7 +1607,7 @@ button {
   grid-template-columns: 1fr 280px;
   gap: 40px;
   align-items: flex-start;
-  max-width: 1200px;
+  max-width: var(--content-wide);
   margin: 0 auto;
 }
 
@@ -1606,7 +1631,7 @@ button {
   font-size: 14px;
   line-height: 1.6;
   color: var(--pt-paper-ink);
-  max-width: 560px;
+  max-width: var(--content-narrow);
   margin: 0;
 }
 
@@ -1645,7 +1670,7 @@ button {
 
 /* Principles grid */
 .t-about-principles {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -1654,7 +1679,7 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   border: 1px solid var(--pt-line);
-  max-width: 1200px;
+  max-width: var(--content-wide);
   margin: 0 auto;
 }
 
@@ -1699,7 +1724,7 @@ button {
 
 /* Content section */
 .t-about-content {
-  padding: 40px var(--page-px);
+  /* padding via .t-section class */
   border-bottom: 1px solid var(--pt-line);
 }
 
@@ -1772,7 +1797,7 @@ button {
 
 .t-api-title {
   font-family: "JetBrains Mono", monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 6px 0;
@@ -1783,7 +1808,7 @@ button {
   font-style: italic;
   font-size: 15px;
   color: var(--pt-dim);
-  max-width: 720px;
+  max-width: var(--content-prose);
   margin: 0;
   line-height: 1.55;
 }
@@ -1900,7 +1925,7 @@ button {
 
 .t-showcase-title {
   font-family: "JetBrains Mono", monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 6px 0;
@@ -1911,7 +1936,7 @@ button {
   font-style: italic;
   font-size: 15px;
   color: var(--pt-dim);
-  max-width: 720px;
+  max-width: var(--content-prose);
   margin: 0;
   line-height: 1.55;
 }
@@ -2430,7 +2455,7 @@ button {
 
 .t-browse-h1 {
   margin: 10px 0 6px;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -2654,7 +2679,7 @@ button {
 .t-gs-title {
   margin: 8px 0 6px;
   font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--pt-ink);
@@ -2664,7 +2689,7 @@ button {
   font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
   font-size: 14px;
   color: var(--pt-dim);
-  max-width: 680px;
+  max-width: var(--content-prose);
   margin: 0 0 20px;
   line-height: 1.6;
 }
@@ -2922,7 +2947,7 @@ button {
 .t-cart-title {
   margin: 8px 0 6px;
   font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--pt-ink);
@@ -3662,7 +3687,7 @@ button {
 .t-constructs-h1 {
   margin: 8px 0 6px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -3674,7 +3699,7 @@ button {
   font-size: 14px;
   color: var(--pt-dim);
   margin: 0 0 20px;
-  max-width: 680px;
+  max-width: var(--content-prose);
   line-height: 1.55;
 }
 
@@ -4032,7 +4057,7 @@ button {
 .t-graph-title {
   margin: 8px 0 6px;
   font-family: var(--pt-mono, ui-monospace, "JetBrains Mono", monospace);
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--pt-ink);
@@ -4043,7 +4068,7 @@ button {
   font-size: 14px;
   line-height: 1.6;
   color: var(--pt-dim);
-  max-width: 760px;
+  max-width: var(--content-prose);
   font-variant-numeric: tabular-nums;
 }
 .t-graph-lede-num { color: var(--pt-ink); font-variant-numeric: tabular-nums; }
@@ -4226,7 +4251,7 @@ button {
 .t-graph-empty p {
   font-size: 13px;
   line-height: 1.6;
-  max-width: 560px;
+  max-width: var(--content-narrow);
   margin: 12px auto 0;
 }
 .t-graph-empty code {
@@ -4431,38 +4456,9 @@ button {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* anatomy + tiers sections padding */
-  .t-anatomy,
-  .t-tiers {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* featured section */
-  .t-featured {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* showcase section (home strip) */
-  .t-showcase {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* contribute section */
-  .t-contribute {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* activity section */
-  .t-activity {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* about principles padding */
-  .t-about-principles {
-    padding: 32px var(--page-px-mobile);
-  }
-
-  /* about content */
+  /* mobile padding for the standard sections is handled by .t-section
+     (see :root layout helpers). Only non-standard sections need an
+     override here. */
   .t-about-content {
     padding: 28px var(--page-px-mobile);
   }
@@ -5107,7 +5103,7 @@ button {
 /* h1 */
 .t-detail-h1 {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.05;
@@ -5576,7 +5572,7 @@ a.t-construct-row {
 }
 .t-about-hero-title {
   font-family: var(--pt-font-mono);
-  font-size: 56px;
+  font-size: clamp(36px, 5vw, 56px);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -5593,7 +5589,7 @@ a.t-construct-row {
   font-size: 15px;
   line-height: 1.55;
   color: rgba(0,0,0,0.7);
-  max-width: 720px;
+  max-width: var(--content-prose);
   margin: 0;
 }
 
@@ -5766,7 +5762,7 @@ a.t-construct-row {
 }
 .t-playbooks-h1 {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 40px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 700;
   color: var(--pt-ink);
   margin: 6px 0 12px;
