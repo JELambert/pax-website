@@ -38,6 +38,13 @@
   /* Spacing */
   --page-px: 28px;
   --page-px-mobile: 14px;
+
+  /* Layout — centered 12-col shell.
+     Apply via .t-shell (or implicit on .t-page-wrap and .t-header rows).
+     Adjust --site-max alone to retune the cap; everything inside flows. */
+  --site-max: 1500px;
+  --col-gap: 24px;
+  --cols: 12;
 }
 
 /* Theme presets */
@@ -92,6 +99,27 @@ button {
 /* ─── layout helpers ─────────────────────────────────────────────── */
 .t-page-wrap {
   flex: 1;
+  width: 100%;
+  max-width: var(--site-max);
+  margin-inline: auto;
+}
+
+/* Centered shell — apply to anything that should respect the site cap.
+   .t-page-wrap already does so implicitly; use this on opt-in containers
+   inside full-bleed bands (e.g. header rows). */
+.t-shell {
+  width: 100%;
+  max-width: var(--site-max);
+  margin-inline: auto;
+}
+
+/* 12-column grid utility. Children opt in to spans via .t-col-N classes
+   or grid-column inline. min-width:0 on rows is essential to let cells
+   shrink past intrinsic content. */
+.t-grid-12 {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--col-gap);
 }
 
 .t-page {
@@ -132,6 +160,10 @@ button {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   gap: 18px;
+  /* Cap inner content at the site shell while header band stays full-bleed */
+  max-width: var(--site-max);
+  margin-inline: auto;
+  width: 100%;
 }
 
 .t-header-marquee .t-live-dot {
@@ -144,6 +176,9 @@ button {
   align-items: center;
   gap: 18px;
   padding: 12px var(--page-px);
+  max-width: var(--site-max);
+  margin-inline: auto;
+  width: 100%;
 }
 
 .t-logo {
@@ -400,10 +435,11 @@ button {
 
 .t-hero h1 {
   margin: 0;
-  font-size: 64px;
+  font-size: clamp(36px, 5.2vw, 64px);
   font-weight: 700;
-  line-height: 1.28;
+  line-height: 1.18;
   letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
 }
 
 .t-hero-highlight {
@@ -999,10 +1035,11 @@ button {
 .t-contribute h2 {
   margin: 0;
   font-family: "Source Serif 4", "Source Serif Pro", Georgia, serif;
-  font-size: 36px;
+  font-size: clamp(28px, 3.4vw, 44px);
   line-height: 1.1;
   font-weight: 500;
   font-style: italic;
+  overflow-wrap: anywhere;
 }
 
 .t-contribute-desc {
@@ -1551,11 +1588,12 @@ button {
 
 .t-about-hero-title {
   font-family: "Source Serif 4", serif;
-  font-size: 64px;
+  font-size: clamp(36px, 5.2vw, 64px);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.025em;
   margin: 0 0 28px 0;
+  overflow-wrap: anywhere;
 }
 
 .t-about-hero-title em {
