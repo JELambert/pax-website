@@ -64,17 +64,23 @@ cp "$ARTIFACTS_DIR/constructs.json" data/constructs.json
 # Sync PAX authoring guide from the praxis repo (source of truth).
 # The website copy must not drift from praxis/docs/PAX_CREATION_GUIDE.md.
 # praxis is private, so we read from the local clone at /opt/praxis (kept
-# fresh by praxis-autodeploy.timer). Fail the build if the source is missing —
-# better to halt deploy than ship stale content.
+# fresh by praxis-autodeploy.timer on CT 105). Halt the deploy if the source
+# is missing on the deploy host, but skip with a warning in CI/dev where
+# /opt/praxis isn't expected to exist — the build smoke-test only needs the
+# Hugo output, not a fresh guide.
 PRAXIS_GUIDE_SRC="${PRAXIS_GUIDE_SRC:-/opt/praxis/docs/PAX_CREATION_GUIDE.md}"
 GUIDE_DEST="static/PAX_CREATION_GUIDE.md"
-echo "Syncing PAX_CREATION_GUIDE.md from $PRAXIS_GUIDE_SRC..."
-if [ ! -s "$PRAXIS_GUIDE_SRC" ]; then
+if [ -s "$PRAXIS_GUIDE_SRC" ]; then
+    echo "Syncing PAX_CREATION_GUIDE.md from $PRAXIS_GUIDE_SRC..."
+    cp "$PRAXIS_GUIDE_SRC" "$GUIDE_DEST"
+elif [ "${REQUIRE_PRAXIS_GUIDE:-0}" = "1" ]; then
     echo "ERROR: $PRAXIS_GUIDE_SRC is missing or empty"
     echo "  Ensure /opt/praxis is cloned and praxis-autodeploy.timer is running."
     exit 1
+else
+    echo "Skipping PAX_CREATION_GUIDE.md sync — $PRAXIS_GUIDE_SRC not present"
+    echo "  (Set REQUIRE_PRAXIS_GUIDE=1 to make this fatal — CT 105 deploy does so.)"
 fi
-cp "$PRAXIS_GUIDE_SRC" "$GUIDE_DEST"
 
 PACK_COUNT=$(find "$STATIC_PAX_DIR" -name '*.pax.tar.gz' | wc -l)
 echo "Done: $PACK_COUNT pack archives ready"

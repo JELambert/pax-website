@@ -1,4 +1,8 @@
-name: Deploy Website
+# Build smoke-test only — does NOT deploy.
+# Real deploy is CT 105's autodeploy.timer (polls main + pax-market every 5 min,
+# rsyncs to CT 110 nginx). This workflow exists to catch broken templates,
+# missing artifacts, or Hugo errors before CT 105 picks them up.
+name: Build Verify
 
 on:
   push:
