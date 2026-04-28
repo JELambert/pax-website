@@ -19,9 +19,9 @@
       Then ask it real questions. The agent cites by finding id (<code>F041</code>) and source id (<code>baldwin_2020</code>) — every claim traces back to a real paper. No hallucinated stats, no made-up effect sizes.
     </p>
     <div class="t-showcase-bridge">
-      <div class="t-showcase-bridge-label">workflow</div>
-      <div class="t-showcase-bridge-construct">paste-to-Claude · zero install</div>
-      <div class="t-showcase-bridge-paxes">pax: global-supply-chain-risk</div>
+      <div class="t-showcase-bridge-label">// what you get</div>
+      <div class="t-showcase-bridge-construct">38 constructs &middot; 113 findings &middot; 47 sources</div>
+      <div class="t-showcase-bridge-paxes">pax: global-supply-chain-risk &middot; type: field &middot; ~110 KB</div>
     </div>
   </div>
   <div class="t-showcase-story-right">
@@ -78,15 +78,15 @@ CLAUDE > Single-source dependency triggers
     <div class="t-caption">// story.02</div>
     <h2 class="t-showcase-story-title">From civil war onset to coup forecasting: state capacity as the common thread</h2>
     <p class="t-showcase-story-prose">
-      Three pax cover the same underlying phenomenon from different angles: Fearon &amp; Laitin's civil war onset model focuses on structural opportunity, the coup-prediction pax maps disposition and coordination among military elites, and the state-fragility pax tracks institutional erosion over time. Each uses <code>institutional_capacity</code> and related measures of state power.
+      Three pax cover related phenomena from different angles: Fearon &amp; Laitin's civil war onset model focuses on structural opportunity (<code>civil_war_onset</code>, <code>per_capita_income</code>), the coup-prediction pax maps military-elite coordination (<code>regime_durability_coup</code>, <code>power_sharing_institutions</code>, <code>patronage_capacity</code>), and the state-fragility pax tracks institutional erosion (<code>institutional_capacity</code>, <code>legitimacy_deficit</code>, <code>state_fragility_index</code>).
     </p>
     <p class="t-showcase-story-prose">
-      Aligning findings across these pax lets an agent answer questions no single pax was designed for: which fragility indicators precede both coup attempts and civil war onset — and by how many years? That lead-time signal matters for early warning systems.
+      None of these construct ids are registered bridges across the three pax — each pax was authored independently and uses its own vocabulary. But the <em>concepts</em> overlap. Pasted together, an agent can recognize that legitimacy deficit, fragility index, and elite-coordination metrics are measuring related things, and synthesize a cross-pax answer that no single pax was designed for.
     </p>
     <div class="t-showcase-bridge">
-      <div class="t-showcase-bridge-label">bridge construct</div>
-      <div class="t-showcase-bridge-construct">institutional_capacity</div>
-      <div class="t-showcase-bridge-paxes">spans: fearon-laitin-2003 · military-coup-prediction · state-fragility</div>
+      <div class="t-showcase-bridge-label">// shared theme</div>
+      <div class="t-showcase-bridge-construct">state capacity &amp; political instability</div>
+      <div class="t-showcase-bridge-paxes">conceptual overlap, distinct vocabularies &middot; 3 pax</div>
     </div>
   </div>
   <div class="t-showcase-story-right">
@@ -156,9 +156,9 @@ CLAUDE > Three indicators meet the lead-time
       Below: an agent loads the <code>taxation-fiscal-policy</code> and <code>income-inequality-gini</code> pax, calls <code>praxis_get_data</code> to pull their shared OECD-revenue / WID panel, runs an OLS regression via <code>praxis_run_engine</code>, and reports the coefficient table inline. Bridge construct: <code>redistributive_effect_taxes</code>.
     </p>
     <div class="t-showcase-bridge">
-      <div class="t-showcase-bridge-label">bridge construct</div>
-      <div class="t-showcase-bridge-construct">redistributive_effect_taxes</div>
-      <div class="t-showcase-bridge-paxes">spans: taxation-fiscal-policy · income-inequality-gini</div>
+      <div class="t-showcase-bridge-label">// aligned constructs</div>
+      <div class="t-showcase-bridge-construct">top_marginal_income_tax_rate &middot; income_share_top_10_pct &middot; redistributive_effect_taxes</div>
+      <div class="t-showcase-bridge-paxes">aligned by praxis_align_constructs across 2 pax</div>
     </div>
   </div>
   <div class="t-showcase-story-right">
