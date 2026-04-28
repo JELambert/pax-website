@@ -1,6 +1,38 @@
-/* PAX Terminal — design token CSS */
-/* Wave-4 followup: self-host JetBrains Mono + Source Serif 4 from static/fonts/ */
-/* (currently loaded from Google Fonts CDN — acceptable for dev; fix before prod) */
+/* ============================================================================
+   PAX Terminal — design system
+
+   LAYOUT VOCABULARY
+   -----------------
+   Centered shell + 12-col grid. Use these tokens/classes; avoid magic numbers.
+
+   Tokens (in :root):
+     --site-max         1500px   overall content cap
+     --col-gap          24px     default gap between grid columns
+     --cols             12       number of columns in the grid system
+     --page-px          28px     horizontal page padding (mobile: --page-px-mobile = 14px)
+     --content-prose    720px    long-form reading column (one paragraph wide)
+     --content-narrow   560px    short copy + action stacks
+     --content-wide     1200px   capped multi-card grids inside the shell
+
+   Classes:
+     .t-page-wrap       caps content at --site-max with auto margins (default for body)
+     .t-shell           opt-in shell for elements inside full-bleed bands (header rows)
+     .t-grid-12         display: grid; 12 cols × --col-gap. Children use grid-column
+                        spans (e.g. style="grid-column: 3 / span 8") to align to the rhythm
+     .t-section         standard section padding: 40px top/bottom × --page-px sides.
+                        Use on <section> elements. Mobile auto-shrinks via the breakpoint
+                        already inside this class.
+
+   Headline scaling:
+     Display heads use clamp(min, vw, max) so they scale on narrow viewports.
+     New page titles should follow the same pattern.
+
+   Wave markers (e.g. "Wave 2A: pack detail") are historical — they tracked the
+   pre-redesign refactor sweeps. Safe to ignore; new code doesn't need them.
+   ============================================================================ */
+
+/* Wave-4 followup: self-host JetBrains Mono + Source Serif 4 from static/fonts/
+   (currently loaded from Google Fonts CDN — acceptable for dev; fix before prod) */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&display=swap');
 
 /* ─── tokens ─────────────────────────────────────────────────────── */
@@ -151,18 +183,6 @@ button {
   padding: 36px var(--page-px);
 }
 
-/* hairline panel — no border-radius, no box-shadow */
-.t-panel {
-  border: 1px solid var(--pt-line);
-  border-radius: 0;
-}
-
-.t-panel-deep {
-  background: var(--pt-panel-deep);
-  border: 1px solid var(--pt-line);
-  border-radius: 0;
-}
-
 /* ─── header chrome ──────────────────────────────────────────────── */
 .t-header {
   position: sticky;
@@ -173,29 +193,7 @@ button {
   flex-shrink: 0;
 }
 
-/* Row 1: marquee */
-.t-header-marquee {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px var(--page-px);
-  border-bottom: 1px solid var(--pt-line);
-  font-size: 10px;
-  color: var(--pt-dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  gap: 18px;
-  /* Cap inner content at the site shell while header band stays full-bleed */
-  max-width: var(--site-max);
-  margin-inline: auto;
-  width: 100%;
-}
-
-.t-header-marquee .t-live-dot {
-  color: var(--term-accent);
-}
-
-/* Row 2: nav */
+/* Row 1: nav */
 .t-header-row {
   display: flex;
   align-items: center;
@@ -306,38 +304,6 @@ button {
   font-weight: 600;
 }
 
-/* Install bag button */
-.t-install-bag-btn {
-  background: transparent;
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-line-strong);
-  padding: 6px 12px;
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.t-install-bag-btn:hover {
-  border-color: var(--term-accent);
-  text-decoration: none;
-}
-
-.t-bag-count {
-  background: var(--term-accent);
-  color: var(--pt-bg);
-  padding: 0 6px;
-  min-width: 18px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 10px;
-  line-height: 18px;
-}
-
 /* ─── footer ─────────────────────────────────────────────────────── */
 .t-footer {
   border-top: 1px solid var(--pt-line);
@@ -358,10 +324,6 @@ button {
 .t-footer a:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
-}
-
-.t-footer-faint {
-  color: var(--pt-faint);
 }
 
 /* ─── section heads ──────────────────────────────────────────────── */
@@ -568,33 +530,6 @@ button {
   text-decoration: none;
 }
 
-/* Hero terminal cassette (right column) */
-.t-terminal-cassette {
-  background: var(--pt-panel-deep);
-  border: 1px solid var(--pt-line);
-  font-size: 12px;
-}
-
-.t-terminal-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--pt-line);
-  font-size: 10px;
-  color: var(--pt-dim);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.t-terminal-body {
-  padding: 16px;
-  line-height: 1.7;
-}
-
-.t-term-dim { color: var(--pt-dim); }
-.t-term-accent { color: var(--term-accent); }
-.t-term-ink { color: var(--pt-ink); }
-
 /* Stat strip */
 .t-hero-stats {
   display: grid;
@@ -604,24 +539,6 @@ button {
   padding-top: 28px;
   border-top: 1px solid var(--pt-line);
 }
-
-/* ─── content type glyphs ─────────────────────────────────────────── */
-.t-content-glyph {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  font-weight: 700;
-  font-size: 11px;
-  color: var(--pt-bg);
-  flex-shrink: 0;
-}
-
-.t-content-glyph[data-type="construct"] { background: var(--ct-construct); }
-.t-content-glyph[data-type="finding"]   { background: var(--ct-finding); }
-.t-content-glyph[data-type="source"]    { background: var(--ct-source); }
-.t-content-glyph[data-type="proposition"] { background: var(--ct-proposition); }
-.t-content-glyph[data-type="playbook"]  { background: var(--ct-playbook); }
 
 /* ─── pack type chips ─────────────────────────────────────────────── */
 .t-pack-chip {
@@ -1008,45 +925,6 @@ button {
   opacity: 0.55;
 }
 
-/* ─── activity log ───────────────────────────────────────────────── */
-.t-activity {
-  /* padding via .t-section class */
-  border-bottom: 1px solid var(--pt-line);
-}
-
-.t-activity-log {
-  border: 1px solid var(--pt-line);
-  font-size: 12px;
-}
-
-.t-activity-row {
-  display: grid;
-  grid-template-columns: 50px 80px 110px 1fr 100px 30px;
-  gap: 14px;
-  padding: 10px 18px;
-  align-items: center;
-  cursor: pointer;
-}
-
-.t-activity-row:not(:last-child) {
-  border-bottom: 1px solid var(--pt-line);
-}
-
-.t-activity-row:hover {
-  background: rgba(92,145,230,0.04);
-}
-
-.t-activity-when { color: var(--pt-dim); }
-.t-activity-kind {
-  letter-spacing: 0.1em;
-  font-size: 10px;
-  text-transform: uppercase;
-}
-
-.t-activity-kind.publish { color: var(--term-accent); }
-.t-activity-kind.update  { color: #7cd3ff; }
-.t-activity-kind.verify  { color: #fbbf24; }
-
 /* ─── contribute strip ───────────────────────────────────────────── */
 .t-contribute {
   /* padding via .t-section class */
@@ -1116,29 +994,6 @@ button {
   overflow: auto;
 }
 
-/* ─── registry-status card ───────────────────────────────────────── */
-.t-registry-card {
-  background: var(--pt-panel-deep);
-  border: 1px solid var(--pt-line);
-  font-size: 12px;
-}
-
-.t-registry-card-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--pt-line);
-  font-size: 10px;
-  color: var(--pt-dim);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.t-registry-card-body {
-  padding: 16px;
-  line-height: 1.7;
-}
-
 /* ─── generic page stub ──────────────────────────────────────────── */
 .t-prose {
   font-size: 14px;
@@ -1199,10 +1054,6 @@ button {
     --page-px: var(--page-px-mobile);
   }
 
-  .t-header-marquee {
-    display: none;
-  }
-
   .t-hero h1 {
     font-size: 38px;
     line-height: 1.25;
@@ -1236,10 +1087,6 @@ button {
 
   .t-contribute {
     grid-template-columns: 1fr;
-  }
-
-  .t-activity-row {
-    grid-template-columns: 50px 80px 1fr;
   }
 
   .t-nav {
@@ -1602,15 +1449,6 @@ button {
   border-bottom: 1px solid var(--pt-line);
 }
 
-.t-about-hero-top {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 40px;
-  align-items: flex-start;
-  max-width: var(--content-wide);
-  margin: 0 auto;
-}
-
 .t-about-hero-title {
   font-family: "Source Serif 4", serif;
   font-size: clamp(36px, 5.2vw, 64px);
@@ -1633,26 +1471,6 @@ button {
   color: var(--pt-paper-ink);
   max-width: var(--content-narrow);
   margin: 0;
-}
-
-.t-about-stats-card {
-  background: rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  padding: 16px;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-}
-
-.t-stat-row {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.t-stat-row:last-child {
-  border-bottom: none;
 }
 
 .t-stat-label {
@@ -1720,63 +1538,6 @@ button {
   line-height: 1.55;
   color: var(--pt-dim);
   margin: 0;
-}
-
-/* Content section */
-.t-about-content {
-  /* padding via .t-section class */
-  border-bottom: 1px solid var(--pt-line);
-}
-
-/* Footer section */
-.t-about-footer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0;
-  border-top: 1px solid var(--pt-line);
-  background: var(--pt-bg);
-  color: var(--pt-ink);
-}
-
-.t-about-footer-left,
-.t-about-footer-right {
-  padding: 28px var(--page-px);
-  border-right: 1px solid var(--pt-line);
-}
-
-.t-about-footer-right {
-  border-right: none;
-}
-
-.t-footer-head {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  color: var(--pt-dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.t-footer-name {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.t-footer-email {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
-  color: var(--term-accent);
-}
-
-.t-footer-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 14px;
-  line-height: 2;
 }
 
 /* ─── API PAGE ───────────────────────────────────────────────────── */
@@ -2102,10 +1863,6 @@ button {
 }
 
 .t-glyph-construct { background: var(--ct-construct); }
-.t-glyph-finding   { background: var(--ct-finding); }
-.t-glyph-source    { background: var(--ct-source); }
-.t-glyph-proposition { background: var(--ct-proposition); }
-.t-glyph-playbook  { background: var(--ct-playbook); }
 
 /* ─── code block (enhanced) ──────────────────────────────────────── */
 .t-code-block {
@@ -2349,13 +2106,6 @@ button {
 .t-count-finding span { color: var(--ct-finding); }
 .t-count-source span { color: var(--ct-source); }
 
-.t-pax-installs {
-  font-size: 12px;
-  color: var(--pt-dim);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
 .t-pax-actions {
   display: flex;
   gap: 8px;
@@ -2384,21 +2134,6 @@ button {
   border-color: var(--term-accent);
   text-decoration: none;
   color: var(--pt-ink);
-}
-
-.t-btn-install {
-  background: transparent;
-  border: 1px solid var(--pt-line-strong);
-}
-
-.t-btn-install:hover {
-  border-color: var(--term-accent);
-}
-
-.t-btn-install.t-added {
-  background: var(--term-accent);
-  color: var(--pt-bg);
-  border-color: var(--term-accent);
 }
 
 /* ─── pack type chip variations ──────────────────────────────────── */
@@ -2827,36 +2562,6 @@ button {
   color: var(--pt-faint);
 }
 
-/* ── Feature list (tier 2) ───────────────────────────────────────── */
-.t-gs-feature-list {
-  margin-top: 24px;
-}
-
-.t-gs-features {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.t-gs-features li {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 13px;
-  color: var(--pt-dim);
-  line-height: 1.5;
-  padding-left: 14px;
-  position: relative;
-}
-
-.t-gs-features li::before {
-  content: '·';
-  position: absolute;
-  left: 0;
-  color: var(--term-accent);
-}
-
 /* ── MCP tool reference grid (tier 3) ───────────────────────────── */
 .t-gs-tool-grid {
   margin-top: 10px;
@@ -2938,273 +2643,6 @@ button {
   }
 }
 
-/* ── Install bag — page header ───────────────────────────────────── */
-.t-cart-header {
-  padding: 36px var(--page-px) 24px;
-  border-bottom: 1px solid var(--pt-line);
-}
-
-.t-cart-title {
-  margin: 8px 0 6px;
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: clamp(28px, 3.4vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--pt-ink);
-}
-
-.t-cart-lede {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 14px;
-  color: var(--pt-dim);
-  margin: 0;
-  line-height: 1.6;
-}
-
-/* ── Install command block ───────────────────────────────────────── */
-.t-cart-command {
-  padding: 20px var(--page-px) 0;
-}
-
-.t-cart-command-inner {
-  max-width: 640px;
-}
-
-/* ── Main 2-col cart body ────────────────────────────────────────── */
-.t-cart-body {
-  display: grid;
-  grid-template-columns: 60% 40%;
-  align-items: start;
-  min-height: 400px;
-}
-
-.t-cart-left {
-  border-right: 1px solid var(--pt-line);
-  padding: 0;
-  min-width: 0;
-}
-
-/* ── Empty state ─────────────────────────────────────────────────── */
-.t-cart-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px var(--page-px);
-  text-align: center;
-  gap: 10px;
-}
-
-.t-cart-empty-glyph {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 64px;
-  color: var(--pt-faint);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
-.t-cart-empty-msg {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 14px;
-  color: var(--pt-ink);
-  margin: 0;
-}
-
-.t-cart-empty-hint {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 13px;
-  color: var(--pt-dim);
-  margin: 0;
-}
-
-/* ── Items table ─────────────────────────────────────────────────── */
-.t-cart-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 12px;
-}
-
-.t-cart-col-header th {
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--pt-dim);
-  background: var(--pt-panel);
-  border-bottom: 1px solid var(--pt-line);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-
-.t-cart-row {
-  border-bottom: 1px solid var(--pt-line);
-}
-
-.t-cart-row:hover {
-  background: var(--pt-panel);
-}
-
-.t-cart-row td {
-  padding: 12px 12px;
-  vertical-align: middle;
-  font-variant-numeric: tabular-nums;
-}
-
-.t-cart-row-idx {
-  color: var(--pt-dim);
-  font-size: 11px;
-  min-width: 28px;
-}
-
-.t-cart-row-name .t-cart-row-display {
-  color: var(--pt-ink);
-  font-weight: 600;
-}
-
-.t-cart-row-name .t-cart-row-meta {
-  color: var(--pt-dim);
-  font-size: 11px;
-  margin-top: 2px;
-}
-
-.t-cart-row-author {
-  color: var(--pt-dim);
-  font-size: 11px;
-}
-
-.t-cart-row-counts {
-  color: var(--pt-ink);
-  white-space: nowrap;
-}
-
-.t-cart-count-label {
-  color: var(--pt-dim);
-  font-size: 10px;
-  margin-left: 1px;
-  margin-right: 6px;
-}
-
-.t-cart-row-size {
-  color: var(--pt-dim);
-  white-space: nowrap;
-}
-
-.t-cart-remove {
-  background: transparent;
-  color: var(--pt-red);
-  border: 1px solid var(--pt-line-strong);
-  padding: 4px 8px;
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.t-cart-remove:hover {
-  border-color: var(--pt-red);
-}
-
-/* ── Bridge constructs callout ───────────────────────────────────── */
-.t-cart-bridges {
-  border-left: 4px solid var(--term-accent);
-  padding: 16px 18px;
-  margin: 0;
-}
-
-.t-cart-bridges-msg {
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 14px;
-  color: var(--pt-ink);
-  margin: 8px 0 12px;
-}
-
-.t-cart-bridge-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* ── Totals sidebar ──────────────────────────────────────────────── */
-.t-cart-totals {
-  padding: 22px 20px;
-  background: var(--pt-panel);
-  border: 1px solid var(--pt-line);
-  margin: 24px 20px;
-  font-family: var(--pt-font-mono, 'JetBrains Mono', monospace);
-  font-size: 13px;
-}
-
-.t-cart-stat-rows {
-  margin-top: 12px;
-}
-
-.t-cart-stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 7px 0;
-}
-
-.t-cart-stat-divider {
-  border-top: 1px solid var(--pt-line);
-  margin-top: 6px;
-  padding-top: 13px;
-}
-
-.t-cart-stat-label {
-  color: var(--pt-dim);
-  font-size: 12px;
-}
-
-.t-cart-stat-val {
-  color: var(--pt-ink);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-.t-cart-stat-accent {
-  color: var(--term-accent);
-}
-
-/* ── Install bag responsive ──────────────────────────────────────── */
-@media (max-width: 900px) {
-  .t-cart-body {
-    grid-template-columns: 1fr;
-  }
-
-  .t-cart-left {
-    border-right: none;
-    border-bottom: 1px solid var(--pt-line);
-  }
-
-  .t-cart-totals {
-    margin: 16px var(--page-px-mobile);
-  }
-
-  .t-cart-header {
-    padding: 24px var(--page-px-mobile) 18px;
-  }
-
-  .t-cart-command {
-    padding: 16px var(--page-px-mobile) 0;
-  }
-
-  .t-cart-col-header th:nth-child(4),
-  .t-cart-col-header th:nth-child(6) {
-    display: none;
-  }
-
-  .t-cart-row-author,
-  .t-cart-row-size {
-    display: none;
-  }
-}
 
 /* === end Wave 2B === */
 
@@ -3286,17 +2724,6 @@ button {
 .t-tab.t-tab-active {
   color: var(--term-accent);
   border-bottom-color: var(--term-accent);
-  text-decoration: none;
-}
-
-.t-tab-disabled {
-  opacity: 0.35;
-  color: var(--pt-faint);
-  cursor: default;
-}
-.t-tab-disabled:hover {
-  color: var(--pt-faint);
-  border-bottom-color: transparent;
   text-decoration: none;
 }
 
@@ -3753,32 +3180,6 @@ button {
 
 .t-construct-search:focus {
   border-color: var(--term-accent);
-}
-
-/* ── Kind chips ── */
-.t-kind-chips {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.t-kind-chip {
-  padding: 5px 10px;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: transparent;
-  border: 1px solid var(--pt-line);
-  color: var(--pt-ink);
-  cursor: pointer;
-  line-height: 1;
-}
-
-.t-kind-chip.is-active {
-  background: var(--pt-ink);
-  color: var(--pt-bg);
-  border-color: var(--pt-ink);
 }
 
 /* ── Bridge toggle ── */
@@ -4441,15 +3842,6 @@ button {
     padding: 48px var(--page-px-mobile);
   }
 
-  /* activity log — already condensed to 3 cols by base; ensure padding */
-  .t-activity-log {
-    font-size: 11px;
-  }
-
-  .t-activity-row {
-    padding: 10px var(--page-px-mobile);
-  }
-
   /* code block pre — ensure overflow on small screens */
   .t-code-block pre {
     overflow-x: auto;
@@ -4457,11 +3849,7 @@ button {
   }
 
   /* mobile padding for the standard sections is handled by .t-section
-     (see :root layout helpers). Only non-standard sections need an
-     override here. */
-  .t-about-content {
-    padding: 28px var(--page-px-mobile);
-  }
+     (see :root layout helpers). */
 
 }
 
@@ -4915,28 +4303,6 @@ button {
 
 .t-footer-sep {
   color: var(--pt-faint);
-}
-
-/* ── About colophon meta links ──────────────────────────────────── */
-.t-footer-meta {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--pt-dim);
-  margin-top: 4px;
-}
-.t-footer-meta a {
-  color: var(--pt-dim);
-  text-decoration: none;
-}
-.t-footer-meta a:hover {
-  color: var(--pt-ink);
-  text-decoration: underline;
-}
-
-/* ── About stats dim value ──────────────────────────────────────── */
-.t-stat-dim {
-  color: var(--pt-dim);
-  font-style: italic;
 }
 
 /* ── Shared download buttons ─────────────────────────────────────── */
