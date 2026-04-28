@@ -3,6 +3,7 @@ content/pax/
 content/constructs/[a-z0-9-]*/
 content/playbooks/[a-z0-9-]*/
 static/pax/*.pax.tar.gz
+static/PAX_CREATION_GUIDE.md
 data/registry.json
 data/constructs.json
 data/graph.json
