@@ -251,9 +251,9 @@
       {{/* 11. publishing */}}
       <section id="section-11" class="t-guide-section">
         {{ partial "section-head.html" (dict "caption" "11.publishing" "title" "Publishing") }}
-        <p class="t-guide-prose">There are two paths to publishing a pax: the web uploader, or directly through Praxis. Both paths run the same registry validation before merging.</p>
+        <p class="t-guide-prose">Publish a pax through the web uploader. Validation runs against the same registry contract whether you submit by hand today or through the agentic path that's coming later.</p>
 
-        <div class="t-guide-subsection-head">path 1 — web upload</div>
+        <div class="t-guide-subsection-head">web upload</div>
         <ol class="t-guide-ol">
           <li>Zip your pax directory: <code class="t-inline-code">zip -r my-pax.zip my-pax-name/</code></li>
           <li>Upload at <a href="https://submit.pax-market.com" class="t-guide-link">submit.pax-market.com</a>.</li>
@@ -261,11 +261,10 @@
           <li>After editorial review, your pax is merged and live within minutes.</li>
         </ol>
 
-        <div class="t-guide-subsection-head">path 2 — publish through praxis</div>
-        <p class="t-guide-prose">If you already use the <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-guide-link">Praxis MCP server</a>, you can author and publish from inside any MCP-aware agent (Claude Code, Continue, Zed, Cursor). The agent calls <code class="t-inline-code">praxis_publish_pax</code> with your pax folder; Praxis handles the validation and submission to the registry on your behalf.</p>
-        {{ partial "code-block.html" (dict "lang" "agent · MCP tool call" "id" "publish-praxis-ex" "code" "praxis_publish_pax(\n  path=\"./my-pax-name\",\n  message=\"Initial release\"\n)\n\n→ validating schema...      ok\n→ resolving DOIs...         47/47 ok\n→ checking construct ids... no collisions\n→ submitted to pax-market   pr #142") }}
+        <p class="t-guide-prose">Once accepted, your pax appears at <code class="t-inline-code">pax-market.com/pax/my-pax-name</code> immediately after deploy.</p>
 
-        <p class="t-guide-prose">Either path lands at the same place: once accepted, your pax appears at <code class="t-inline-code">pax-market.com/pax/my-pax-name</code> immediately after deploy.</p>
+        <div class="t-guide-subsection-head">agentic publishing — coming soon</div>
+        <p class="t-guide-prose">An MCP-server runtime will let agents author and publish from inside any MCP-aware client. The submission contract is the same as the web path, so anything you author today will work unchanged when the agentic path ships.</p>
       </section>
 
     </div>{{/* end .t-guide-body */}}
@@ -278,7 +277,6 @@
           <li><a href="https://github.com/JELambert/pax-market" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] pax-market/registry</a></li>
           <li><a href="https://github.com/JELambert/pax-market/blob/main/schema.json" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] schema.json</a></li>
           <li><a href="/guide/#section-10" class="t-guide-ref-link">[ ] versioning guide</a></li>
-          <li><a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] praxis (mcp server)</a></li>
           <li><a href="https://submit.pax-market.com" target="_blank" rel="noopener" class="t-guide-ref-link">[ ] submit a pax</a></li>
         </ul>
 

@@ -8,7 +8,6 @@ theme = 'pax-terminal'
   tagline = 'Portable Analytical eXpertise'
   github_url = 'https://github.com/JELambert/pax-website'
   registry_url = 'https://github.com/JELambert/pax-market'
-  praxis_url = 'https://github.com/JELambert/praxis'
 
 [taxonomies]
   tag = 'tags'
