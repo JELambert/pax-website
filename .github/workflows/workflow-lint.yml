@@ -1,0 +1,67 @@
+name: Workflow Lint
+
+# Loud failure if any .github/workflows/*.yml file is unparseable.
+# Catches the class of bug from JELambert/praxis#377: dedented lines
+# inside a `run: |` block scalar break YAML parsing, GitHub Actions
+# silently fails to register triggers, and `gh workflow run` returns
+# 422 for a dispatch that should work. yaml.safe_load surfaces these
+# at PR time instead of after merge.
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['.github/workflows/**']
+  pull_request:
+    branches: [main, develop]
+    paths: ['.github/workflows/**']
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: "Validate every workflow file parses + has on/jobs block"
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(.github/workflows/*.yml .github/workflows/*.yaml)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No workflow files found."
+            exit 1
+          fi
+          fail=0
+          for f in "${files[@]}"; do
+            echo "Validating $f..."
+            python3 - "$f" <<'PY' || fail=1
+          import sys, yaml
+          path = sys.argv[1]
+          with open(path) as fh:
+              data = yaml.safe_load(fh)
+          if not isinstance(data, dict):
+              print(f"  FAIL: {path} did not parse as a mapping")
+              sys.exit(1)
+          # YAML 1.1 parses 'on' as boolean True; PyYAML follows 1.1.
+          on_block = data.get("on") or data.get(True)
+          if not on_block:
+              print(f"  FAIL: {path} missing or empty 'on:' block")
+              sys.exit(1)
+          if not isinstance(on_block, dict):
+              print(f"  FAIL: {path} 'on:' is not a mapping")
+              sys.exit(1)
+          if "jobs" not in data or not isinstance(data["jobs"], dict) or not data["jobs"]:
+              print(f"  FAIL: {path} missing or empty 'jobs:' block")
+              sys.exit(1)
+          print(f"  OK: {path}")
+          PY
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::One or more workflows failed validation."
+            exit 1
+          fi
+          echo "All workflow files valid."
