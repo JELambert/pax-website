@@ -9,14 +9,18 @@ Hugo static site + FastAPI upload service for pax-market.com. This repo is the *
 ```
 Registry (pax-market repo)
   → publish-artifacts.yml creates GitHub Release on push to main
-  → Release contains: registry.json, constructs.json, full-catalog.json, pax-archives.tar
+  → Release contains: registry.json, constructs.json, full-catalog.json,
+                      pax-archives.tar, PAX_CREATION_GUIDE.md, PAX_USAGE_GUIDE.md
 
 Website (this repo)
-  → fetch-artifacts.sh downloads latest release
+  → fetch-artifacts.sh downloads latest release (validates PAX_SCHEMA_START /
+    PAX_FIELDS_START markers in the guide; loud failure if either is missing)
   → generate-content.py reads full-catalog.json, writes content/pax/*/index.md
   → hugo --minify builds static site
   → rsync to CT 110 (nginx + Cloudflare tunnel)
 ```
+
+PAX guides are canonical in `pax-market/docs/` — never edit `static/PAX_*_GUIDE.md` here. The pax-market release is the source of truth and CT 105 pulls fresh on every build.
 
 ## Key Commands
 - `bash scripts/fetch-artifacts.sh` — Download registry artifacts
@@ -36,6 +40,9 @@ FastAPI app at submit.pax-market.com. Accepts zip uploads, validates pack struct
 These are created by fetch-artifacts.sh + generate-content.py at build time:
 - `content/pax/` — Hugo content pages for each pack
 - `static/pax/*.pax.tar.gz` — Pack download archives
+- `static/PAX_CREATION_GUIDE.md` — Authoring spec, pulled from pax-market release
+- `static/PAX_USAGE_GUIDE.md` — Usage spec, pulled from pax-market release
+- `static/graph.json` + `data/graph.json` — Knowledge graph
 - `data/registry.json` — Registry install contract
 - `data/constructs.json` — Cross-pack construct index
 - `static/registry.json` — Served at site root
@@ -56,5 +63,5 @@ scripts/
   ct105-autodeploy.sh     Polls both repos, builds, deploys
   deploy.sh               Emergency local deploy
 .github/workflows/
-  deploy-website.yml      CI: build verification on push
+  build-verify.yml        CI: build verification on push (does NOT deploy)
 ```
