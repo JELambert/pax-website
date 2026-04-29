@@ -5,6 +5,8 @@ content/playbooks/[a-z0-9-]*/
 static/pax/*.pax.tar.gz
 static/PAX_CREATION_GUIDE.md
 static/PAX_USAGE_GUIDE.md
+static/constructs.json
+static/full-catalog.json
 data/registry.json
 data/constructs.json
 data/graph.json

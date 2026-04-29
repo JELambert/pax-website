@@ -1,0 +1,93 @@
+# PAX Market — Agent Map
+
+> Machine-actionable entry point for LLM agents. Humans, see https://pax-market.com/
+
+PAX (Portable Analytical eXpertise) is a portable knowledge package format —
+constructs, findings, propositions, sources, and playbooks bundled into a
+self-contained tar.gz that any Praxis instance can install.
+
+## What is a PAX
+
+Canonical specification: **https://pax-market.com/PAX_CREATION_GUIDE.md**
+
+This single document is the source of truth for the PAX schema, file layout,
+field semantics, and validation rules. It is written to be fed directly to an
+LLM along with source material to produce a valid PAX. If you are creating
+a PAX, read it first; do not infer the schema from examples.
+
+The guide is fetched at build time from the canonical home in the
+`JELambert/pax-market` repository (`docs/PAX_CREATION_GUIDE.md`). The website
+copy is regenerated on every build.
+
+## Discover packs
+
+| URL | Purpose |
+|-----|---------|
+| https://pax-market.com/registry.json | Install contract — minimal pack list with download URLs and checksums |
+| https://pax-market.com/full-catalog.json | Full catalog with structured metadata (construct/finding/source counts, descriptions, types) |
+| https://pax-market.com/constructs.json | Cross-pack construct index — which constructs appear in which packs |
+| https://pax-market.com/pax/ | Human-browsable list view |
+| https://pax-market.com/pax/<slug>/ | Per-pack landing page |
+
+`pax_type` values: `paper`, `topic`, `field`, `enterprise`, `engine`.
+
+## Download a pack
+
+Each pack is a gzipped tar archive at a deterministic URL:
+
+```
+https://pax-market.com/pax/<pack-name>.pax.tar.gz
+```
+
+The `download_url` and `sha256` for each pack are in `registry.json`. Verify
+the checksum before extracting. Archives unpack to a directory containing
+`pax.yaml` (manifest) plus the schema files documented in the creation guide.
+
+## Use a pack
+
+Usage guide: **https://pax-market.com/PAX_USAGE_GUIDE.md**
+
+Covers querying constructs, running engines, extending packs, and the Praxis
+MCP tool surface. If you are operating on an installed pack rather than
+creating one, this is the doc to read.
+
+For Praxis-native installation (recommended over raw tar extraction), use the
+`praxis_install_remote` MCP tool with the pack name from `registry.json`.
+
+## Create a pack
+
+Read `PAX_CREATION_GUIDE.md` (link above). Workflow:
+
+1. Gather source material (papers, datasets, domain documentation).
+2. Feed the guide + source material to an LLM with the prompt: *"Produce a
+   valid PAX following this specification."*
+3. Validate the output against the schema and checklist in the guide.
+4. Submit (next section).
+
+The guide contains worked examples and a validation checklist. Do not skip it.
+
+## Submit a pack
+
+Endpoint: `POST https://submit.pax-market.com/api/upload`
+
+- Body: `multipart/form-data` with a single `file` field containing a `.zip`
+  of the PAX directory (not a `.tar.gz`).
+- Auth: GitHub OAuth — agents need a session cookie from
+  `https://submit.pax-market.com/`. There is no API token flow today.
+- Rate limit: 5 uploads per hour per IP.
+- On success, the service opens a pull request against
+  `JELambert/pax-market`. Maintainers review, merge, and the next release
+  cycle publishes the pack.
+
+The browser interface at https://submit.pax-market.com/ is the recommended
+path for first-time submitters. For programmatic submission, expect the auth
+flow to be the friction point.
+
+## Source repositories
+
+- **Website (this site):** https://github.com/JELambert/pax-website
+- **Registry + canonical guides:** https://github.com/JELambert/pax-market
+
+File issues against the repo that owns the surface you are trying to use:
+schema/guide questions → `pax-market`; site/rendering/discovery questions →
+`pax-website`.
