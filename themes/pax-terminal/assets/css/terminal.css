@@ -424,7 +424,10 @@ button {
   margin: 0;
   font-size: clamp(36px, 5.2vw, 64px);
   font-weight: 700;
-  line-height: 1.18;
+  /* line-height must clear .t-hero-highlight's vertical padding (0.04em ×2)
+     plus account for box-decoration-break: clone painting per fragment. 1.35
+     gives the cobalt block headroom so it doesn't bleed into adjacent lines. */
+  line-height: 1.35;
   letter-spacing: -0.03em;
   overflow-wrap: anywhere;
 }
