@@ -1,8 +1,9 @@
 #!/bin/bash
 # fetch-artifacts.sh — Download latest registry artifacts from pax-market releases
 #
-# Downloads registry.json, constructs.json, full-catalog.json, and pack archives
-# from the latest GitHub Release on JELambert/pax-market.
+# Downloads registry.json, constructs.json, full-catalog.json, pack archives,
+# and PAX_CREATION_GUIDE.md / PAX_USAGE_GUIDE.md from the latest GitHub Release
+# on JELambert/pax-market.
 #
 # Uses curl (no gh CLI auth required — pax-market is a public repo).
 #
@@ -41,13 +42,26 @@ for url in $URLS; do
     curl -sL "$url" -o "$ARTIFACTS_DIR/$filename"
 done
 
-# Verify required files
-for f in registry.json constructs.json full-catalog.json pax-archives.tar; do
+# Verify required files. PAX_*.md guides became release assets in pax-market#73
+# (umbrella tracker pax-market#72) — both must be present.
+for f in registry.json constructs.json full-catalog.json pax-archives.tar \
+         PAX_CREATION_GUIDE.md PAX_USAGE_GUIDE.md; do
     if [ ! -f "$ARTIFACTS_DIR/$f" ]; then
         echo "ERROR: Missing $ARTIFACTS_DIR/$f"
         exit 1
     fi
 done
+
+# Validate guide markers — pax_schema.py in praxis parses these at import time.
+# A guide without markers ships breakage downstream.
+if ! grep -q '<!-- PAX_SCHEMA_START' "$ARTIFACTS_DIR/PAX_CREATION_GUIDE.md"; then
+    echo "ERROR: PAX_CREATION_GUIDE.md missing PAX_SCHEMA_START marker"
+    exit 1
+fi
+if ! grep -q '<!-- PAX_FIELDS_START' "$ARTIFACTS_DIR/PAX_CREATION_GUIDE.md"; then
+    echo "ERROR: PAX_CREATION_GUIDE.md missing PAX_FIELDS_START marker"
+    exit 1
+fi
 
 # Unpack pack archives into static/pax/
 # Wipe existing archives first so pruned packs don't linger from prior runs.
@@ -61,26 +75,13 @@ cp "$ARTIFACTS_DIR/registry.json" data/registry.json
 cp "$ARTIFACTS_DIR/registry.json" static/registry.json
 cp "$ARTIFACTS_DIR/constructs.json" data/constructs.json
 
-# Sync PAX authoring guide from the praxis repo (source of truth).
-# The website copy must not drift from praxis/docs/PAX_CREATION_GUIDE.md.
-# praxis is private, so we read from the local clone at /opt/praxis (kept
-# fresh by praxis-autodeploy.timer on CT 105). Halt the deploy if the source
-# is missing on the deploy host, but skip with a warning in CI/dev where
-# /opt/praxis isn't expected to exist — the build smoke-test only needs the
-# Hugo output, not a fresh guide.
-PRAXIS_GUIDE_SRC="${PRAXIS_GUIDE_SRC:-/opt/praxis/docs/PAX_CREATION_GUIDE.md}"
-GUIDE_DEST="static/PAX_CREATION_GUIDE.md"
-if [ -s "$PRAXIS_GUIDE_SRC" ]; then
-    echo "Syncing PAX_CREATION_GUIDE.md from $PRAXIS_GUIDE_SRC..."
-    cp "$PRAXIS_GUIDE_SRC" "$GUIDE_DEST"
-elif [ "${REQUIRE_PRAXIS_GUIDE:-0}" = "1" ]; then
-    echo "ERROR: $PRAXIS_GUIDE_SRC is missing or empty"
-    echo "  Ensure /opt/praxis is cloned and praxis-autodeploy.timer is running."
-    exit 1
-else
-    echo "Skipping PAX_CREATION_GUIDE.md sync — $PRAXIS_GUIDE_SRC not present"
-    echo "  (Set REQUIRE_PRAXIS_GUIDE=1 to make this fatal — CT 105 deploy does so.)"
-fi
+# Copy PAX guides from release artifacts into static/ for download.
+# pax-market is now the canonical home of both guides (migration #72).
+# Praxis vendors its own copy via sync-guide.yml — we no longer read from
+# /opt/praxis on the deploy host.
+cp "$ARTIFACTS_DIR/PAX_CREATION_GUIDE.md" static/PAX_CREATION_GUIDE.md
+cp "$ARTIFACTS_DIR/PAX_USAGE_GUIDE.md"    static/PAX_USAGE_GUIDE.md
+echo "Copied PAX_CREATION_GUIDE.md and PAX_USAGE_GUIDE.md to static/"
 
 PACK_COUNT=$(find "$STATIC_PAX_DIR" -name '*.pax.tar.gz' | wc -l)
 echo "Done: $PACK_COUNT pack archives ready"
