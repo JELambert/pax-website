@@ -73,9 +73,8 @@
         <div class="t-pax-tagline">{{ $p.Params.description | default "" | truncate 100 }}</div>
       </div>
 
-      {{/* Col 4: author / version */}}
+      {{/* Col 4: version */}}
       <div class="t-pax-author">
-        {{ with $p.Params.author }}<div>{{ . }}</div>{{ end }}
         <div>v{{ $p.Params.version | default "1.0.0" }}</div>
       </div>
 
