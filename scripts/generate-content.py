@@ -582,12 +582,15 @@ def main():
         else:
             print("WARNING: constructs.json not found, skipping construct pages", file=sys.stderr)
 
-    # Copy registry.json to static/ as well
-    reg_src = ARTIFACTS_DIR / "registry.json"
-    if reg_src.exists():
-        STATIC_DIR.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(reg_src, STATIC_DIR / "registry.json")
-        print("Copied registry.json -> static/")
+    # Copy catalog files to static/ so agents can fetch them over HTTP.
+    # registry.json — install contract; constructs.json — cross-pack construct
+    # index; full-catalog.json — complete pack catalog with structured metadata.
+    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+    for fname in ("registry.json", "constructs.json", "full-catalog.json"):
+        src = ARTIFACTS_DIR / fname
+        if src.exists():
+            shutil.copy2(src, STATIC_DIR / fname)
+            print(f"Copied {fname} -> static/")
 
     # Copy tar.gz archives from artifacts/pax/ to static/pax/
     artifacts_pax = ARTIFACTS_DIR / "pax"
