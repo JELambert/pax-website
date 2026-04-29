@@ -4,7 +4,7 @@
 <header class="t-gs-header">
   <div class="t-caption">// start/</div>
   <h1 class="t-gs-title">Two ways to use Pax</h1>
-  <p class="t-gs-lede">Pick the tier that matches how you want to consume verified knowledge. Tier 1 needs no tooling. Tier 2 hands pax to an agent via the Praxis MCP server.</p>
+  <p class="t-gs-lede">Pick the tier that matches how you want to consume verified knowledge. Tier 1 needs no tooling and works today. Tier 2 — agentic access via an MCP-server runtime — is coming soon.</p>
 
   {{- /* ── Tier tab nav ───────────────────────────────────────────────── */ -}}
   <nav class="t-gs-tabs" id="tier-tabs">
@@ -107,95 +107,17 @@ network given:
   </div>
 </section>
 
-{{- /* ── Tier 2 (was Tier 3): MCP server via Praxis ──────────────────── */ -}}
+{{- /* ── Tier 2: agentic access (coming soon) ───────────────────────── */ -}}
 <section class="t-gs-panel" id="tier-3">
   <div class="t-gs-panel-inner">
     <div class="t-gs-panel-left">
-      {{ partial "section-head.html" (dict "caption" "tier.02 · agentic" "title" "MCP server (Praxis)") }}
-      <p class="t-gs-body-lede">Run Pax inside any MCP-compatible agent (Claude Code, Continue, Zed, Cursor) via <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-link">Praxis</a>, the reference MCP server for the pax format. Tools like <code>praxis_search_pax</code>, <code>praxis_install_pax</code>, <code>praxis_query_findings</code> become first-class.</p>
+      {{ partial "section-head.html" (dict "caption" "tier.02 · agentic" "title" "MCP-server runtime") }}
+      <p class="t-gs-body-lede">An MCP-server runtime is in development. It will let any MCP-compatible agent (Claude Code, Continue, Zed, Cursor) load a pax, query its findings and constructs, align constructs across pax, and run registered analytical playbooks — turning the static knowledge layer here into a live agentic surface.</p>
 
-      <div class="t-gs-sub">
-        {{ partial "section-head.html" (dict "caption" "install" "title" "Run Praxis locally") }}
-        <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:14px; line-height:1.55; color:var(--pt-dim); margin:0 0 12px;">
-          Praxis is an open-source Python MCP server. Clone, install, and point your agent at it. Setup instructions live in the
-          <a href="https://github.com/JELambert/praxis" target="_blank" rel="noopener" class="t-link">Praxis README</a>.
+      <div class="t-gs-sub" style="margin-top: 18px;">
+        <p style="font-family:'Source Serif 4','Source Serif Pro',Georgia,serif; font-size:14px; line-height:1.6; color:var(--pt-dim); margin:0;">
+          <strong style="color:var(--pt-ink); font-style:normal;">Coming soon.</strong> Until then, Tier 1 (paste a pax into your model of choice) is the supported path. Pax authored today will work unchanged with the runtime when it ships — the format is the contract, the runtime is just one consumer.
         </p>
-      </div>
-
-      <div class="t-gs-sub">
-        {{ partial "section-head.html" (dict "caption" "exposed tools" "title" "Tool reference") }}
-        <div class="t-gs-tool-grid">
-          <div class="t-gs-tool-header">
-            <span>tool</span>
-            <span>signature</span>
-            <span>description</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_search_pax</span>
-            <span class="t-gs-tool-sig">(query: str)</span>
-            <span class="t-gs-tool-desc">search the registry by keyword</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_install_pax</span>
-            <span class="t-gs-tool-sig">(pax: str)</span>
-            <span class="t-gs-tool-desc">download and install a pax locally</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_query_findings</span>
-            <span class="t-gs-tool-sig">(construct: str, pax?: str)</span>
-            <span class="t-gs-tool-desc">retrieve findings for a construct</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_query_constructs</span>
-            <span class="t-gs-tool-sig">(pax?: str)</span>
-            <span class="t-gs-tool-desc">list and search constructs across pax</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_align_constructs</span>
-            <span class="t-gs-tool-sig">(pax_a: str, pax_b: str)</span>
-            <span class="t-gs-tool-desc">find bridge constructs between two pax</span>
-          </div>
-          <div class="t-gs-tool-row">
-            <span class="t-gs-tool-name">praxis_run_playbook</span>
-            <span class="t-gs-tool-sig">(pax: str, playbook: str)</span>
-            <span class="t-gs-tool-desc">execute an analytical playbook</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="t-gs-panel-right">
-      {{ partial "section-head.html" (dict "caption" "end-to-end" "title" "A worked example" "kicker" "From English request to a cited result.") }}
-      <div class="t-code-block" style="max-height:620px; overflow-y:auto;">
-        <div class="t-code-block-bar"><span>text &middot; agent transcript</span></div>
-        <pre id="t-code-gs-mcp-transcript">USER  &gt; using the supply-chain pax, identify our top
-        cascading-failure risks. cite findings.
-
-CLAUDE &gt; [tool] praxis_install_pax
-       ↳ { pax: 'global-supply-chain-risk' }
-         38 constructs, 113 findings, 8 playbooks
-
-       [tool] praxis_query_findings
-              { construct: 'cascading_failure_size' }
-       ↳ 8 findings · sorted by strength
-
-       [tool] praxis_query_findings
-              { ids: ['F001', 'F003', 'F005'] }
-       ↳ F001: -40% equity returns on disruption
-         F003: top-5% nodes → 64% of cascades
-         F005: Malacca blockage $9.6B/day
-
-──────── results ────────
-Three nodes carry disproportionate risk:
-  1) Supplier_A (betweenness 0.41) — F003: TSMC-style
-     concentration; one outage propagates to 64% of
-     downstream tier-2 nodes.
-  2) Supplier_C (TTR/TTS = 3.1) — F001: REI > 1
-     historically associates with -40% equity returns.
-  3) Chokepoint_K (Strait of Malacca) — F005: 6-day
-     blockage modeled at $9.6B/day in delayed trade.
-
-cited: F001, F003, F005, P001.</pre>
       </div>
     </div>
   </div>
