@@ -79,10 +79,39 @@ log "Checking website repo..."
 git fetch origin main --quiet 2>>"$LOG_FILE"
 LOCAL_HASH=$(git rev-parse HEAD)
 REMOTE_HASH=$(git rev-parse origin/main)
+UPLOAD_SERVICE_CHANGED=false
 if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
     log "Website repo has new commits: ${LOCAL_HASH:0:8} → ${REMOTE_HASH:0:8}"
+    # Capture path-scoped diff BEFORE the pull so we know what to restart.
+    if git diff --name-only "$LOCAL_HASH" "$REMOTE_HASH" 2>/dev/null | grep -qE '^upload-service/'; then
+        UPLOAD_SERVICE_CHANGED=true
+        log "  upload-service/ files changed in this update."
+    fi
     git pull --ff-only origin main >>"$LOG_FILE" 2>&1
     NEEDS_BUILD=true
+fi
+
+# ---------------------------------------------------------------------------
+# Restart pax-upload.service if its source changed.
+# Done independently of the static-site build: upload-service runs locally on
+# CT 105 and a restart is unrelated to whether the Hugo build/rsync succeeds.
+# Only restart when files actually changed — even a sub-second restart drops
+# any in-flight upload, so we don't want to do it on every cycle.
+# ---------------------------------------------------------------------------
+if [ "$UPLOAD_SERVICE_CHANGED" = true ]; then
+    log "Restarting pax-upload.service (source changed)..."
+    if systemctl restart pax-upload.service >>"$LOG_FILE" 2>&1; then
+        sleep 1
+        if systemctl is-active --quiet pax-upload.service; then
+            log "pax-upload.service restarted successfully."
+        else
+            log "ERROR: pax-upload.service inactive after restart."
+            notify_failure "pax-upload.service inactive after restart"
+        fi
+    else
+        log "ERROR: systemctl restart pax-upload.service failed."
+        notify_failure "pax-upload.service restart command failed"
+    fi
 fi
 
 # Check 2: registry releases
