@@ -20,8 +20,14 @@ echo "Fetching latest registry artifacts from $REPO..."
 
 mkdir -p "$ARTIFACTS_DIR" "$STATIC_PAX_DIR"
 
-# Get download URLs from the latest release
-RELEASE_JSON=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest")
+# Get download URLs from the latest release.
+# Use GITHUB_TOKEN when present to avoid the 60/hr unauthenticated rate limit
+# (shared runner IPs get exhausted quickly).
+AUTH_ARGS=()
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+    AUTH_ARGS=(-H "Authorization: Bearer $GITHUB_TOKEN")
+fi
+RELEASE_JSON=$(curl -sL "${AUTH_ARGS[@]}" "https://api.github.com/repos/$REPO/releases/latest")
 if echo "$RELEASE_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'assets' in d" 2>/dev/null; then
     URLS=$(echo "$RELEASE_JSON" | python3 -c "
 import sys, json

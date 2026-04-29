@@ -27,6 +27,8 @@ jobs:
 
       - name: Fetch registry artifacts
         run: bash scripts/fetch-artifacts.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Hugo content from catalog
         run: python3 scripts/generate-content.py
