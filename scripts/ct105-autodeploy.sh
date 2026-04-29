@@ -111,7 +111,7 @@ fi
 # Fetch registry artifacts
 # ---------------------------------------------------------------------------
 log "Fetching registry artifacts..."
-if ! REQUIRE_PRAXIS_GUIDE=1 bash scripts/fetch-artifacts.sh >>"$LOG_FILE" 2>&1; then
+if ! bash scripts/fetch-artifacts.sh >>"$LOG_FILE" 2>&1; then
     log "ERROR: fetch-artifacts.sh failed. Aborting."
     exit 1
 fi

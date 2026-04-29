@@ -252,4 +252,4 @@ Feed these to any LLM to create or use PAX packages:
 
 - [Download PAX Creation Guide](/PAX_CREATION_GUIDE.md) — the full v3 spec for building packs. Give this + your source material to any LLM and get a valid PAX out.
 - [Download PAX Usage Guide](/PAX_USAGE_GUIDE.md) — how to use a downloaded PAX with any LLM or agent. Give this + a pack to any AI assistant.
-- [View creation spec on GitHub](https://github.com/JELambert/praxis/blob/main/docs/PAX_CREATION_GUIDE.md) — browse the full spec online
+- [View creation spec on GitHub](https://github.com/JELambert/pax-market/blob/main/docs/PAX_CREATION_GUIDE.md) — browse the full spec online
