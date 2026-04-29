@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install pyyaml
+        run: pip install pyyaml
+
       - name: "Validate every workflow file parses + has on/jobs block"
         run: |
           set -euo pipefail
