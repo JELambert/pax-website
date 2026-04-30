@@ -513,6 +513,67 @@ def generate_graph(packs: list, constructs: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Guide metadata extraction (parses PAX_CREATION_GUIDE.md)
+# ---------------------------------------------------------------------------
+
+def parse_guide_meta(guide_path: Path, packs: list) -> dict:
+    """Extract schema version, last-updated date, and 'What's New' bullets
+    from PAX_CREATION_GUIDE.md so the website can surface spec status without
+    duplicating the canonical text.
+    """
+    text = guide_path.read_text()
+
+    schema_version = ""
+    last_updated = ""
+    m = re.search(
+        r"\*\*Schema version:\*\*\s*([^\s—-]+)\s*[—-]\s*Last updated:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})",
+        text,
+    )
+    if m:
+        schema_version = m.group(1).strip()
+        last_updated = m.group(2).strip()
+
+    # Pull "What's New in vX" bullets — each one starts "- **Title.** body"
+    whats_new = []
+    section = re.search(r"^## What's New[^\n]*\n(.*?)(?=^## )", text, re.MULTILINE | re.DOTALL)
+    if section:
+        for line in section.group(1).splitlines():
+            line = line.strip()
+            if not line.startswith("- "):
+                continue
+            body = line[2:]
+            bm = re.match(r"\*\*(.+?)\.\*\*\s*(.*)", body)
+            if bm:
+                whats_new.append({"title": bm.group(1).strip(), "description": bm.group(2).strip()})
+            else:
+                whats_new.append({"title": "", "description": body})
+
+    # Per-schema-version pack counts so the guide can show adoption at a glance.
+    distribution: dict[str, int] = {}
+    for p in packs:
+        sv = str(p.get("pax_schema_version") or "unknown")
+        distribution[sv] = distribution.get(sv, 0) + 1
+
+    return {
+        "schema_version": schema_version,
+        "last_updated": last_updated,
+        "whats_new": whats_new,
+        "pack_schema_distribution": distribution,
+        "total_packs": len(packs),
+    }
+
+
+def write_guide_meta(meta: dict):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    out = DATA_DIR / "guide_meta.yml"
+    out.write_text(yaml.dump(meta, default_flow_style=False, allow_unicode=True, sort_keys=False))
+    print(
+        f"Wrote guide_meta.yml: schema {meta['schema_version']} ({meta['last_updated']}), "
+        f"{len(meta['whats_new'])} highlights, distribution {meta['pack_schema_distribution']}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -604,6 +665,15 @@ def main():
         print(f"Copied {count} archives -> static/pax/")
     else:
         print(f"WARNING: {artifacts_pax} not found, no archives copied", file=sys.stderr)
+
+    # Extract guide metadata from PAX_CREATION_GUIDE.md so the /guide/ page can
+    # show schema version, last-updated date, and "What's New" highlights
+    # without duplicating the canonical guide.
+    guide_path = ARTIFACTS_DIR / "PAX_CREATION_GUIDE.md"
+    if guide_path.exists():
+        write_guide_meta(parse_guide_meta(guide_path, packs))
+    else:
+        print(f"WARNING: {guide_path} not found, skipping guide_meta", file=sys.stderr)
 
     # Generate knowledge graph (Wave 20)
     constructs_for_graph_path = DATA_DIR / "constructs.json"

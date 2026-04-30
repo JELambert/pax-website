@@ -14,6 +14,43 @@
     </div>
   </div>
 
+  {{/* ── Spec status (auto-extracted from PAX_CREATION_GUIDE.md) ─────── */}}
+  {{ $meta := site.Data.guide_meta }}
+  {{ if and $meta $meta.schema_version }}
+  <section class="t-spec-status" aria-label="Spec status">
+    <div class="t-spec-status-head">
+      <div>
+        <div class="t-caption">// spec/status</div>
+        <div class="t-spec-status-version">PAX schema {{ $meta.schema_version }}</div>
+        {{ with $meta.last_updated }}<div class="t-spec-status-date">last updated {{ . }}</div>{{ end }}
+      </div>
+      {{ with $meta.pack_schema_distribution }}
+      <div class="t-spec-status-dist" title="Pack count by schema version">
+        <div class="t-caption" style="margin-bottom:4px;">// registry mix</div>
+        <div class="t-spec-status-dist-row">
+          {{ range $ver, $count := . }}
+            <span class="t-spec-status-dist-cell"><span class="t-spec-status-dist-ver">v{{ $ver }}</span><span class="t-spec-status-dist-count">{{ $count }}</span></span>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+    {{ with $meta.whats_new }}
+    <details class="t-spec-status-news" open>
+      <summary>What's new in v{{ $meta.schema_version }} <span class="t-spec-status-news-count">({{ len . }})</span></summary>
+      <ul class="t-spec-status-news-list">
+        {{ range . }}
+        <li>{{ with .title }}<strong>{{ . | markdownify }}.</strong> {{ end }}{{ .description | markdownify }}</li>
+        {{ end }}
+      </ul>
+      <div class="t-spec-status-news-footer">
+        Full text in the <a href="/PAX_CREATION_GUIDE.md" download>creation guide</a> · "What's New" section.
+      </div>
+    </details>
+    {{ end }}
+  </section>
+  {{ end }}
+
   {{/* ── Guide download callout ───────────────────────────────────────── */}}
   <div class="t-guide-dl-strip">
     <p class="t-guide-dl-strip-copy">Hand these to Claude, ChatGPT, or Gemini and you can author or use a pax without any local tooling.</p>

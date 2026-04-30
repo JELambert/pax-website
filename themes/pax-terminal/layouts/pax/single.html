@@ -227,6 +227,7 @@
           {{ end }}
           <div class="t-meta-kv"><span class="t-kv-label">pax type</span><span class="t-kv-value">{{ $paxType }}</span></div>
           <div class="t-meta-kv"><span class="t-kv-label">version</span><span class="t-kv-value" style="font-variant-numeric:tabular-nums;">{{ $version }}</span></div>
+          {{ with .Params.pax_schema_version }}<div class="t-meta-kv"><span class="t-kv-label">schema</span><span class="t-kv-value" style="font-variant-numeric:tabular-nums;">{{ . }}</span></div>{{ end }}
           {{ with .Params.published_by }}<div class="t-meta-kv"><span class="t-kv-label">published by</span><span class="t-kv-value">{{ . }}</span></div>{{ end }}
           {{ with .Params.download_size }}<div class="t-meta-kv"><span class="t-kv-label">archive</span><span class="t-kv-value" style="font-variant-numeric:tabular-nums;">{{ . }}</span></div>{{ end }}
         </div>

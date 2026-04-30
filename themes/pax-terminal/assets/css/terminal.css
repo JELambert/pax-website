@@ -2086,6 +2086,18 @@ button {
   color: var(--pt-ink);
 }
 
+.t-pax-schema-chip {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border: 1px solid var(--pt-line);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--pt-dim);
+  text-transform: lowercase;
+}
+
 .t-pax-counts {
   display: flex;
   gap: 12px;
@@ -4353,6 +4365,99 @@ button {
   gap: 16px;
   flex-wrap: wrap;
 }
+
+/* ── Spec status callout (rendered from data/guide_meta.yml) ─────── */
+.t-spec-status {
+  border: 1px solid var(--pt-line);
+  border-left: 3px solid var(--term-accent);
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  background: var(--pt-panel);
+}
+.t-spec-status-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.t-spec-status-version {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pt-ink);
+  margin-top: 2px;
+}
+.t-spec-status-date {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--pt-dim);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.t-spec-status-dist-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.t-spec-status-dist-cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--pt-line);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.t-spec-status-dist-ver { color: var(--pt-dim); }
+.t-spec-status-dist-count { color: var(--pt-ink); font-weight: 600; }
+.t-spec-status-news { margin-top: 6px; }
+.t-spec-status-news > summary {
+  cursor: pointer;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--pt-ink);
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+  list-style: none;
+}
+.t-spec-status-news > summary::before {
+  content: "▸ ";
+  color: var(--term-accent);
+}
+.t-spec-status-news[open] > summary::before { content: "▾ "; }
+.t-spec-status-news-count { color: var(--pt-dim); font-weight: 400; }
+.t-spec-status-news-list {
+  list-style: none;
+  padding: 8px 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.t-spec-status-news-list li {
+  font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--pt-dim);
+  padding-left: 12px;
+  border-left: 2px solid var(--pt-line);
+}
+.t-spec-status-news-list li strong {
+  color: var(--pt-ink);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+.t-spec-status-news-footer {
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--pt-dim);
+}
+.t-spec-status-news-footer a { color: var(--term-accent); }
 
 .t-guide-dl-strip-copy {
   font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
