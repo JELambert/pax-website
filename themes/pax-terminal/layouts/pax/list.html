@@ -76,6 +76,7 @@
       {{/* Col 4: version */}}
       <div class="t-pax-author">
         <div>v{{ $p.Params.version | default "1.0.0" }}</div>
+        {{ with $p.Params.pax_schema_version }}<div class="t-pax-schema-chip" title="PAX schema version">schema {{ . }}</div>{{ end }}
       </div>
 
       {{/* Col 5: content-type counts */}}
